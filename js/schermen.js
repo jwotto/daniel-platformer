@@ -147,14 +147,18 @@ class Instellingen extends Phaser.Scene {
       });
     });
     // onderaan: verder spelen, of terug naar het hoofdscherm
-    knop(this, 280, 395, 190, 52, 'Verder spelen', 0x3cc8bb, () => this.sluit(), 22);
-    knop(this, 490, 395, 190, 52, '⌂ Hoofdscherm', 0xf2c14e, () => this.naarHoofdscherm(), 22);
+    if (this.terug === 'Spel') {
+      // tijdens het spelen: verder, of stoppen (dan ga je naar het Game over-menu)
+      knop(this, 280, 395, 190, 52, 'Verder spelen', 0x3cc8bb, () => this.sluit(), 22);
+      knop(this, 490, 395, 190, 52, '■ Stop potje', 0xd1495b, () => this.stopPotje(), 22);
+    } else knop(this, 385, 395, 190, 52, 'Klaar', 0x3cc8bb, () => this.sluit(), 22);
     this.input.keyboard.on('keydown-ESC', () => this.sluit());
   }
-  naarHoofdscherm() {
-    if (this.terug === 'Titel') { this.sluit(); return; }
-    this.scene.stop(this.terug);
-    this.scene.start('Titel');
+  stopPotje() {
+    const sp = this.scene.get('Spel');
+    this.scene.resume('Spel');
+    this.scene.stop();
+    if (sp && !sp.dood) sp.gameOver();
   }
   sluit() {
     this.scene.resume(this.terug);
@@ -186,23 +190,25 @@ class Titel extends Phaser.Scene {
     this.add.text(480, 186, 'Een game gemaakt door Daniel en Jantje Willie', {
       fontFamily: FONT, fontSize: '22px', fontStyle: 'bold', color: '#3cc8bb', stroke: '#0a1028', strokeThickness: 5,
     }).setOrigin(0.5).setDepth(6);
-    // links en rechts staan monsters te wachten (symmetrisch)
-    const monster = (key, x, flip, schaal, vertraging) => {
-      const m = this.add.image(x, 404, key).setOrigin(0.5, 1).setScale(schaal).setFlipX(flip).setDepth(4);
-      this.tweens.add({ targets: m, y: 396, scaleY: schaal * 1.05, yoyo: true, repeat: -1, duration: 500 + vertraging, ease: 'Sine.easeInOut' });
-      return m;
-    };
-    monster('pinguin', 110, true, 1.3, 0);
-    monster('fust', 210, true, 1.3, 120);
-    monster('lavalager', 750, false, 1.3, 60);
-    monster('golem', 860, false, 1.2, 180);
+    // overal bier: glazen en flesjes zweven rond
+    for (let i = 0; i < 14; i++) {
+      const fles = i % 3 === 0, links = i % 2 === 0;
+      const x = links ? Phaser.Math.Between(20, 330) : Phaser.Math.Between(630, 940), y = Phaser.Math.Between(230, 400);
+      const b = this.add.image(x, y, fles ? 'flesbom' : 'bierglas').setScale(fles ? 1.6 : 2.2).setDepth(3).setAngle(Phaser.Math.Between(-20, 20)).setAlpha(0.9);
+      this.tweens.add({ targets: b, y: y - Phaser.Math.Between(10, 30), angle: b.angle + Phaser.Math.Between(-25, 25), yoyo: true, repeat: -1, duration: Phaser.Math.Between(1200, 2400), ease: 'Sine.easeInOut', delay: i * 90 });
+    }
     // het gouden flesje rent heen en weer onder het bord
     const goud = this.add.image(250, 268, 'goudfles').setDepth(4);
     this.tweens.add({ targets: goud, x: 710, yoyo: true, repeat: -1, duration: 3200, ease: 'Sine.easeInOut',
       onYoyo: () => goud.setFlipX(true), onRepeat: () => goud.setFlipX(false) });
     this.tweens.add({ targets: goud, y: 260, yoyo: true, repeat: -1, duration: 160 });
-    const held = this.add.image(480, 404, 'sp_groot').setOrigin(0.5, 1).setScale(0.62).setDepth(5);
-    this.tweens.add({ targets: held, y: 396, yoyo: true, repeat: -1, duration: 700, ease: 'Sine.easeInOut' });
+    // het poppetje drinkt een biertje
+    const held = this.add.image(480, 404, 'sp_drinkt').setOrigin(0.5, 1).setScale(0.62).setDepth(5);
+    this.time.addEvent({ delay: 2600, loop: true, callback: () => {
+      this.tweens.add({ targets: held, angle: -8, yoyo: true, duration: 500, hold: 600, ease: 'Sine.easeInOut' });
+      const g = this.add.text(530, 250, 'glug glug', { fontFamily: FONT, fontSize: '20px', fontStyle: 'bold', color: '#f2c14e', stroke: '#0a1028', strokeThickness: 5 }).setDepth(6);
+      this.tweens.add({ targets: g, y: 220, alpha: 0, duration: 1300, onComplete: () => g.destroy() });
+    } });
 
     const touch = this.sys.game.device.input.touch;
     let hulp = touch
@@ -220,24 +226,68 @@ class Titel extends Phaser.Scene {
     const tandwiel = maakInstellingenKnop(this, 932, 28);
     maakVolledigSchermKnop(this, 884, 28);
 
+    // De Start-knop rent 3 keer weg ("haha noob!"). De 4e keer mag je echt spelen.
+    this.gepest = 0;
+    const W = 300, H = 64;
+    let plek = { x: 480, y: 442 };
     const begin = () => {
-      if (this.gestart || this.scene.isPaused()) return;
+      if (this.gestart || this.scene.isPaused() || this.rent) return;
+      if (this.gepest < 3) { this.renWeg(); return; }
       this.gestart = true;
       naarVolledigScherm(this);
       this.scene.start('Spel', { run: nieuweRun() });
     };
-    // de Start-knop: klik erop (of druk op spatie/Enter) om te beginnen
-    // het startscherm is alleen om te beginnen: alles anders zit in het Game over-menu
-    const startKnop = knop(this, 330, 410, 300, 64, '▶  Start', 0xf2c14e, begin, 30);
+    const startKnop = this.startKnop = knop(this, plek.x - W / 2, plek.y - H / 2, W, H, '▶  Start', 0xf2c14e, begin, 30);
     for (const o of Object.values(startKnop)) o.setDepth(20);
+    // pootjes onder de knop (zie je alleen als hij wegrent)
+    const poot = (dx) => this.add.ellipse(0, 0, 26, 12, 0x4a2a12).setStrokeStyle(2, 0x0a1028).setDepth(19).setVisible(false);
+    this.pootjes = [poot(-60), poot(60)];
+    this.renWeg = () => {
+      this.gepest++;
+      this.rent = true;
+      const oud = { ...plek };
+      // een plek ver weg van waar hij nu is
+      do { plek = { x: Phaser.Math.Between(170, 790), y: Phaser.Math.Between(240, 450) }; } while (Math.abs(plek.x - oud.x) < 250);
+      const noob = this.add.text(oud.x, oud.y - 40, ['haha noob!', 'NOOB!', 'haha, nog steeds een noob!'][this.gepest - 1], {
+        fontFamily: FONT_TITEL, fontSize: '34px', color: '#ff8a8a', stroke: '#0a1028', strokeThickness: 7,
+      }).setOrigin(0.5).setDepth(30).setScale(0.3);
+      this.tweens.add({ targets: noob, scale: 1, duration: 200, ease: 'Back.easeOut' });
+      this.tweens.add({ targets: noob, y: oud.y - 90, alpha: 0, delay: 900, duration: 500, onComplete: () => noob.destroy() });
+      Geluid.effect('noob');
+      this.pootjes.forEach(p => p.setVisible(true));
+      const duur = 650, delen = [startKnop.g, startKnop.t];
+      this.tweens.addCounter({ from: 0, to: 1, duration: duur, ease: 'Sine.easeInOut',
+        onUpdate: (tw) => {
+          // rennen met huppeltjes: 5 sprongetjes onderweg
+          const f = tw.getValue(), x = oud.x + (plek.x - oud.x) * f;
+          const y = oud.y + (plek.y - oud.y) * f - Math.abs(Math.sin(f * Math.PI * 5)) * 16;
+          for (const d of delen) { d.x = x; d.y = y; }
+          startKnop.z.setPosition(x - W / 2, y - H / 2);
+          this.pootjes.forEach((p, i) => p.setPosition(x + (i ? 50 : -50) + Math.sin(f * 30 + i * Math.PI) * 12, y + H / 2 + 6));
+          if (Math.random() < 0.3) this.vonkje(x, y + H / 2);
+        },
+        onComplete: () => {
+          for (const d of delen) { d.x = plek.x; d.y = plek.y; }
+          startKnop.z.setPosition(plek.x - W / 2, plek.y - H / 2);
+          this.pootjes.forEach(p => p.setVisible(false));
+          this.rent = false;
+          if (this.gepest === 3) {
+            const ok = this.add.text(plek.x, plek.y - 56, 'oké oké, nu mag je spelen 😇', { fontFamily: FONT, fontSize: '20px', fontStyle: 'bold', color: '#5fd38a', stroke: '#0a1028', strokeThickness: 5 }).setOrigin(0.5).setDepth(30);
+            this.tweens.add({ targets: ok, alpha: 0, delay: 1600, duration: 500, onComplete: () => ok.destroy() });
+          }
+        },
+      });
+    };
+    this.vonkje = (x, y) => {
+      const s = this.add.circle(x + Phaser.Math.Between(-60, 60), y, Phaser.Math.Between(3, 6), 0xc8b08a, 0.8).setDepth(18);
+      this.tweens.add({ targets: s, y: y - 14, alpha: 0, scale: 2, duration: 400, onComplete: () => s.destroy() });
+    };
     // alle bazen verslagen? Dan kun je opnieuw brouwen (prestige)
     if (PROFIEL.regio >= REGIOS.length) {
       const pk = knop(this, 20, 46, 230, 40, '⭐ Opnieuw brouwen', 0xf2c14e, () => this.vraagOpnieuw(), 18);
       for (const o of Object.values(pk)) o.setDepth(20);
       this.tweens.add({ targets: [pk.g, pk.t], alpha: 0.7, yoyo: true, repeat: -1, duration: 700 });
     }
-    // de knop zachtjes laten kloppen, zodat je ziet dat je erop moet drukken
-    this.tweens.add({ targets: [startKnop.g, startKnop.t], alpha: 0.75, yoyo: true, repeat: -1, duration: 650 });
     this.input.keyboard.on('keydown-SPACE', () => begin());
     this.input.keyboard.on('keydown-ENTER', () => begin());
     void tandwiel;
@@ -314,7 +364,7 @@ class Winkel extends Phaser.Scene {
       { naam: 'Level', kleur: 0x7a5cff, actie: () => this.openLevels() },
       { naam: 'Eindbaas', kleur: 0xc8501c, actie: () => this.toonBaas() },
       { naam: 'Prestaties', kleur: 0xf2c14e, actie: () => this.naar('Prestaties') },
-      { naam: 'Menu', kleur: 0xa9c4ee, actie: () => this.naarMenu() },
+      { naam: 'Instellingen', kleur: 0xa9c4ee, actie: () => this.openInstellingen() },
     ];
     this.tegels = {};
     T.forEach((t, i) => { this.tegels[t.naam] = this.maakTegel(t, 36 + (i % 4) * 226, 84 + Math.floor(i / 4) * 180); });
@@ -393,8 +443,8 @@ class Winkel extends Phaser.Scene {
     T.Eindbaas.hint.setText(PROFIEL.ticket === n ? 'Gekocht! ⚔ Vechten' : `${baasPrijs(n)} → ${baasBeloning(n)} 🍺` + (n < PROFIEL.regio ? '  ✔' : ''));
     this.zetPlaatje(T.Prestaties, null, 1, '🏆');
     T.Prestaties.hint.setText(`${PROFIEL.prestaties.length} van ${PRESTATIES.length}`);
-    this.zetPlaatje(T.Menu, null, 1, '⌂');
-    T.Menu.hint.setText('naar het hoofdmenu');
+    this.zetPlaatje(T.Instellingen, null, 1, '⚙');
+    T.Instellingen.hint.setText('muziek en geluid');
     this.speelKnop.t.setText('▶  Spelen in ' + levelNaam(PROFIEL.startRegio));
   }
 
@@ -497,10 +547,10 @@ class Winkel extends Phaser.Scene {
     else this.scene.start(scene, { terugNaar: 'Winkel', terugData: terug });
   }
 
-  naarMenu() {
-    if (this.weg || this.scene.isPaused()) return;
-    this.weg = true;
-    this.scene.start('Titel');
+  openInstellingen() {
+    if (this.kiest || this.weg || this.scene.isPaused()) return;
+    this.scene.launch('Instellingen', { terug: 'Winkel' });
+    this.scene.pause();
   }
 
   // het levelkeuzescherm openen (dit menu wacht even)

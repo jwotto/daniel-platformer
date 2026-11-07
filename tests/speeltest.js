@@ -275,12 +275,10 @@
       doe('shop'); scene('Titel').scene.start('Shop'); await wacht(() => actief('Shop'), 4000, 'shop');
       druk(scene('Shop'), 'Draai'); await wacht(() => !scene('Shop').draait, 8000, 'rad');
       druk(scene('Shop'), 'Terug'); await wacht(() => actief('Titel'), 4000, 'titel');
-      doe('titel → start'); druk(scene('Titel'), 'Start'); await wacht(() => spelKlaar(0.5), 8000, 'spel');
-      doe('instellingen → hoofdscherm');
-      const sp = scene('Spel'); sp.scene.launch('Instellingen', { terug: 'Spel' }); sp.scene.pause();
-      await wacht(() => actief('Instellingen'), 4000, 'instellingen');
-      druk(scene('Instellingen'), 'Hoofdscherm'); await wacht(() => actief('Titel') && !M().isPaused('Spel') && !actief('Instellingen'), 4000, 'hoofdscherm');
-      doe('instellingen → verder spelen'); druk(scene('Titel'), 'Start'); await wacht(() => spelKlaar(0.5), 8000, 'spel');
+      doe('titel → start (3× noob)');
+      for (let i = 0; i < 3; i++) { druk(scene('Titel'), 'Start'); moet(scene('Titel').gepest === i + 1, 'Start-knop rende niet weg'); await wacht(() => !scene('Titel').rent, 3000, 'knop staat stil'); }
+      druk(scene('Titel'), 'Start'); await wacht(() => spelKlaar(0.5), 8000, 'spel');
+      doe('instellingen → verder spelen');
       scene('Spel').scene.launch('Instellingen', { terug: 'Spel' }); scene('Spel').scene.pause();
       await wacht(() => actief('Instellingen'), 4000, 'instellingen');
       druk(scene('Instellingen'), 'Verder spelen'); await wacht(() => actief('Spel') && !M().isPaused('Spel'), 4000, 'verder spelen');
@@ -305,8 +303,13 @@
       druk(scene('Winkel'), 'Spelen'); await wacht(() => spelKlaar(0.5), 8000, 'spelen');
       scene('Spel').gameOver(); await wacht(() => actief('Winkel'), 5000, 'winkel');
       kiesUpgrade(scene('Winkel'));
-      druk(scene('Winkel'), 'Menu'); await wacht(() => actief('Titel'), 4000, 'menu vanuit winkel');
-      return 'Start, Draai, Terug, Hoofdscherm, Verder spelen, en in het Game over-menu: Power-ups (kopen/ongedaan), Eindbaas, Level, Gokkast, Dieren, Prestaties, Skins, Spelen en Menu werken';
+      druk(scene('Winkel'), 'Instellingen'); await wacht(() => actief('Instellingen'), 4000, 'instellingen vanuit menu');
+      druk(scene('Instellingen'), 'Klaar'); await wacht(() => actief('Winkel') && !M().isPaused('Winkel'), 4000, 'terug in het menu');
+      doe('stop potje'); scene('Winkel').spelen(); await wacht(() => spelKlaar(0.5), 8000, 'spel');
+      scene('Spel').scene.launch('Instellingen', { terug: 'Spel' }); scene('Spel').scene.pause();
+      await wacht(() => actief('Instellingen'), 4000, 'instellingen');
+      druk(scene('Instellingen'), 'Stop potje'); await wacht(() => actief('Winkel'), 6000, 'Game over-menu na stoppen');
+      return 'Start (3× noob), Draai, Terug, Verder spelen, Stop potje, en in het Game over-menu: Power-ups (kopen/ongedaan), Eindbaas, Level, Gokkast, Dieren, Prestaties, Skins, Instellingen en Spelen werken';
     },
 
     // regio-trucjes: trampoline, lopende band, bierplas, maan

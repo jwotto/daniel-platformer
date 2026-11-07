@@ -764,6 +764,16 @@ function maakSpelerTexturen(scene) {
   // groot en scherp, voor het titelscherm
   if (scene.textures.exists('sp_groot')) scene.textures.remove('sp_groot');
   tekenTextuur(scene, 'sp_groot', 56, 88, ctx => tekenSpeler(ctx, {}, skin), 4);
+  // het poppetje met een biertje aan zijn mond (titelscherm)
+  if (scene.textures.exists('sp_drinkt')) scene.textures.remove('sp_drinkt');
+  tekenTextuur(scene, 'sp_drinkt', 56, 88, ctx => {
+    tekenSpeler(ctx, { arm: 2.7 }, skin);
+    ctx.save(); ctx.translate(39, 41); ctx.rotate(-0.9);
+    ctx.strokeStyle = INKT; ctx.lineWidth = 1.4; ctx.fillStyle = '#f2a33a';
+    ctx.beginPath(); ctx.moveTo(-4, -10); ctx.lineTo(4, -10); ctx.lineTo(3.4, 2); ctx.lineTo(-3.4, 2); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#fffaf0'; for (const [x, r] of [[-2.6, 2.2], [0, 2.6], [2.6, 2.2]]) { ctx.beginPath(); ctx.arc(x, -10.5, r, 0, TAU); ctx.fill(); ctx.stroke(); }
+    ctx.restore();
+  }, 4);
 }
 
 function maakTexturen(scene) {

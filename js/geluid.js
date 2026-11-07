@@ -97,6 +97,8 @@ const Geluid = (() => {
     duik: () => toon(1200, 300, 0.25, 'sawtooth', 0.15),
     tink: () => toon(2200, 1800, 0.05, 'triangle', 0.18),
     klik: () => toon(900, 600, 0.04, 'square', 0.14),
+    // "haha noob": een pestend deuntje (na-na-na-na-naa-na)
+    noob: () => rijtje([784, 659, 880, 784, 659], 0.11, 'square', 0.2),
     boing: () => toon(180, 760, 0.25, 'sine', 0.35),
     laser: () => toon(1800, 300, 0.15, 'sawtooth', 0.14),
     plop: () => toon(600, 1200, 0.08, 'square', 0.2),
