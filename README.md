@@ -85,6 +85,7 @@ Elke power-up kun je meerdere keren kopen. Hij wordt dan beter én duurder.
 | `js/spel.js` | het level en de eindbaas-gevechten |
 | `js/schermen.js` | titelscherm, instellingen en winkel |
 | `js/shop.js` | de shop met het draairad en je skins |
+| `js/iconen.js` | de icoontjes van de power-ups en de upgrade-keuzes |
 | `js/main.js` | zet alles aan |
 | `manifest.webmanifest`, `icoon-*.png` | zodat de game als app op je beginscherm kan |
 

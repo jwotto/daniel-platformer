@@ -128,13 +128,40 @@ class Titel extends Phaser.Scene {
     this.gestart = false;
     this.achtergrond = maakAchtergrond(this, regioVan(Math.min(PROFIEL.startRegio, PROFIEL.regio)).id);
     this.t = 0;
-    this.add.text(480, 70, 'BVO', {
-      fontFamily: FONT_TITEL, fontSize: '64px', color: '#f2c14e', stroke: '#0a1028', strokeThickness: 10,
-    }).setOrigin(0.5);
-    this.add.text(480, 132, 'Een game gemaakt door Daniel en Jantje Willie', {
-      fontFamily: FONT, fontSize: '24px', fontStyle: 'bold', color: '#3cc8bb', stroke: '#0a1028', strokeThickness: 5,
-    }).setOrigin(0.5);
-    const held = this.add.image(480, 404, 'sp_groot').setOrigin(0.5, 1).setScale(0.7);
+    // opstijgende bierbelletjes
+    this.add.particles(0, 0, 'bel', {
+      x: { min: 0, max: 960 }, y: 560, speedY: { min: -90, max: -40 }, speedX: { min: -12, max: 12 },
+      lifespan: 9000, frequency: 160, scale: { min: 0.6, max: 1.6 }, alpha: { start: 0.9, end: 0 },
+    }).setDepth(2);
+    // het titelbord: een glas bier, met BVO erop
+    const bord = this.add.image(480, 92, 'titelbord').setDepth(5);
+    this.tweens.add({ targets: bord, angle: { from: -1.5, to: 1.5 }, yoyo: true, repeat: -1, duration: 1800, ease: 'Sine.easeInOut' });
+    ['B', 'V', 'O'].forEach((l, i) => {
+      const t = this.add.text(400 + i * 80, 110, l, {
+        fontFamily: FONT_TITEL, fontSize: '92px', color: '#fffaf0', stroke: '#0a1028', strokeThickness: 12,
+      }).setOrigin(0.5).setDepth(6);
+      // de letters springen om de beurt
+      this.tweens.add({ targets: t, y: 96, yoyo: true, repeat: -1, duration: 420, delay: i * 140, ease: 'Sine.easeInOut', repeatDelay: 900 });
+    });
+    this.add.text(480, 186, 'Een game gemaakt door Daniel en Jantje Willie', {
+      fontFamily: FONT, fontSize: '22px', fontStyle: 'bold', color: '#3cc8bb', stroke: '#0a1028', strokeThickness: 5,
+    }).setOrigin(0.5).setDepth(6);
+    // links en rechts staan monsters te wachten (symmetrisch)
+    const monster = (key, x, flip, schaal, vertraging) => {
+      const m = this.add.image(x, 404, key).setOrigin(0.5, 1).setScale(schaal).setFlipX(flip).setDepth(4);
+      this.tweens.add({ targets: m, y: 396, scaleY: schaal * 1.05, yoyo: true, repeat: -1, duration: 500 + vertraging, ease: 'Sine.easeInOut' });
+      return m;
+    };
+    monster('pinguin', 110, true, 1.3, 0);
+    monster('fust', 210, true, 1.3, 120);
+    monster('lavalager', 750, false, 1.3, 60);
+    monster('golem', 860, false, 1.2, 180);
+    // het gouden flesje rent heen en weer onder het bord
+    const goud = this.add.image(250, 268, 'goudfles').setDepth(4);
+    this.tweens.add({ targets: goud, x: 710, yoyo: true, repeat: -1, duration: 3200, ease: 'Sine.easeInOut',
+      onYoyo: () => goud.setFlipX(true), onRepeat: () => goud.setFlipX(false) });
+    this.tweens.add({ targets: goud, y: 260, yoyo: true, repeat: -1, duration: 160 });
+    const held = this.add.image(480, 404, 'sp_groot').setOrigin(0.5, 1).setScale(0.62).setDepth(5);
     this.tweens.add({ targets: held, y: 396, yoyo: true, repeat: -1, duration: 700, ease: 'Sine.easeInOut' });
 
     const touch = this.sys.game.device.input.touch;
@@ -243,12 +270,13 @@ class Winkel extends Phaser.Scene {
         g.lineStyle(licht ? 4 : 3, 0xf2c14e, 1).strokeRoundedRect(x, y, w, h, 16);
       };
       teken(false);
-      vast(this.add.text(x + w / 2, y + 22, k.naam, { fontFamily: FONT_TITEL, fontSize: '28px', color: '#f2c14e' }).setOrigin(0.5, 0));
-      vast(this.add.text(x + 20, y + 90, '+  ' + k.plus, {
-        fontFamily: FONT, fontSize: '20px', fontStyle: 'bold', color: '#5fd38a', wordWrap: { width: w - 40 },
+      vast(this.add.text(x + w / 2, y + 14, k.naam, { fontFamily: FONT_TITEL, fontSize: '26px', color: '#f2c14e' }).setOrigin(0.5, 0));
+      vast(this.add.image(x + w / 2, y + 82, 'icoon_' + k.id).setScale(0.66));
+      vast(this.add.text(x + 20, y + 122, '+  ' + k.plus, {
+        fontFamily: FONT, fontSize: '19px', fontStyle: 'bold', color: '#5fd38a', wordWrap: { width: w - 40 },
       }));
-      vast(this.add.text(x + 20, y + 160, '−  ' + k.min, {
-        fontFamily: FONT, fontSize: '20px', fontStyle: 'bold', color: '#ff7a8a', wordWrap: { width: w - 40 },
+      vast(this.add.text(x + 20, y + 182, '−  ' + k.min, {
+        fontFamily: FONT, fontSize: '19px', fontStyle: 'bold', color: '#ff7a8a', wordWrap: { width: w - 40 },
       }));
       vast(this.add.text(x + w / 2, y + h + 14, String(i + 1), {
         fontFamily: FONT, fontSize: '18px', fontStyle: 'bold', color: '#5a6a9a',
@@ -274,7 +302,8 @@ class Winkel extends Phaser.Scene {
     const kaart = {
       p, x, y, w, h,
       g: this.add.graphics(),
-      naam: this.add.text(x + 12, y + 10, p ? p.naam : 'Eindbaas', { fontFamily: FONT_TITEL, fontSize: '19px', color: p ? '#f3ead6' : '#ff8a8a', wordWrap: { width: w - 20 }, lineSpacing: -4 }),
+      naam: this.add.text(x + 12, y + 10, p ? p.naam : 'Eindbaas', { fontFamily: FONT_TITEL, fontSize: '18px', color: p ? '#f3ead6' : '#ff8a8a', wordWrap: { width: p ? w - 58 : w - 20 }, lineSpacing: -4 }),
+      plaatje: p ? this.add.image(x + w - 24, y + 24, 'icoon_' + p.id).setScale(0.38) : null,
       uitleg: this.add.text(x + 12, y + 60, '', { fontFamily: FONT, fontSize: '14px', color: '#a9b6d8', wordWrap: { width: w - 22 } }),
       prijsT: this.add.text(x + w - 28, y + h - 8, '', { fontFamily: FONT, fontSize: '22px', fontStyle: 'bold', color: '#f2c14e' }).setOrigin(1, 1),
       icoon: this.add.image(x + w - 8, y + h - 8, 'fles_mini').setOrigin(1, 1).setScale(0.7),

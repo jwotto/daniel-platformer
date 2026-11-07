@@ -1011,6 +1011,25 @@ function maakTexturen(scene) {
   tekenTextuur(scene, 'baas_draak', 220, 152, tekenDraak);
   tekenProjectielen(scene);
   maakMonsterTexturen(scene);
+  maakIcoonTexturen(scene);
+  // titelbord: een glas bier met een schuimkraag
+  tekenTextuur(scene, 'titelbord', 380, 170, ctx => {
+    const g = ctx.createLinearGradient(0, 40, 0, 160);
+    g.addColorStop(0, '#ffcf5a'); g.addColorStop(1, '#c8701a');
+    ctx.fillStyle = g; ctx.strokeStyle = INKT; ctx.lineWidth = 5;
+    rondRect(ctx, 20, 44, 340, 116, 26); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,.35)'; rondRect(ctx, 36, 60, 14, 84, 7); ctx.fill();
+    ctx.fillStyle = 'rgba(255,250,220,.6)';
+    for (const [x, y, r] of [[300, 130, 4], [320, 100, 3], [80, 140, 3], [270, 90, 2.5], [110, 110, 2]]) { ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill(); }
+    ctx.fillStyle = '#fffaf0'; ctx.lineWidth = 4;
+    for (let i = 0; i < 9; i++) { const x = 32 + i * 39.5, r = 22 + (i % 3) * 5; ctx.beginPath(); ctx.arc(x, 48 - (i % 2) * 6, r, 0, TAU); ctx.fill(); ctx.stroke(); }
+    ctx.fillStyle = '#fffaf0'; ctx.fillRect(14, 44, 352, 20);
+  });
+  tekenTextuur(scene, 'bel', 14, 14, ctx => {
+    ctx.strokeStyle = 'rgba(255,250,220,.9)'; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.arc(7, 7, 5.5, 0, TAU); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.beginPath(); ctx.arc(5, 5, 1.5, 0, TAU); ctx.fill();
+  });
   tekenTextuur(scene, 'tandwiel', 40, 40, ctx => {
     ctx.fillStyle = 'rgba(10,16,40,.55)'; rondRect(ctx, 1, 1, 38, 38, 9); ctx.fill();
     ctx.fillStyle = '#f3ead6';
