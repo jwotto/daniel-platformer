@@ -306,6 +306,7 @@
       druk(scene('Shop'), 'Terug'); await wacht(() => actief('Winkel'), 4000, 'terug naar winkel');
       druk(scene('Winkel'), 'Spelen'); await wacht(() => spelKlaar(0.5), 8000, 'spelen');
       scene('Spel').gameOver(); await wacht(() => actief('Winkel'), 5000, 'winkel');
+      kiesUpgrade(scene('Winkel'));
       druk(scene('Winkel'), 'Menu'); await wacht(() => actief('Titel'), 4000, 'menu vanuit winkel');
       return 'Start, Shop, Draai, Terug, Prestaties, Hoofdscherm, Verder spelen, en in het Game over-menu: Power-ups (kopen/ongedaan), Eindbaas, Level, Gokkast, Dieren, Prestaties, Skins, Spelen en Menu werken';
     },
