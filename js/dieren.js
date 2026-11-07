@@ -15,8 +15,8 @@ const DIEREN = [
   { id: 'bierbeest', naam: 'Bierbeestje', uitleg: l => `Shotjes én schade ${6 * l}% meer`, vliegt: false },
 ];
 const DIER_MAX = 5;
-function dierPrijs() { return 80 + Object.keys(PROFIEL.dieren).length * 40; }
-function upgradePrijs(l) { return 50 * l; }
+function dierPrijs() { return 500 + Object.keys(PROFIEL.dieren).length * 250; }
+function upgradePrijs(l) { return 300 * l; }
 // niveau van een dier dat je NU meeneemt (anders 0)
 function dierLvl(id) { return PROFIEL.dier === id ? (PROFIEL.dieren[id] || 0) : 0; }
 

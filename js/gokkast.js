@@ -3,7 +3,9 @@
 
 // 16 vakjes: 12× niks, 2× dubbel, 1× drie keer, 1× vijf keer
 const GOK_VAKJES = [0, 2, 0, 0, 3, 0, 0, 2, 0, 0, 0, 5, 0, 0, 0, 0];
-const GOK_INZET = [1, 5, 10, 25];
+// hoe verder je bent, hoe hoger je mag inzetten
+const GOK_INZET = [1, 5, 10, 25, 50, 100, 250, 500];
+function gokMaxStap() { return Math.min(GOK_INZET.length - 1, 3 + Math.floor(PROFIEL.regio / 3)); }
 
 class Gokkast extends Phaser.Scene {
   constructor() { super('Gokkast'); }
@@ -94,7 +96,7 @@ class Gokkast extends Phaser.Scene {
   zetInzet(r) {
     if (this.draait) return;
     this.alles = false;
-    this.inzetStap = Phaser.Math.Clamp(this.inzetStap + r, 0, GOK_INZET.length - 1);
+    this.inzetStap = Phaser.Math.Clamp(this.inzetStap + r, 0, gokMaxStap());
     this.vernieuw();
   }
 

@@ -33,6 +33,7 @@ class Shop extends Phaser.Scene {
     // naar de gokkast (en daarna weer terug naar de shop)
     const naar = (scene) => () => {
       if (this.draait || this.weg) return;
+      if (PROFIEL.regio < (scene === 'Gokkast' ? GOKKAST_VANAF : DIEREN_VANAF)) { Geluid.effect('nee'); return; }
       this.weg = true;
       this.scene.start(scene, { terugNaar: 'Shop', terugData: { terugNaar: this.terugNaar, winkelData: this.winkelData } });
     };

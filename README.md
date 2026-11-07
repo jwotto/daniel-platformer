@@ -120,27 +120,29 @@ Kies in de winkel bij "Start in" een eerdere regio. Dan staat de baas van die re
 
 Versla je een eindbaas, dan krijg je flink wat flesjes, altijd meer dan het gevecht kostte (25, 42, 59 …) en de eerste keer een **baas-skin met een kroon** (Padkoning, IJsbeer, Bokkenrijder, Drakendoder). Die skins kun je niet aan het rad winnen.
 
-### Power-ups (winkel)
+### Power-ups en balans
 
-Dash · Dubbele sprong · Wall jump · Extra hartje · Zweven · Sterkere slash · Dubbele pijlen · Ontploffende pijlen · Smash.
-Elke power-up kun je meerdere keren kopen. Hij wordt dan beter én duurder.
+Drie soorten power-ups:
 
-En de dure, gekke power-ups:
+| Soort | Welke | Prijs |
+|---|---|---|
+| Gewoon (met MAX) | Dash, Dubbele sprong, Wall jump, Zweven, Dubbele pijlen, Ontploffende pijlen, Smash, Schuimschild, Bierbuik-stamp, Magneetkurk, Herstelslok, Kebabradar | elk niveau 1,6× duurder |
+| **Oneindig** (∞, geen MAX) | Extra hartje, Sterkere slash, Statiegeld, **Behendigheid** (sneller lopen, hoger springen), **Boogkracht** (meer pijlschade) | elk niveau 1,35× duurder: wordt vanzelf heel duur |
+| Heel duur | Flesmaatje (90), Boerbom (60), Doorboorpijlen (120), Reservevat (300) | |
 
-| Power-up | Wat hij doet |
+Sommige dingen gaan pas open als je ver genoeg bent (in de winkel zie je dan een 🔒):
+
+| Vanaf | Wat gaat open |
 |---|---|
-| Schuimschild | een bel van bierschuim vangt 1 (of 2) klappen per potje op |
-| Flesmaatje | een klein flesje vliegt met je mee en schiet zelf op monsters |
-| Bierbuik-stamp | spring bovenop een monster: schade en je stuitert omhoog |
-| Reservevat | ga je dood, dan krijg je 1 keer per potje een tweede kans |
-| Boerbom | word je geraakt, dan blaast een enorme boer de monsters om je heen weg |
-| Magneetkurk | shotjes vliegen van ver (of het hele scherm) naar je toe |
-| Statiegeld | elk verslagen monster laat 1 tot 3 shotjes extra vallen |
-| Doorboorpijlen | je pijlen gaan dwars door alle monsters heen |
-| Herstelslok | na elke 20 (of 12) verslagen monsters een hartje terug |
-| Kebabradar | veel vaker kebabrollen |
+| begin | de gewone power-ups, Behendigheid, Boogkracht |
+| Bergen | Gokkast, Schuimschild, Magneetkurk, Bierbuik-stamp |
+| Grot | Statiegeld, Herstelslok, Kebabradar |
+| Kroeg | Flesmaatje, Boerbom, Doorboorpijlen |
+| na de Maan | Huisdieren (500 flesjes, daarna 250 meer per dier; upgraden 300/600/900/1200) en het Reservevat |
 
-In de winkel kun je **scrollen** (muiswiel, pijltjestoetsen of slepen met je vinger). Linksboven zit **↶ Ongedaan**: daarmee maak je je laatste aankoop van dit bezoek ongedaan en krijg je je flesjes terug. Met **🎡 Shop** ga je naar het draairad en weer terug naar de winkel.
+Verder: het eerste potje van de dag geeft shotjes ×2, een al verslagen baas nog eens doen levert iets minder op (maar altijd meer dan de prijs), en de maximale inzet bij de gokkast groeit mee.
+
+**Gemeten** met `python3 tests/test.py balans` (de computer speelt 40 seconden per regio en kan niet doodgaan, dus dit is het maximum): flesjes per minuut Rivier 65 · IJs 17 · Bergen 19 · Vulkaan 15 · Grot 10 · Savanne 34 · Kroeg 39 · Fabriek 39 · Speeltuin 32 · Maan 36. Een echte speler haalt naar schatting 10–15 per minuut. Doel: alle gewone power-ups (≈560) verspreid over de eerste regio's, de zware (≈1200) richting de Maan, en daarna de huisdieren (≈46.000 voor alles) als einddoel samen met opnieuw brouwen.
 
 ### Geluid en muziek
 

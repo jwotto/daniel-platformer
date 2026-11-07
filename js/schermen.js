@@ -359,8 +359,8 @@ class Winkel extends Phaser.Scene {
     const T = [
       { naam: 'Power-ups', kleur: 0x3cc8bb, actie: () => this.naar('PowerUps') },
       { naam: 'Skins', kleur: 0xff8ac8, actie: () => this.naar('Shop') },
-      { naam: 'Dieren', kleur: 0x5fd38a, actie: () => this.naar('Dieren') },
-      { naam: 'Gokkast', kleur: 0xd1495b, actie: () => this.naar('Gokkast') },
+      { naam: 'Dieren', kleur: 0x5fd38a, actie: () => this.naarOpSlot('Dieren', DIEREN_VANAF) },
+      { naam: 'Gokkast', kleur: 0xd1495b, actie: () => this.naarOpSlot('Gokkast', GOKKAST_VANAF) },
       { naam: 'Level', kleur: 0x7a5cff, actie: () => this.openLevels() },
       { naam: 'Eindbaas', kleur: 0xc8501c, actie: () => this.toonBaas() },
       { naam: 'Prestaties', kleur: 0xf2c14e, actie: () => this.naar('Prestaties') },
@@ -424,7 +424,7 @@ class Winkel extends Phaser.Scene {
     this.flesTekst.setText('× ' + PROFIEL.flessen);
     PROFIEL.startRegio = Math.min(PROFIEL.startRegio, PROFIEL.regio);
     const T = this.tegels, n = this.baasN();
-    const teKoop = POWERUPS.filter(p => PROFIEL.up[p.id] < p.max && PROFIEL.flessen >= prijs(p, PROFIEL.up[p.id])).length;
+    const teKoop = POWERUPS.filter(p => powerupOpen(p) && PROFIEL.up[p.id] < p.max && PROFIEL.flessen >= prijs(p, PROFIEL.up[p.id])).length;
     this.zetPlaatje(T['Power-ups'], 'icoon_dash', 1.1);
     T['Power-ups'].hint.setText(teKoop ? `${teKoop} te koop!` : 'nog even sparen').setColor(teKoop ? '#5fd38a' : '#a9b6d8');
     this.zetPlaatje(T.Skins, 'skin_' + PROFIEL.skin, 0.32);
@@ -433,9 +433,11 @@ class Winkel extends Phaser.Scene {
     const dier = DIEREN.find(d => d.id === PROFIEL.dier && PROFIEL.dieren[d.id]);
     this.zetPlaatje(T.Dieren, 'dier_groot_' + (dier ? dier.id : 'kuiken'), 0.55);
     T.Dieren.plaatje.setAlpha(dier ? 1 : 0.4);
-    T.Dieren.hint.setText(`${Object.keys(PROFIEL.dieren).length} van ${DIEREN.length}` + (dier ? ` · ${dier.naam} mee` : ''));
+    T.Dieren.hint.setText(PROFIEL.regio < DIEREN_VANAF ? '🔒 ' + vanafNaam(DIEREN_VANAF) : `${Object.keys(PROFIEL.dieren).length} van ${DIEREN.length}` + (dier ? ` · ${dier.naam} mee` : ''));
     this.zetPlaatje(T.Gokkast, null, 1, '🎰');
-    T.Gokkast.hint.setText('×2, ×3 of ×5... of niks!');
+    T.Gokkast.hint.setText(PROFIEL.regio < GOKKAST_VANAF ? '🔒 ' + vanafNaam(GOKKAST_VANAF) : '×2, ×3 of ×5... of niks!');
+    T.Gokkast.c.setAlpha(PROFIEL.regio < GOKKAST_VANAF ? 0.55 : 1);
+    T.Dieren.c.setAlpha(PROFIEL.regio < DIEREN_VANAF ? 0.55 : 1);
     this.zetPlaatje(T.Level, 'mini_' + regioVan(PROFIEL.startRegio).id, 1);
     T.Level.hint.setText(levelNaam(PROFIEL.startRegio) + (PROFIEL.startRegio < PROFIEL.regio ? ' ✔' : '') + '  ·  wisselen');
     this.levelHint = T.Level.hint;
@@ -699,24 +701,26 @@ class PowerUps extends Phaser.Scene {
   }
 
   vernieuw(k) {
-    const lvl = PROFIEL.up[k.p.id], vol = lvl >= k.p.max, kost = prijs(k.p, lvl);
-    const kan = !vol && PROFIEL.flessen >= kost;
+    const lvl = PROFIEL.up[k.p.id], oneindg = oneindig(k.p), vol = !oneindg && lvl >= k.p.max, kost = prijs(k.p, lvl);
+    const open = powerupOpen(k.p), kan = open && !vol && PROFIEL.flessen >= kost;
     k.g.clear();
-    k.g.fillStyle(0x16244f, 0.95).fillRoundedRect(k.x, k.y, k.w, k.h, 14);
-    k.g.lineStyle(kan ? 3 : 2, kan ? 0xf2c14e : 0x2c4387, 1).strokeRoundedRect(k.x, k.y, k.w, k.h, 14);
-    for (let i = 0; i < k.p.max; i++) {
-      k.g.fillStyle(i < lvl ? 0x3cc8bb : 0x2c4387, 1).fillCircle(k.x + 18 + i * 15, k.y + k.h - 20, 5);
-    }
-    k.uitleg.setText(vol ? 'Helemaal vol!' : uitlegVan(k.p, lvl));
+    k.g.fillStyle(open ? 0x16244f : 0x0e1630, 0.95).fillRoundedRect(k.x, k.y, k.w, k.h, 14);
+    k.g.lineStyle(kan ? 3 : 2, kan ? 0xf2c14e : open ? 0x2c4387 : 0x1e2a50, 1).strokeRoundedRect(k.x, k.y, k.w, k.h, 14);
+    if (!oneindg) for (let i = 0; i < k.p.max; i++) k.g.fillStyle(i < lvl ? 0x3cc8bb : 0x2c4387, 1).fillCircle(k.x + 18 + i * 15, k.y + k.h - 20, 5);
+    if (!k.oneindigT) { k.oneindigT = this.add.text(k.x + 12, k.y + k.h - 20, '', { fontFamily: FONT, fontSize: '15px', fontStyle: 'bold', color: '#3cc8bb' }).setOrigin(0, 0.5); this.lijst.add(k.oneindigT); }
+    k.oneindigT.setText(oneindg ? '∞  niveau ' + lvl : '');
+    k.naam.setAlpha(open ? 1 : 0.45); if (k.plaatje) k.plaatje.setAlpha(open ? 1 : 0.35);
+    k.uitleg.setText(!open ? '🔒 ' + vanafNaam(k.p.vanaf) : vol ? 'Helemaal vol!' : uitlegVan(k.p, lvl)).setColor(open ? '#a9b6d8' : '#7a8ab8');
     const aan = aanNiveau(k.p.id);
     for (const o of [k.aanT, k.hebT, k.pijlL, k.pijlR]) o.setVisible(lvl > 0);
     k.aanT.setText(aan === 0 ? 'uit' : 'aan ' + aan);
     k.hebT.setText('heb ' + (vol ? 'MAX' : lvl));
     k.pijlL.setAlpha(aan > 0 ? 1 : 0.25); k.pijlR.setAlpha(aan < lvl ? 1 : 0.25);
-    k.prijsT.setText(vol ? 'MAX' : String(kost)).setColor(kan ? '#f2c14e' : '#5a6a9a');
-    k.prijsT.setX(vol ? k.x + k.w - 12 : k.x + k.w - 28);
-    k.icoon.setVisible(!vol).setAlpha(kan ? 1 : 0.4);
+    k.prijsT.setText(!open ? '🔒' : vol ? 'MAX' : String(kost)).setColor(kan ? '#f2c14e' : '#5a6a9a');
+    k.prijsT.setX(vol || !open ? k.x + k.w - 12 : k.x + k.w - 28);
+    k.icoon.setVisible(open && !vol).setAlpha(kan ? 1 : 0.4);
   }
+
 
   // een power-up lager (of weer hoger) zetten, zonder iets te verliezen
   zetAan(k, r) {
@@ -742,7 +746,7 @@ class PowerUps extends Phaser.Scene {
 
   koop(k) {
     const lvl = PROFIEL.up[k.p.id], kost = prijs(k.p, lvl);
-    if (lvl >= k.p.max || PROFIEL.flessen < kost) { this.schud(k); return; }
+    if (!powerupOpen(k.p) || lvl >= k.p.max || PROFIEL.flessen < kost) { this.schud(k); return; }
     PROFIEL.flessen -= kost; PROFIEL.up[k.p.id]++;
     delete PROFIEL.aan[k.p.id]; // wat je net koopt staat meteen aan
     statTel('koop');

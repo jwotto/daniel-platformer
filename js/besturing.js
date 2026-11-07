@@ -53,7 +53,7 @@ class Besturing {
       dash = dash || !!ingedrukt.dash;
     }
 
-    if (location.hash === '#test' || location.hash.startsWith('#baas')) {
+    if (location.hash === '#test' || location.hash.startsWith('#baas') || window.AUTOPILOOT) {
       // testrit: de computer speelt zelf
       const t = this.scene.time.now / 1000;
       x = 1; y = (t % 3) > 2.6 ? 1 : 0;

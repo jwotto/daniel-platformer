@@ -121,7 +121,8 @@ class Spel extends Phaser.Scene {
     this.besturing = new Besturing(this);
     this.maakDier();
     // bonussen van sterren (prestige) en huisdieren
-    this.shotBonus = 1 + 0.1 * PROFIEL.sterren + 0.05 * dierLvl('kuiken') + 0.06 * dierLvl('bierbeest');
+    this.shotBonus = (1 + 0.1 * PROFIEL.sterren + 0.05 * dierLvl('kuiken') + 0.06 * dierLvl('bierbeest')) * (this.run.dagbonus ? 2 : 1);
+    if (this.run.dagbonus) this.time.delayedCall(2300, () => this.popTekst('Eerste potje van de dag: shotjes ×2!'));
     this.time.delayedCall(800, () => checkPrestaties(this));
     this.maakHud();
 
@@ -455,13 +456,13 @@ class Spel extends Phaser.Scene {
       // lopen (op ijs glij je een beetje)
       if (this.muurLock <= 0) {
         const grip = opGrond ? (this.th.id === 'ijs' || this.glad > 0 ? 0.08 : 0.4) : 0.18;
-        b.velocity.x = Phaser.Math.Linear(b.velocity.x, inp.x * LOOPSNELHEID * this.mod.loop * (1 + 0.04 * dierLvl('vos')) + (this.bandV || 0), grip);
+        b.velocity.x = Phaser.Math.Linear(b.velocity.x, inp.x * LOOPSNELHEID * this.mod.loop * (1 + 0.04 * dierLvl('vos') + 0.03 * (this.run.up.behendig || 0)) + (this.bandV || 0), grip);
         if (Math.abs(inp.x) > 0.2) this.kijk = Math.sign(inp.x);
       }
       // springen
       if (this.springBuffer > 0) {
         if (this.coyote > 0) {
-          this.spring(SPRONG * this.mod.sprong * (1 + 0.03 * dierLvl('uil')));
+          this.spring(SPRONG * this.mod.sprong * (1 + 0.03 * dierLvl('uil') + 0.02 * (this.run.up.behendig || 0)));
           Geluid.effect('spring');
         } else if (this.muurTijd > 0 && !opGrond) {
           this.spring(-540 * this.mod.sprong);
@@ -560,9 +561,12 @@ class Spel extends Phaser.Scene {
   }
 
   // ---------- AANVALLEN ----------
+  // Boogkracht: elk niveau 15% meer pijlschade
+  pijlSchade() { return 1 + 0.15 * (this.run.up.boogkracht || 0); }
+
   doeSlash() {
     const sp = this.speler, lvl = this.run.up.slash;
-    const bereik = 58 + 12 * lvl, schade = 1 + lvl;
+    const bereik = 58 + 12 * Math.min(5, lvl), schade = 1 + lvl;
     this.slashCd = 0.3; this.poseTimer = 0.16; this.poseVast = 'sp_slash';
     Geluid.effect('slash');
     const fx = this.add.image(sp.x + this.kijk * 6, sp.y - 30, 'slash')
@@ -601,11 +605,11 @@ class Spel extends Phaser.Scene {
       p.geraakt = p.geraakt || new Set();
       if (p.geraakt.has(v)) return;
       p.geraakt.add(v);
-      this.raakVijand(v, 1, Math.sign(p.body.velocity.x) || 1, 'pijl');
+      this.raakVijand(v, this.pijlSchade(), Math.sign(p.body.velocity.x) || 1, 'pijl');
       if (p.boem) this.ontplof(p.x, p.y);
       return;
     }
-    this.raakVijand(v, 1, Math.sign(p.body.velocity.x) || 1, 'pijl');
+    this.raakVijand(v, this.pijlSchade(), Math.sign(p.body.velocity.x) || 1, 'pijl');
     if (p.boem) this.ontplof(p.x, p.y);
     p.destroy();
   }
@@ -890,6 +894,8 @@ class Spel extends Phaser.Scene {
     this.hartIcons = [];
     // veel hartjes? dan kleiner en dichter op elkaar
     const veel = this.maxH > 8;
+    // meer dan 12 hartjes? dan een getal erachter
+    this.hartTekst = vast(this.add.text(296, 26, '', { fontFamily: FONT, fontSize: '18px', fontStyle: 'bold', color: '#f3ead6', stroke: '#0a1028', strokeThickness: 4 }).setOrigin(0, 0.5));
     for (let i = 0; i < 12; i++) this.hartIcons.push(vast(this.add.image(28 + i * (veel ? 22 : 28), 26, 'hart').setScale(veel ? 0.8 : 1)));
     this.flesGlas = vast(this.add.image(30, 84, 'fles_glas'));
     this.flesBier = vast(this.add.image(30, 84, 'fles_bier'));
@@ -917,7 +923,14 @@ class Spel extends Phaser.Scene {
 
   updateHud() {
     const max = this.maxH;
-    this.hartIcons.forEach((h, i) => { h.setVisible(i < max); h.setTexture(i < this.run.harten ? 'hart' : 'hart_leeg'); });
+    if (max > 12) {
+      // veel hartjes: één hartje met een getal
+      this.hartIcons.forEach((h, i) => { h.setVisible(i === 0); h.setTexture('hart'); });
+      this.hartTekst.setX(46).setText('× ' + this.run.harten + ' / ' + max);
+    } else {
+      this.hartIcons.forEach((h, i) => { h.setVisible(i < max); h.setTexture(i < this.run.harten ? 'hart' : 'hart_leeg'); });
+      this.hartTekst.setText('');
+    }
     const vul = Math.round(70 * PROFIEL.shotjes / 10);
     this.flesBier.setCrop(0, 74 - vul, 32, vul);
     this.flesBier.setVisible(vul > 0);

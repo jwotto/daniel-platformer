@@ -1,7 +1,12 @@
 // Power-ups, regio's, eindbazen en opslaan.
 
 // Je betaalt met volle flesjes (10 shotjes = 1 flesje).
-// Prijs = basis × 3 × (niveau + 1). Elke keer dat je hem koopt wordt hij duurder.
+// Drie soorten:
+// - gewoon (met een MAX): elk niveau 1,6× duurder
+// - oneindig (geen MAX): je kunt blijven kopen, maar elk niveau is 1,35× duurder
+// - heel duur: hoge basisprijs
+// vanaf = vanaf welke regio je hem kunt kopen (0 = meteen, 10 = als je de Maan hebt verslagen)
+const ONEINDIG = 999;
 const POWERUPS = [
   { id: 'dash', naam: 'Dash', basis: 2, max: 5, uitleg: [
     'Zoef alle kanten op. Shift of DASH-knop.',
@@ -16,14 +21,14 @@ const POWERUPS = [
   { id: 'muur', naam: 'Wall jump', basis: 2, max: 2, uitleg: [
     'Klim tegen muren op: duw tegen de muur en druk steeds op springen.',
     'Langzamer langs muren glijden.'] },
-  { id: 'hart', naam: 'Extra hartje', basis: 1, max: 5, uitleg: [
-    'Eén hartje erbij.'] },
+  { id: 'hart', naam: 'Extra hartje', basis: 1, max: ONEINDIG, uitleg: [
+    'Eén hartje erbij. Blijf kopen voor nog meer!'] },
   { id: 'zweef', naam: 'Zweven', basis: 1, max: 3, uitleg: [
     'Houd springen vast in de lucht om te zweven.',
     'Langzamer zweven.',
     'Nog langzamer zweven.'] },
-  { id: 'slash', naam: 'Sterkere slash', basis: 1, max: 5, uitleg: [
-    'Meer schade en je raakt verder.'] },
+  { id: 'slash', naam: 'Sterkere slash', basis: 1, max: ONEINDIG, uitleg: [
+    'Meer schade met je slash (en verder, tot niveau 5).'] },
   { id: 'pijlen', naam: 'Dubbele pijlen', basis: 2, max: 4, uitleg: [
     'Schiet 2 pijlen tegelijk.',
     'Schiet 3 pijlen tegelijk.',
@@ -35,36 +40,38 @@ const POWERUPS = [
   { id: 'smash', naam: 'Smash', basis: 2, max: 4, uitleg: [
     'In de lucht omlaag: knal naar beneden!',
     'Grotere en hardere klap.'] },
+  { id: 'behendig', naam: 'Behendigheid', basis: 2, max: ONEINDIG, uitleg: [
+    'Elk niveau: 3% sneller lopen en 2% hoger springen.'] },
+  { id: 'boogkracht', naam: 'Boogkracht', basis: 2, max: ONEINDIG, uitleg: [
+    'Elk niveau: je pijlen doen 15% meer schade.'] },
   // ---- de dure, gekke power-ups ----
-  { id: 'schild', naam: 'Schuimschild', basis: 5, max: 2, uitleg: [
+  { id: 'schild', naam: 'Schuimschild', basis: 6, max: 2, vanaf: 2, uitleg: [
     'Een bel van bierschuim om je heen. Vangt 1 klap per potje op.',
     'Twee schuimbellen: 2 klappen per potje.'] },
-  { id: 'maatje', naam: 'Flesmaatje', basis: 6, max: 3, uitleg: [
+  { id: 'maatje', naam: 'Flesmaatje', basis: 30, max: 3, vanaf: 6, uitleg: [
     'Een klein flesje vliegt met je mee en schiet zelf op monsters.',
     'Je maatje schiet sneller.',
     'Je maatje schiet als een gek!'] },
-  { id: 'stomp', naam: 'Bierbuik-stamp', basis: 4, max: 2, uitleg: [
+  { id: 'stomp', naam: 'Bierbuik-stamp', basis: 5, max: 2, vanaf: 2, uitleg: [
     'Spring bovenop een monster: AU! en je stuitert omhoog.',
     'Harder stampen: dubbele schade.'] },
-  { id: 'reserve', naam: 'Reservevat', basis: 10, max: 1, uitleg: [
+  { id: 'reserve', naam: 'Reservevat', basis: 100, max: 1, vanaf: 10, uitleg: [
     'Ga je dood? Dan krijg je 1 keer per potje een tweede kans.'] },
-  { id: 'boer', naam: 'Boerbom', basis: 4, max: 3, uitleg: [
+  { id: 'boer', naam: 'Boerbom', basis: 20, max: 3, vanaf: 6, uitleg: [
     'Word je geraakt? Dan laat je een enorme boer die monsters wegblaast.',
     'Grotere boer.',
     'MEGA-BOER!'] },
-  { id: 'magneet', naam: 'Magneetkurk', basis: 3, max: 2, uitleg: [
+  { id: 'magneet', naam: 'Magneetkurk', basis: 4, max: 2, vanaf: 2, uitleg: [
     'Shotjes vliegen van ver naar je toe.',
     'Shotjes van het hele scherm vliegen naar je toe.'] },
-  { id: 'statiegeld', naam: 'Statiegeld', basis: 4, max: 3, uitleg: [
-    'Elk verslagen monster laat 1 shotje extra vallen.',
-    '2 shotjes extra per monster.',
-    '3 shotjes extra per monster.'] },
-  { id: 'doorboor', naam: 'Doorboorpijlen', basis: 6, max: 1, uitleg: [
+  { id: 'statiegeld', naam: 'Statiegeld', basis: 4, max: ONEINDIG, vanaf: 4, uitleg: [
+    'Elk niveau: elk verslagen monster laat 1 shotje extra vallen.'] },
+  { id: 'doorboor', naam: 'Doorboorpijlen', basis: 40, max: 1, vanaf: 6, uitleg: [
     'Je pijlen gaan dwars door alle monsters heen.'] },
-  { id: 'slok', naam: 'Herstelslok', basis: 5, max: 2, uitleg: [
+  { id: 'slok', naam: 'Herstelslok', basis: 8, max: 2, vanaf: 4, uitleg: [
     'Na elke 20 verslagen monsters krijg je een hartje terug.',
     'Al na elke 12 monsters een hartje terug.'] },
-  { id: 'kebabradar', naam: 'Kebabradar', basis: 3, max: 2, uitleg: [
+  { id: 'kebabradar', naam: 'Kebabradar', basis: 4, max: 2, vanaf: 4, uitleg: [
     'Veel vaker kebabrollen (PRRRT!).',
     'Kebab overal!'] },
 ];
@@ -91,9 +98,15 @@ function shotWaarde(n) { return 1 + n; }
 // Een gevecht met de eindbaas is duur!
 function baasPrijs(n) { return 15 + n * 12; }
 // Wat je krijgt als je hem verslaat: altijd meer dan je betaalt
-function baasBeloning(n) { return baasPrijs(n) + 10 + n * 5; }
+// een baas die je al verslagen hebt nog eens doen levert iets minder op (maar nog steeds meer dan de prijs)
+function baasBeloning(n) { return baasPrijs(n) + (n < PROFIEL.regio ? 5 + n * 2 : 10 + n * 5); }
 
-function prijs(p, niveau) { return p.basis * 3 * (niveau + 1); }
+function oneindig(p) { return p.max === ONEINDIG; }
+function prijs(p, niveau) { return Math.round(p.basis * 3 * Math.pow(oneindig(p) ? 1.35 : 1.6, niveau)); }
+// kun je hem al kopen? (sommige power-ups gaan pas open in latere regio's)
+function powerupOpen(p) { return PROFIEL.regio >= (p.vanaf || 0); }
+function vanafNaam(n) { return n >= REGIOS.length ? 'na de Maan' : 'vanaf ' + REGIOS[n].naam; }
+const GOKKAST_VANAF = 2, DIEREN_VANAF = 10;
 function uitlegVan(p, niveau) { return p.uitleg[Math.min(niveau, p.uitleg.length - 1)]; }
 
 // ---------- KEUZES NA DOODGAAN ----------
@@ -149,6 +162,7 @@ function laadProfiel() {
       if (typeof d.dier === 'string') p.dier = d.dier;
       if (d.dieren && typeof d.dieren === 'object') for (const [k, w] of Object.entries(d.dieren)) if (typeof w === 'number') p.dieren[k] = Math.min(5, w);
       p.sterren = Number(d.sterren) || 0;
+      if (typeof d.laatsteDag === 'string') p.laatsteDag = d.laatsteDag;
       if (Array.isArray(d.prestaties)) p.prestaties = d.prestaties.filter(x => typeof x === 'string');
       if (d.aan && typeof d.aan === 'object') for (const k of Object.keys(p.up)) if (typeof d.aan[k] === 'number') p.aan[k] = d.aan[k];
       if (typeof d.keuze === 'string') p.keuze = d.keuze;
@@ -181,6 +195,10 @@ function nieuweRun(baas, baasRegio) {
   const keuze = PROFIEL.keuze || '';
   PROFIEL.keuze = '';
   statTel('potjes');
+  // het eerste potje van de dag: shotjes ×2
+  const vandaag = new Date().toDateString();
+  const dagbonus = PROFIEL.laatsteDag !== vandaag;
+  PROFIEL.laatsteDag = vandaag;
   bewaarProfiel();
-  return { level, up: actieveUp(), harten: hartenMet(keuze), baas: !!baas, keuze };
+  return { level, up: actieveUp(), harten: hartenMet(keuze), baas: !!baas, keuze, dagbonus };
 }

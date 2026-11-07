@@ -271,7 +271,7 @@
         moet(t && z, 'knop "' + tekst + '" niet gevonden in ' + sc.scene.key);
         z.emit('pointerup', { y: t.y, x: t.x });
       };
-      PROFIEL.flessen = 300;
+      PROFIEL.flessen = 300; PROFIEL.regio = 10; // alles open
       doe('shop'); scene('Titel').scene.start('Shop'); await wacht(() => actief('Shop'), 4000, 'shop');
       druk(scene('Shop'), 'Draai'); await wacht(() => !scene('Shop').draait, 8000, 'rad');
       druk(scene('Shop'), 'Terug'); await wacht(() => actief('Titel'), 4000, 'titel');
@@ -373,15 +373,15 @@
 
     // huisdieren: draaien, upgraden, meenemen, en het dier werkt in het spel
     async dieren() {
-      PROFIEL.flessen = 1000; PROFIEL.prestaties = PRESTATIES.map(p => p.id);
+      PROFIEL.flessen = 5000; PROFIEL.prestaties = PRESTATIES.map(p => p.id);
       scene('Titel').scene.start('Dieren'); await wacht(() => actief('Dieren'), 5000, 'dierenwinkel');
       const d = scene('Dieren');
       doe('draaien'); d.draai(); await wacht(() => !d.draait, 8000, 'rad stopt');
       const id = Object.keys(PROFIEL.dieren)[0];
-      moet(id && PROFIEL.dier === id && PROFIEL.flessen === 920 && dierPrijs() === 120, 'draaien klopt niet');
+      moet(id && PROFIEL.dier === id && PROFIEL.flessen === 4500 && dierPrijs() === 750, 'draaien klopt niet');
       doe('upgraden'); const v = d.vakjes.find(v => v.d.id === id);
       for (let i = 0; i < 5; i++) d.upgrade(v);
-      moet(PROFIEL.dieren[id] === 5 && PROFIEL.flessen === 920 - 50 - 100 - 150 - 200, 'upgraden klopt niet (' + PROFIEL.dieren[id] + ', ' + PROFIEL.flessen + ')');
+      moet(PROFIEL.dieren[id] === 5 && PROFIEL.flessen === 4500 - 300 - 600 - 900 - 1200, 'upgraden klopt niet (' + PROFIEL.dieren[id] + ', ' + PROFIEL.flessen + ')');
       doe('thuislaten en meenemen'); d.neemMee(v); moet(PROFIEL.dier === '', 'thuislaten werkte niet'); d.neemMee(v); moet(PROFIEL.dier === id, 'meenemen werkte niet');
       doe('in het spel'); PROFIEL.dieren.schildpad = 4; PROFIEL.dier = 'schildpad';
       d.terug(); await wacht(() => actief('Titel'), 4000, 'titel');
@@ -401,6 +401,43 @@
       scene('Titel').scene.start('Spel', { run: nieuweRun(false) }); await wacht(() => spelKlaar(0.5), 8000, 'spel');
       moet(Math.abs(scene('Spel').shotBonus - 1.1) < 0.001, 'ster geeft geen +10% shotjes');
       return 'ster 1: alles terug naar het begin, skins blijven, shotjes ×1.1';
+    },
+
+    // balans meten (geen goed/fout): hoeveel flesjes per minuut verdien je per regio?
+    async balans() {
+      window.AUTOPILOOT = true;
+      const uit = [];
+      for (let r = 0; r < 10; r++) {
+        PROFIEL.up.dash = 2; PROFIEL.up.dubbel = 1; PROFIEL.up.slash = 1;
+        doe('regio ' + r); speel({ level: r, up: actieveUp() }); await wacht(() => spelKlaar(0.3) && scene('Spel').n === r, 8000, 'regio ' + r);
+        const sp = scene('Spel');
+        const shot0 = PROFIEL.flessen * 10 + PROFIEL.shotjes, m0 = PROFIEL.stats.monsters || 0, t0 = sp.tijd;
+        while (sp.tijd - t0 < 40) { sp.run.harten = 99; await slaap(200); }
+        const min = (sp.tijd - t0) / 60, fl = (PROFIEL.flessen * 10 + PROFIEL.shotjes - shot0) / 10;
+        uit.push(`${sp.reg.id}:${(fl / min).toFixed(1)}fl/min,${Math.round(((PROFIEL.stats.monsters || 0) - m0) / min)}mon/min,${Math.round(sp.meters() / min)}m/min`);
+      }
+      return uit.join('  ');
+    },
+
+    // sloten en oneindige power-ups
+    async balansregels() {
+      PROFIEL.regio = 0; PROFIEL.flessen = 10000;
+      scene('Titel').scene.start('Winkel', { meters: 0, regio: 0, baas: false }); await wacht(() => actief('Winkel'), 5000, 'menu');
+      const w = scene('Winkel'); kiesUpgrade(w);
+      doe('gokkast op slot'); w.naarOpSlot('Gokkast', GOKKAST_VANAF); await slaap(200); moet(actief('Winkel'), 'gokkast was niet op slot');
+      w.naar('PowerUps'); await wacht(() => actief('PowerUps'), 5000, 'power-ups');
+      const pu = scene('PowerUps'), kaart = id => pu.kaarten.find(k => k.p.id === id);
+      doe('dure power-up op slot'); pu.koop(kaart('maatje')); moet(PROFIEL.up.maatje === 0 && kaart('maatje').prijsT.text === '🔒', 'flesmaatje was niet op slot');
+      doe('oneindig'); for (let i = 0; i < 8; i++) pu.koop(kaart('hart'));
+      moet(PROFIEL.up.hart === 8 && kaart('hart').oneindigT.text.includes('8'), 'extra hartje is niet oneindig');
+      moet(prijs(POWERUPS.find(p => p.id === 'hart'), 20) > 500, 'oneindig wordt niet duur genoeg');
+      doe('boogkracht en behendigheid'); pu.koop(kaart('boogkracht')); pu.koop(kaart('behendig'));
+      moet(PROFIEL.up.boogkracht === 1 && PROFIEL.up.behendig === 1, 'nieuwe power-ups niet te koop');
+      pu.spelen(); await wacht(() => spelKlaar(0.5), 8000, 'spel');
+      const sp = scene('Spel');
+      moet(Math.abs(sp.pijlSchade() - 1.15) < 0.001, 'boogkracht doet niks');
+      moet(sp.maxH === 11, 'hartjes kloppen niet (' + sp.maxH + ')');
+      return 'gokkast en flesmaatje op slot; hartje tot 8 (∞); boogkracht 1.15× schade; 11 hartjes';
     },
 
     // kebabrol eten: scheet en heel hoog de lucht in
