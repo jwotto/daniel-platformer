@@ -176,6 +176,14 @@ Object.assign(ICOON_TEKEN, {
 });
 
 function maakIcoonTexturen(scene) {
+  // kleine tekentjes boven monsters: zo versla je hem
+  for (const [zwak, icoon] of [['slash', 'slash'], ['pijl', 'pijlen'], ['stamp', 'smash']]) {
+    tekenTextuur(scene, 'zwak_' + zwak, 64, 64, ctx => {
+      ctx.fillStyle = '#0a1028'; ctx.strokeStyle = '#f2c14e'; ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.arc(32, 32, 28, 0, TAU); ctx.fill(); ctx.stroke();
+      ICOON_TEKEN[icoon](ctx);
+    }, 0.42);
+  }
   for (const [id, teken] of Object.entries(ICOON_TEKEN)) {
     tekenTextuur(scene, 'icoon_' + id, 64, 64, ctx => {
       const g = ctx.createRadialGradient(26, 24, 4, 32, 32, 30);

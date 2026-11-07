@@ -435,7 +435,7 @@ class Spel extends Phaser.Scene {
     this.tweens.add({ targets: fx, alpha: 0, scale: fx.scale * 1.15, duration: 170, onComplete: () => fx.destroy() });
     const rect = new Phaser.Geom.Rectangle(this.kijk > 0 ? sp.x - 6 : sp.x - bereik + 6, sp.y - 64, bereik, 70);
     this.vijanden.getChildren().slice().forEach(v => {
-      if (v.active && Phaser.Geom.Intersects.RectangleToRectangle(rect, v.getBounds())) this.raakVijand(v, schade, this.kijk);
+      if (v.active && Phaser.Geom.Intersects.RectangleToRectangle(rect, v.getBounds())) this.raakVijand(v, schade, this.kijk, 'slash');
     });
     // met je slash kun je bubbels, ijsblokjes en vuurballen kapotslaan
     this.kogels.getChildren().slice().forEach(k => {
@@ -466,11 +466,11 @@ class Spel extends Phaser.Scene {
       p.geraakt = p.geraakt || new Set();
       if (p.geraakt.has(v)) return;
       p.geraakt.add(v);
-      this.raakVijand(v, 1, Math.sign(p.body.velocity.x) || 1);
+      this.raakVijand(v, 1, Math.sign(p.body.velocity.x) || 1, 'pijl');
       if (p.boem) this.ontplof(p.x, p.y);
       return;
     }
-    this.raakVijand(v, 1, Math.sign(p.body.velocity.x) || 1);
+    this.raakVijand(v, 1, Math.sign(p.body.velocity.x) || 1, 'pijl');
     if (p.boem) this.ontplof(p.x, p.y);
     p.destroy();
   }
@@ -490,7 +490,7 @@ class Spel extends Phaser.Scene {
     Geluid.effect('boem');
     this.vijanden.getChildren().slice().forEach(v => {
       if (v.active && Phaser.Math.Distance.Between(x, y, v.x, v.getCenter().y) < r + 20 + (v.soort === 'baas' ? 50 : 0)) {
-        this.raakVijand(v, schade, Math.sign(v.x - x) || 1);
+        this.raakVijand(v, schade, Math.sign(v.x - x) || 1, 'pijl');
       }
     });
   }
@@ -506,14 +506,19 @@ class Spel extends Phaser.Scene {
     this.vonken.explode(18, sp.x, sp.y);
     this.vijanden.getChildren().slice().forEach(v => {
       if (v.active && Math.abs(v.x - sp.x) < r + (v.soort === 'baas' ? 60 : 0) && Math.abs(v.y - sp.y) < 80) {
-        this.raakVijand(v, schade, Math.sign(v.x - sp.x) || 1);
+        this.raakVijand(v, schade, Math.sign(v.x - sp.x) || 1, 'smash');
       }
     });
     this.onkwetsbaar = Math.max(this.onkwetsbaar, 0.2);
   }
 
-  raakVijand(v, schade, richting) {
+  // bron: hoe je hem raakt ('slash', 'pijl', 'stamp', 'smash' of 'boer')
+  raakVijand(v, schade, richting, bron) {
     if (!v.active || v.hp <= 0 || this.gewonnen) return;
+    // sommige monsters kun je maar op één manier verslaan
+    const zwak = ZWAK[v.soort];
+    const telt = !zwak || bron === zwak || bron === 'boer' || (zwak === 'stamp' && bron === 'smash');
+    if (!telt) { this.ketst(v, zwak); return; }
     v.hp -= schade * this.mod.schade;
     v.setTintFill(0xffffff);
     this.time.delayedCall(70, () => { if (v.active) { v.clearTint(); if (v.woedend) v.setTint(0xff9a9a); } });
@@ -632,8 +637,8 @@ class Spel extends Phaser.Scene {
     if (v.soort === 'goud') { this.vangGoud(v); return; }
     // bierbuik-stamp: van bovenop een monster springen
     const sp = this.speler;
-    if (this.run.up.stomp && !this.smashing && sp.body.velocity.y > 60 && sp.y < v.getCenter().y) {
-      this.raakVijand(v, this.run.up.stomp * 2, this.kijk);
+    if ((this.run.up.stomp || ZWAK[v.soort] === 'stamp') && !this.smashing && sp.body.velocity.y > 60 && sp.y < v.getCenter().y) {
+      this.raakVijand(v, Math.max(2, this.run.up.stomp * 2), this.kijk, 'stamp');
       sp.body.setVelocityY(-520);
       this.onkwetsbaar = Math.max(this.onkwetsbaar, 0.15);
       this.vonken.explode(10, sp.x, sp.y);
@@ -641,7 +646,7 @@ class Spel extends Phaser.Scene {
       return;
     }
     if (this.smashing) {
-      this.raakVijand(v, 1 + this.run.up.smash, this.kijk);
+      this.raakVijand(v, 1 + this.run.up.smash, this.kijk, 'smash');
       this.smashing = false;
       this.speler.body.setVelocity(0, -420);
       return;

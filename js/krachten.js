@@ -27,7 +27,7 @@ class KrachtDeel {
     this.tweens.add({ targets: ring, scale: 1, alpha: 0, duration: 400, onComplete: () => ring.destroy() });
     this.vijanden.getChildren().slice().forEach(v => {
       if (v.active && v.soort !== 'goud' && Phaser.Math.Distance.Between(x, y, v.x, v.getCenter().y) < r + (v.soort === 'baas' ? 50 : 0)) {
-        this.raakVijand(v, 1 + lvl, Math.sign(v.x - x) || 1);
+        this.raakVijand(v, 1 + lvl, Math.sign(v.x - x) || 1, 'boer');
       }
     });
     this.kogels.getChildren().slice().forEach(k => {

@@ -70,8 +70,8 @@
     // elke regio heeft zijn eigen monsters
     async monsters() {
       const MAG = {
-        rivier: ['kruiper', 'licht', 'goud'], ijs: ['klont', 'klontje', 'pinguin', 'licht', 'goud'],
-        berg: ['fust', 'vleermuis', 'goud'], vulkaan: ['lava', 'golem', 'licht', 'goud'],
+        rivier: ['kruiper', 'licht', 'goud'], ijs: ['klont', 'klontje', 'pinguin', 'vriesvlok', 'goud'],
+        berg: ['fust', 'vleermuis', 'goud'], vulkaan: ['lava', 'golem', 'vuurmot', 'goud'],
       };
       const EIGEN = { rivier: ['kruiper'], ijs: ['klont', 'pinguin'], berg: ['fust', 'vleermuis'], vulkaan: ['lava', 'golem'] };
       const uit = [];
@@ -117,13 +117,15 @@
     async powerups() {
       ['schild', 'maatje', 'stomp', 'reserve', 'boer', 'magneet', 'statiegeld', 'doorboor', 'slok', 'kebabradar']
         .forEach(k => { PROFIEL.up[k] = POWERUPS.find(p => p.id === k).max; });
-      speel({ level: 1, harten: 3 }); await wacht(() => spelKlaar(1), 8000, 'spel start');
+      speel({ level: 0, harten: 3 }); await wacht(() => spelKlaar(1), 8000, 'spel start');
       const sp = scene('Spel');
       doe('schuimschild'); sp.onkwetsbaar = 0; sp.schade(1); moet(sp.run.harten === 3 && sp.schilden === 1, 'schuimschild vangt niets op');
       doe('reservevat'); sp.schilden = 0; sp.run.harten = 1; sp.onkwetsbaar = 0; sp.schade(1);
       moet(!sp.dood && sp.run.harten === 1 && sp.reserve === 0, 'reservevat gaf geen tweede kans');
-      doe('stampen'); await wacht(() => sp.vijanden.getChildren().some(v => v.active && v.loopt), 8000, 'een monster om op te stampen');
-      const v = sp.vijanden.getChildren().find(v => v.active && v.loopt), hp = v.hp;
+      doe('stampen');
+      const stampbaar = v => v.active && v.loopt && v.soort !== 'goud' && (!ZWAK[v.soort] || ZWAK[v.soort] === 'stamp');
+      for (let i = 0; i < 200 && !sp.vijanden.getChildren().some(stampbaar); i++) { sp.onkwetsbaar = 5; sp.speler.x += 25; sp.speler.y = Math.min(sp.speler.y, 300); await slaap(40); }
+      const v = sp.vijanden.getChildren().find(stampbaar), hp = v.hp;
       sp.speler.x = v.x; sp.speler.y = v.y - v.displayHeight - 2; sp.speler.body.setVelocity(0, 300); sp.spelerRaakt(v);
       moet(v.hp < hp && sp.speler.body.velocity.y < -400, 'stampen deed niks');
       doe('flesmaatje'); const voor = sp.verslagen;
@@ -142,6 +144,32 @@
       moet(PROFIEL.skins.length === 2 && PROFIEL.flessen === 195 && draaiPrijs() === 10, 'prijs of skin klopt niet');
       doe('terug'); s.terug(); await wacht(() => actief('Titel'), 5000, 'terug naar titel');
       return 'gewonnen: ' + skinVan(PROFIEL.skin).naam + ', volgende draai kost ' + draaiPrijs();
+    },
+
+    // monsters met een zwakke plek: verkeerd raken ketst af, goed raken doet pijn
+    async zwak() {
+      const uit = [];
+      for (let r = 1; r < 4; r++) {
+        speel({ level: r }); await wacht(() => spelKlaar() && scene('Spel').n === r, 8000, 'regio ' + r);
+        const sp = scene('Spel'), getest = new Set();
+        for (let i = 0; i < 160 && getest.size < 3; i++) {
+          sp.onkwetsbaar = 5; sp.run.harten = 99; sp.speler.x += 25; sp.speler.y = Math.min(sp.speler.y, 300);
+          for (const v of sp.vijanden.getChildren()) {
+            const zw = ZWAK[v.soort];
+            if (!v.active || !zw || getest.has(v.soort) || v.hp < 1) continue;
+            doe(sp.reg.id + ' ' + v.soort);
+            const fout = zw === 'slash' ? 'pijl' : 'slash', hp = v.hp;
+            sp.raakVijand(v, 1, 1, fout);
+            moet(v.active && v.hp === hp, v.soort + ' ging dood/kwijt met ' + fout + ' (mag alleen ' + zw + ')');
+            sp.raakVijand(v, 1, 1, zw);
+            moet(!v.active || v.hp < hp, v.soort + ' kreeg geen schade met ' + zw);
+            getest.add(v.soort); uit.push(v.soort + ':' + zw);
+          }
+          await slaap(50);
+        }
+      }
+      moet(uit.length >= 5, 'te weinig monsters getest: ' + uit.join(','));
+      return uit.join('  ');
     },
 
     // kebabrol eten: scheet en heel hoog de lucht in

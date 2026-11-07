@@ -251,7 +251,48 @@ function tekenGoudfles(ctx) {
   ctx.restore();
 }
 
+// IJsvlakte (vliegt): een sneeuwvlok met een boos gezichtje
+function tekenVriesvlok(ctx) {
+  ctx.save(); ctx.translate(26, 26);
+  for (let i = 0; i < 6; i++) {
+    ctx.save(); ctx.rotate(i * TAU / 6);
+    ctx.strokeStyle = INKT; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -23); ctx.stroke();
+    ctx.strokeStyle = '#dff2ff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -23); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, -14); ctx.lineTo(-6, -19); ctx.moveTo(0, -14); ctx.lineTo(6, -19); ctx.stroke();
+    ctx.restore();
+  }
+  const g = ctx.createRadialGradient(-3, -3, 2, 0, 0, 12);
+  g.addColorStop(0, '#ffffff'); g.addColorStop(1, '#8cc8f0');
+  ctx.fillStyle = g; ctx.strokeStyle = INKT; ctx.lineWidth = 2.2;
+  ctx.beginPath(); ctx.arc(0, 0, 11, 0, TAU); ctx.fill(); ctx.stroke();
+  boosOog(ctx, -4, -1, 3, '#1b2f6b', true); boosOog(ctx, 4, -1, 3, '#1b2f6b', false);
+  ctx.restore();
+}
+
+// Vulkaan (vliegt): een mot met vlammende vleugels
+function tekenVuurmot(ctx) {
+  ctx.save(); ctx.translate(28, 24);
+  for (const z of [-1, 1]) {
+    const g = ctx.createRadialGradient(z * 14, -4, 2, z * 14, -2, 16);
+    g.addColorStop(0, '#ffe08a'); g.addColorStop(0.6, '#ff6a2c'); g.addColorStop(1, '#a01a10');
+    ctx.fillStyle = g; ctx.strokeStyle = INKT; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(z * 3, -2); ctx.bezierCurveTo(z * 18, -24, z * 30, -10, z * 24, 4); ctx.bezierCurveTo(z * 20, 14, z * 8, 10, z * 3, 4); ctx.closePath(); ctx.fill(); ctx.stroke();
+  }
+  ctx.fillStyle = '#3a2a2a'; ctx.beginPath(); ctx.ellipse(0, 2, 5, 13, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle = INKT; ctx.lineWidth = 1.6;
+  ctx.beginPath(); ctx.moveTo(-2, -10); ctx.quadraticCurveTo(-8, -20, -12, -18); ctx.moveTo(2, -10); ctx.quadraticCurveTo(8, -20, 12, -18); ctx.stroke();
+  ctx.shadowColor = '#ffd27a'; ctx.shadowBlur = 6; ctx.fillStyle = '#ffd27a';
+  ctx.beginPath(); ctx.arc(-2, -5, 1.8, 0, TAU); ctx.arc(2, -5, 1.8, 0, TAU); ctx.fill();
+  ctx.restore();
+}
+
 function maakMonsterTexturen(scene) {
+  tekenTextuur(scene, 'vriesvlok', 52, 52, tekenVriesvlok);
+  tekenTextuur(scene, 'vuurmot', 56, 44, tekenVuurmot);
+  tekenTextuur(scene, 'ijsscherf', 12, 22, ctx => {
+    ctx.fillStyle = '#dff2ff'; ctx.strokeStyle = INKT; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.moveTo(2, 2); ctx.lineTo(10, 2); ctx.lineTo(6, 20); ctx.closePath(); ctx.fill(); ctx.stroke();
+  });
   tekenTextuur(scene, 'ijsklont', 48, 44, tekenIJsklont);
   tekenTextuur(scene, 'ijsklont_klein', 26, 24, tekenIJsklont);
   tekenTextuur(scene, 'pinguin', 52, 60, tekenPinguin);

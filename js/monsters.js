@@ -3,6 +3,15 @@
 // Bergen: rollend fust + hopvleermuis. Vulkaan: lavalager + brouwketel-golem.
 // Overal (zeldzaam): het gouden flesje met pootjes.
 
+// Hoe versla je hem? Staat er niks, dan kan alles.
+// 'slash' = alleen slaan, 'pijl' = alleen schieten, 'stamp' = alleen erbovenop springen
+const ZWAK = {
+  klont: 'slash', klontje: 'slash', pinguin: 'pijl', vriesvlok: 'pijl',
+  fust: 'stamp', vleermuis: 'slash',
+  lava: 'pijl', golem: 'stamp', vuurmot: 'slash',
+};
+const ZWAK_TEKST = { slash: 'Alleen slaan! ⚔', pijl: 'Alleen schieten! ➶', stamp: 'Spring erop! ⤓' };
+
 class MonsterDeel {
   maakKruiper(x, y, minX, maxX) {
     const L = this.moeilijkheid(x);
@@ -46,12 +55,39 @@ class MonsterDeel {
   }
 
   maakLuchtVijand(x, y, w) {
-    if (this.reg.id === 'berg') {
+    const id = this.reg.id, hoog = Phaser.Math.Between(110, Math.max(130, y - 110));
+    if (id === 'berg') {
       // de hopvleermuis hangt ondersteboven onder een platform
       if (y <= 400) this.maakVleermuis(x + w / 2, y + 48);
-    } else {
-      this.maakDwaallicht(x + w / 2, Phaser.Math.Between(110, Math.max(130, y - 110)));
-    }
+    } else if (id === 'ijs') this.maakVlieger('vriesvlok', 'vriesvlok', x + w / 2, hoog);
+    else if (id === 'vulkaan') this.maakVlieger('vuurmot', 'vuurmot', x + w / 2, hoog);
+    else this.maakDwaallicht(x + w / 2, hoog);
+  }
+
+  // een vliegend monster (zonder zwaartekracht)
+  maakVlieger(key, soort, x, y) {
+    const L = this.moeilijkheid(x);
+    const v = this.vijanden.create(x, y, key).setOrigin(0.5).setDepth(9);
+    v.body.setAllowGravity(false);
+    v.body.setSize(v.width * 0.7, v.height * 0.7);
+    v.soort = soort;
+    v.hp = 1 + Math.floor(L * 0.5);
+    v.basisY = y; v.fase = Math.random() * 6; v.shots = 3;
+    v.jaagSnelheid = 50 + Math.min(50, L * 8);
+    v.schietT = 2 + Math.random();
+    return v;
+  }
+
+  // je raakt hem op de verkeerde manier: ketst af
+  ketst(v, zwak) {
+    this.vonken.explode(4, v.x, v.getCenter().y);
+    Geluid.effect('tink');
+    if ((v.ketsT || 0) > this.tijd) return;
+    v.ketsT = this.tijd + 1.2;
+    const t = this.add.text(v.x, v.getTopCenter().y - 26, ZWAK_TEKST[zwak], {
+      fontFamily: FONT, fontSize: '16px', fontStyle: 'bold', color: '#f2c14e', stroke: '#0a1028', strokeThickness: 4,
+    }).setOrigin(0.5).setDepth(20);
+    this.tweens.add({ targets: t, y: t.y - 24, alpha: 0, delay: 500, duration: 500, onComplete: () => t.destroy() });
   }
 
   // een monster dat over een platform loopt
@@ -163,6 +199,13 @@ class MonsterDeel {
     };
     this.vijanden.getChildren().slice().forEach(v => {
       if (!v.active || v.soort === 'baas') return;
+      // teken boven het monster: zo zie je hoe je hem verslaat
+      const zwak = ZWAK[v.soort];
+      if (zwak && !v.badge) {
+        v.badge = this.add.image(v.x, v.y, 'zwak_' + zwak).setDepth(13);
+        v.once('destroy', () => v.badge.destroy());
+      }
+      if (v.badge) v.badge.setPosition(v.x, v.getTopCenter().y - 14);
       const dx = sp.x - v.x, dy = (sp.y - 30) - v.y;
       const inBeeld = v.x > this.camX - 40 && v.x < this.camX + 1000;
       if (v.loopt) {
@@ -233,6 +276,28 @@ class MonsterDeel {
         } else {
           patrouille(v, 1); // kruiper, ijsklontjes
         }
+      } else if (v.soort === 'vriesvlok') {
+        // zweeft zigzag boven je en laat ijsscherfjes vallen
+        v.fase += dt;
+        if (Math.abs(dx) < 420) v.x += Math.sign(dx) * v.jaagSnelheid * 0.8 * dt;
+        v.x += Math.cos(v.fase * 3) * 60 * dt;
+        v.y = v.basisY + Math.sin(v.fase * 1.5) * 20;
+        v.rotation += dt * 1.5;
+        v.schietT -= dt;
+        if (v.schietT <= 0 && inBeeld && Math.abs(dx) < 120 && sp.y > v.y) {
+          v.schietT = 2.2;
+          this.kogel('ijsscherf', v.x, v.y + 16, 0, 160, 900).leeft = 3;
+        }
+      } else if (v.soort === 'vuurmot') {
+        // vliegt in rondjes om je heen als je dichtbij bent
+        v.fase += dt * 2.2;
+        if (Math.abs(dx) < 380 && inBeeld) {
+          const dX = sp.x + Math.cos(v.fase) * 95, dY = sp.y - 50 + Math.sin(v.fase) * 55;
+          v.x += (dX - v.x) * Math.min(1, dt * 1.6);
+          v.y += (dY - v.y) * Math.min(1, dt * 1.6);
+        } else v.y = v.basisY + Math.sin(v.fase) * 12;
+        v.setFlipX(Math.cos(v.fase) < 0);
+        v.scaleY = 1 + Math.sin(this.tijd * 26) * 0.15;
       } else if (v.soort === 'vleermuis' && v.modus === 'hang') {
         // hangt stil tot je eronder loopt
         v.y = v.basisY + Math.sin(this.tijd * 2 + v.fase) * 2;

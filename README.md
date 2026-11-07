@@ -58,13 +58,16 @@ Daarna begint het opnieuw met Rivier 2, en alles is sterker.
 
 ### Monsters per regio
 
-| Regio | Monsters |
-|---|---|
-| 🐸 Rivier | kruiper (loopt heen en weer) · dwaallicht (zweeft op je af) |
-| 🧊 IJsvlakte | **IJsklontje** (breekt in 3 kleintjes) · **Pinguïn-ober** (gooit glazen bier) · dwaallicht |
-| ⛰️ Bergen | **Rollend fust** (rolt op je af, spring eroverheen) · **Hopvleermuis** (hangt onder platforms en duikt op je af) |
-| 🌋 Vulkaan | **Lavalager** (ontploft als je te dichtbij komt) · **Brouwketel-golem** (groot en sterk, stampt schokgolven) · dwaallicht |
-| Overal, zeldzaam | **Gouden flesje met pootjes**: rent weg, vang hem voor een heel flesje! |
+Boven sommige monsters staat een tekentje: zo versla je hem. Raak je hem op een andere manier, dan ketst het af.
+⚔ = alleen slaan · ➶ = alleen schieten · ⤓ = alleen erbovenop springen (smash telt ook). Geen tekentje = alles mag.
+
+| Regio | Op de grond | In de lucht |
+|---|---|---|
+| 🐸 Rivier | kruiper | dwaallicht |
+| 🧊 IJsvlakte | **IJsklontje** ⚔ (breekt in 3 kleintjes) · **Pinguïn-ober** ➶ (gooit glazen bier, vangt je zwaard met zijn dienblad) | **Vriesvlokje** ➶ (zigzagt en laat ijsscherven vallen) |
+| ⛰️ Bergen | **Rollend fust** ⤓ (rolt op je af) | **Hopvleermuis** ⚔ (hangt onder platforms en duikt op je af) |
+| 🌋 Vulkaan | **Lavalager** ➶ (ontploft als je te dichtbij komt) · **Brouwketel-golem** ⤓ (groot, stampt schokgolven) | **Vuurmot** ⚔ (vliegt rondjes om je heen) |
+| Overal, zeldzaam | **Gouden flesje met pootjes**: rent weg, vang hem voor een heel flesje! | |
 
 ### Power-ups (winkel)
 
@@ -125,7 +128,7 @@ Een nieuw liedje maken? Voeg in `LIEDJES` een schema en een rijtje melodie-patro
 ### Vaste speeltest
 
 Typ `python3 tests/test.py`. Dan speelt de computer de game na in een onzichtbare Chrome en zegt per onderdeel ✔ of ✘:
-ronde (doodgaan → kiezen → winkel → shop → baas → weer spelen), vallen, monsters, bazen, powerups, shop en kebab.
+ronde (doodgaan → kiezen → winkel → shop → baas → weer spelen), vallen, monsters, zwak (zwakke plekken), bazen, powerups, shop en kebab.
 Eén onderdeel testen kan ook: `python3 tests/test.py vallen`.
 
 ### Test-adressen
