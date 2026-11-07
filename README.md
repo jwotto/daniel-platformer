@@ -118,6 +118,12 @@ Een nieuw liedje maken? Voeg in `LIEDJES` een schema en een rijtje melodie-patro
 | `js/main.js` | zet alles aan |
 | `manifest.webmanifest`, `icoon-*.png` | zodat de game als app op je beginscherm kan |
 
+### Vaste speeltest
+
+Typ `python3 tests/test.py`. Dan speelt de computer de game na in een onzichtbare Chrome en zegt per onderdeel ✔ of ✘:
+ronde (doodgaan → kiezen → winkel → shop → baas → weer spelen), vallen, monsters, bazen, powerups, shop en kebab.
+Eén onderdeel testen kan ook: `python3 tests/test.py vallen`.
+
 ### Test-adressen
 
 Zet dit achter het adres van de game (je opgeslagen spel wordt dan niet aangeraakt):
