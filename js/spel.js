@@ -94,7 +94,9 @@ class Spel extends Phaser.Scene {
     this.maakHud();
 
     Geluid.muziekAan();
-    Geluid.zetTempo(this.baasModus ? Math.min(240, 212 + this.n * 5) : Math.min(230, 188 + this.n * 6));
+    // liedje kiezen: Bierpolka voor Rivier en IJsvlakte, Bergmars voor Bergen en Vulkaan, Baaslied bij een eindbaas
+    const lied = this.baasModus ? 'baas' : (this.reg.id === 'rivier' || this.reg.id === 'ijs' ? 'polka' : 'mars');
+    Geluid.speelLied(lied, Math.min(30, rondeVan(this.n) * 10));
 
     const titel = this.baasModus ? this.reg.baasNaam : levelNaam(this.n);
     const onder = this.baasModus ? 'Versla hem om verder te mogen!' : (this.waarde > 1 ? `Shotjes zijn hier ${this.waarde}× waard!` : 'Hoe ver kom jij?');

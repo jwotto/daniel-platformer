@@ -69,9 +69,19 @@ Daarna begint het opnieuw met Rivier 2, en alles is sterker.
 Dash · Dubbele sprong · Wall jump · Extra hartje · Zweven · Sterkere slash · Dubbele pijlen · Ontploffende pijlen · Smash.
 Elke power-up kun je meerdere keren kopen. Hij wordt dan beter én duurder.
 
-### Geluid
+### Geluid en muziek
 
-8-bit geluidjes en hyperactieve polka met hardcore drums, live gemaakt met de computer (`js/geluid.js`). Muziek en geluidjes kun je apart uitzetten in de instellingen.
+Alles wordt live gemaakt met de computer (`js/geluid.js`), er zijn geen geluidsbestanden. Muziek en geluidjes kun je apart uitzetten in de instellingen.
+
+Elk liedje is een **akkoordenschema**: één akkoord per maat. De bas, de akkoorden en de melodie worden allemaal uit dat akkoord gemaakt. De melodie gebruikt alleen noten uit het akkoord van dat moment, daarom klinkt alles samen mooi.
+
+| Liedje | Waar | Toonsoort | Akkoordenschema |
+|---|---|---|---|
+| **Bierpolka** (hoem-pa!) | Rivier, IJsvlakte | C majeur | C C F G7 · C Am Dm G7 · F G Em Am · Dm G7 C C |
+| **Bergmars** | Bergen, Vulkaan | A mineur | Am Am Dm E7 · Am F G C · F G Em Am · Dm E7 Am Am |
+| **Baaslied** (snel) | eindbazen | D mineur | Dm Dm Bb A7 · Dm Bb C A7 |
+
+Een nieuw liedje maken? Voeg in `LIEDJES` een schema en een rijtje melodie-patronen toe.
 
 ## Bestanden
 
