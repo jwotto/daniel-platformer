@@ -1,33 +1,60 @@
-# Daniel Platformer
+# Flesje op Avontuur
 
 **Yo niffow, zullen we een game gaan bouwen?** 🎮
 
-Dit is de platformer van Daniel, gemaakt met [Godot 4.7](https://godotengine.org/).
+Een roguelike platformer van Daniel. Het is een HTML-game, gemaakt met [Phaser 3](https://phaser.io/). Hij werkt in de browser op de computer én op je telefoon.
 
 ## Spelen
 
-1. Open Godot (`Godot_v4.7.2-stable_win64.exe` op het bureaublad).
-2. Klik op **Import** en kies `project.godot` in deze map.
-3. Druk op **F5** (of het ▶-knopje rechtsboven).
+- **Op de computer:** open `index.html` in Chrome of Edge.
+- **Op je telefoon:** open de link van de game en houd je telefoon dwars.
 
-| Toets | Wat doet het |
+### Besturing
+
+| Wat | Toetsenbord | Telefoon |
+|---|---|---|
+| Lopen | ← → (of A D) | duim links op het scherm en schuiven |
+| Springen | spatie (lang = hoger) | SPRING |
+| Slash | X | SLASH |
+| Pijl schieten | C | PIJL |
+| Dash (na kopen) | shift + pijltjes | DASH + duim richting |
+| Smash (na kopen) | ↓ in de lucht | duim omlaag in de lucht |
+| Zweven (na kopen) | spatie vasthouden | SPRING vasthouden |
+
+## Hoe het werkt
+
+- Elk level wordt door de computer gemaakt, elke keer anders.
+- Het scherm schuift langzaam naar rechts. Val je eraf of in het water, dan ben je een hartje kwijt.
+- Vijanden laten **shotjes** vallen. 10 shotjes = **1 vol flesje**.
+- Aan het eind van het level ga je door de poort. Daarna koop je **power-ups** met je flesjes.
+- Levels: Rivierlevel → Berglevel → Rivierlevel 2 → … (eindbazen komen later)
+
+### Power-ups
+
+Dash · Dubbele sprong · Extra hartje · Dubbele pijlen · Sterkere slash · Zweven · Wall jump · Smash · Ontploffende pijlen.
+Elke power-up kun je meerdere keren kopen. Hij wordt dan steeds beter en ook steeds duurder.
+
+## Bestanden
+
+| Bestand | Wat zit erin |
 |---|---|
-| ← → | lopen |
-| spatie of ↑ | springen |
+| `index.html` | de pagina die de game start |
+| `js/tekeningen.js` | alle plaatjes (met code getekend) en de kleuren |
+| `js/powerups.js` | de power-ups, prijzen en uitleg |
+| `js/besturing.js` | toetsenbord en touch-knoppen |
+| `js/spel.js` | het level: springen, vechten, vijanden, shotjes |
+| `js/schermen.js` | titelscherm, winkel en game over |
+| `js/main.js` | zet alles aan |
 
-## Wat zit erin
+### Test-adressen
 
-- `main.tscn` – het level: grond, twee platforms en de welkomsttekst
-- `player.gd` – hoe het poppetje loopt, springt en valt
-
-## Ideeën om mee te beginnen
-
-- Maak het poppetje sneller of laat het hoger springen (`SNELHEID` en `SPRONGKRACHT` in `player.gd`)
-- Voeg meer platforms toe
-- Muntjes om te verzamelen
-- Een vijand die heen en weer loopt
-- Een vlag aan het eind van het level
+Zet dit achter het adres van de game:
+- `#test`: de computer speelt zelf, met alle power-ups op niveau 2
+- `#winkel`: meteen naar de winkel, met 20 flesjes
+- `#berg`: meteen naar het berglevel
 
 ## Problemen en oplossingen
 
-_(Hier schrijven we op wat er misging en hoe we het hebben opgelost.)_
+- **Achter de maan zat een donkerblauwe vlek.** Oorzaak: de sikkel werd gemaakt door er een blauw rondje overheen te tekenen, en dat paste niet bij de lucht. Oplossing: de tweede cirkel andersom tekenen, dan wordt het een echt gat in de maan.
+- **De uitleg van de toetsen op het titelscherm was onzichtbaar.** Oorzaak: de tekst lag achter het water. Oplossing: de tekst een hogere laag geven (`setDepth(20)`).
+- **Fouten zien op je telefoon?** Als er iets misgaat, komt er onderaan een rode balk met de fout. Maak daar een screenshot van en geef hem aan Claude.

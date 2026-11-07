@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Flesje op Avontuur</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@700;800&family=Alegreya+Sans:wght@400;700&display=swap">
+<style>
+  :root { color-scheme: dark; }
+  html, body { height: 100%; margin: 0; background: #0d1636; overflow: hidden; }
+  body { touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+  #spel {
+    position: fixed;
+    top: env(safe-area-inset-top, 0px); right: env(safe-area-inset-right, 0px);
+    bottom: env(safe-area-inset-bottom, 0px); left: env(safe-area-inset-left, 0px);
+  }
+  #draai {
+    display: none; position: fixed; inset: 0; z-index: 10;
+    background: #0d1636; color: #f3ead6;
+    font: 700 22px "Alegreya Sans", sans-serif;
+    flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+    text-align: center; padding: 24px;
+  }
+  #draai span { font-size: 56px; }
+  @media (orientation: portrait) and (pointer: coarse) { #draai { display: flex; } }
+  #fout {
+    position: fixed; left: 8px; right: 8px; bottom: 8px; z-index: 20;
+    background: #d1495b; color: #fff; font: 13px/1.4 monospace; padding: 8px 10px;
+    border-radius: 6px; white-space: pre-wrap;
+  }
+</style>
+</head>
+<body>
+<div id="spel"></div>
+<div id="draai"><span>↻</span>Draai je telefoon een kwartslag</div>
+<div id="fout" hidden></div>
+<script>
+  // Laat fouten op het scherm zien, zodat je ze kunt doorgeven aan Claude
+  window.addEventListener('error', e => {
+    const f = document.getElementById('fout');
+    f.hidden = false;
+    f.textContent += 'Fout: ' + e.message + ' (' + (e.filename || '').split('/').pop() + ':' + e.lineno + ')\n';
+  });
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser.min.js"></script>
+<script src="js/tekeningen.js"></script>
+<script src="js/powerups.js"></script>
+<script src="js/besturing.js"></script>
+<script src="js/spel.js"></script>
+<script src="js/schermen.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

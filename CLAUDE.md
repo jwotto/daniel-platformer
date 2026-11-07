@@ -1,18 +1,21 @@
-# Daniel Platformer
+# Flesje op Avontuur
 
 Dit project is van Daniel, de neef van Jan-Willem. Daniel leert hier vibecoden: hij vertelt wat hij wil en Claude bouwt het.
 
 ## Hoe je met Daniel praat
 
 - Praat Nederlands, kort en makkelijk. Geen moeilijke woorden zonder uitleg.
+- Vertel per stap in één regel wat je nu gaat doen, zodat ze kunnen meelezen.
 - Leg na elke verandering in één of twee zinnen uit wat je deed en waarom, zodat Daniel ervan leert.
-- Doe kleine stapjes en laat Daniel na elke stap testen (F5 in Godot).
+- Doe kleine stapjes en laat Daniel na elke stap testen.
 - Wees enthousiast, maar eerlijk als iets niet werkt.
 
 ## Techniek
 
-- Engine: Godot 4.7.2, GDScript. Programma: `C:\Users\janwo\Desktop\Godot_v4.7.2-stable_win64.exe`
-- Controleren op fouten zonder editor: `"C:\Users\janwo\Desktop\Godot_v4.7.2-stable_win64.exe" --headless --path . --quit`
-- Namen van nodes en variabelen in het Nederlands, zodat Daniel ze snapt.
+- HTML-game met Phaser 3.80.1 (geladen van cdnjs). Geen build-stap: gewone `<script>`-bestanden in `js/`.
+- Spelgrootte 960×540, schaalt mee met het scherm (`Scale.FIT`). Moet altijd op mobiel werken: touch-knoppen staan in `js/besturing.js`.
+- Alle plaatjes worden met canvas-code getekend in `js/tekeningen.js`. Stijl: sprookjesachtig 2D, sierlijke vormen, donkere contouren (`INKT`), kleuren rood, goudgeel, turquoise en diepblauw.
+- Namen van variabelen en functies in het Nederlands, zodat Daniel ze snapt.
+- Testen zonder te spelen: `index.html#test` (de computer speelt zelf), `#winkel`, `#berg`. Fouten verschijnen als rode balk onderaan.
 - Zet problemen en hun oplossing in de README onder "Problemen en oplossingen".
 - Commit na elke stap die werkt, met een korte Nederlandse commit-boodschap.

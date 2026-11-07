@@ -1,4 +1,3 @@
-# Godot
-.godot/
-export_presets.cfg
-/android/
+.DS_Store
+Thumbs.db
+node_modules/
