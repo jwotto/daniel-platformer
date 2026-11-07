@@ -122,7 +122,7 @@ class Titel extends Phaser.Scene {
     this.gestart = false;
     this.achtergrond = maakAchtergrond(this, regioVan(Math.min(PROFIEL.startRegio, PROFIEL.regio)).id);
     this.t = 0;
-    this.add.text(480, 70, 'Flesje op Avontuur', {
+    this.add.text(480, 70, 'BVO', {
       fontFamily: FONT_TITEL, fontSize: '64px', color: '#f2c14e', stroke: '#0a1028', strokeThickness: 10,
     }).setOrigin(0.5);
     this.add.text(480, 132, 'Yo niffow! Zullen we een game gaan spelen?', {

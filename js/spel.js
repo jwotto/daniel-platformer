@@ -24,6 +24,10 @@ class Spel extends Phaser.Scene {
     this.ronde = rondeVan(this.n);
     this.baasModus = !!this.run.baas;
     this.waarde = shotWaarde(this.n);
+    // Phaser gebruikt dit level-object steeds opnieuw. Dingen van het vorige potje zijn al weg,
+    // dus eerst leegmaken. Anders loopt het baasgevecht vast na een normaal potje (en andersom).
+    this.baas = null; this.baasBalk = null; this.baasTekst = null;
+    this.levelTekst = null; this.meterTekst = null;
     this.achtergrond = maakAchtergrond(this, this.reg.id);
 
     this.platforms = this.physics.add.staticGroup();

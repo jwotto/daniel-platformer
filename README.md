@@ -83,4 +83,5 @@ Zet dit achter het adres van de game (je opgeslagen spel wordt dan niet aangeraa
 - **Achter de maan zat een donkerblauwe vlek.** Oorzaak: de sikkel werd gemaakt door er een blauw rondje overheen te tekenen. Oplossing: de tweede cirkel andersom tekenen, dan wordt het een echt gat in de maan.
 - **De uitleg van de toetsen op het titelscherm was onzichtbaar.** Oorzaak: de tekst lag achter het water. Oplossing: de tekst een hogere laag geven.
 - **Volledig scherm werkt niet op iPhone.** Oorzaak: Apple staat dat niet toe voor websites. Oplossing: de game op je beginscherm zetten, dan opent hij als app op volledig scherm.
+- **Na "Vecht tegen de baas!" kon je nergens meer op drukken.** Oorzaak: Phaser gebruikt het level steeds opnieuw, en het level onthield nog de meterteller van het vorige potje. Die was al weggegooid, maar het baasgevecht probeerde hem toch bij te werken en liep vast. Oplossing: aan het begin van elk potje die oude dingen leegmaken. Getest: doodgaan → baas kopen → vechten → doodgaan → gewoon spelen.
 - **Fouten zien op je telefoon?** Als er iets misgaat, komt er onderaan een rode balk met de fout. Maak daar een screenshot van en geef hem aan Claude.
