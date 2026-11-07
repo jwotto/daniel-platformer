@@ -52,7 +52,7 @@ class Boot extends Phaser.Scene {
   create() {
     maakTexturen(this);
     const h = location.hash;
-    const regios = { '#ijs': 1, '#berg': 2, '#vulkaan': 3 };
+    const regios = { '#ijs': 1, '#berg': 2, '#vulkaan': 3, '#grot': 4, '#savanne': 5 };
     if (h === '#spel') {
       this.scene.start('Spel', { run: nieuweRun() });
     } else if (h === '#test') {
@@ -391,7 +391,7 @@ class Winkel extends Phaser.Scene {
     this.regioTekst.setText('Start in\n' + levelNaam(PROFIEL.startRegio));
     this.pijlL.setVisible(PROFIEL.startRegio > 0);
     this.pijlR.setVisible(PROFIEL.startRegio < PROFIEL.regio);
-    for (const o of Object.values(this.vechtKnop)) o.setVisible(PROFIEL.ticket);
+    for (const o of Object.values(this.vechtKnop)) o.setVisible(PROFIEL.ticket !== false && PROFIEL.ticket === this.baasN());
     if (this.ongedaanKnop) for (const o of [this.ongedaanKnop.g, this.ongedaanKnop.t]) o.setAlpha(this.gekocht.length ? 1 : 0.4);
   }
 
@@ -410,19 +410,31 @@ class Winkel extends Phaser.Scene {
     k.icoon.setVisible(!vol).setAlpha(kan ? 1 : 0.4);
   }
 
+  // de baas van de regio waar je start (kies een eerdere regio om een verslagen baas nog eens te doen)
+  baasN() { return Math.min(PROFIEL.startRegio, PROFIEL.regio); }
+
   vernieuwBaas() {
-    const k = this.baasKaart, n = PROFIEL.regio, kost = baasPrijs(n);
-    const kan = !PROFIEL.ticket && PROFIEL.flessen >= kost;
+    const k = this.baasKaart, n = this.baasN(), kost = baasPrijs(n);
+    const gekocht = PROFIEL.ticket === n, verslagen = n < PROFIEL.regio;
+    const kan = !gekocht && PROFIEL.flessen >= kost;
     k.g.clear();
     k.g.fillStyle(0x3a1228, 0.95).fillRoundedRect(k.x, k.y, k.w, k.h, 14);
-    k.g.lineStyle(PROFIEL.ticket || kan ? 3 : 2, PROFIEL.ticket ? 0x3cc8bb : kan ? 0xf2c14e : 0x7a3048, 1).strokeRoundedRect(k.x, k.y, k.w, k.h, 14);
-    k.naam.setText(regioVan(n).baasNaam);
-    k.uitleg.setText(PROFIEL.ticket
+    k.g.lineStyle(gekocht || kan ? 3 : 2, gekocht ? 0x3cc8bb : kan ? 0xf2c14e : 0x7a3048, 1).strokeRoundedRect(k.x, k.y, k.w, k.h, 14);
+    k.naam.setText(regioVan(n).baasNaam).setWordWrapWidth(verslagen ? k.w - 48 : k.w - 20);
+    // vinkje rechtsboven: deze baas heb je al verslagen
+    if (!k.vinkje) {
+      k.vinkje = this.add.text(k.x + k.w - 10, k.y + 8, '✔', { fontFamily: FONT, fontSize: '26px', fontStyle: 'bold', color: '#5fd38a', stroke: '#0a1028', strokeThickness: 4 }).setOrigin(1, 0);
+      this.lijst.add(k.vinkje);
+    }
+    k.vinkje.setVisible(verslagen);
+    k.uitleg.setText(gekocht
       ? 'Gekocht! Druk op "Vecht tegen de baas" om te vechten.'
-      : `Koop een gevecht. Win je, dan ga je door naar ${levelNaam(n + 1)}!`);
-    k.prijsT.setText(PROFIEL.ticket ? '✔' : String(kost)).setColor(PROFIEL.ticket ? '#3cc8bb' : kan ? '#f2c14e' : '#5a6a9a');
-    k.prijsT.setX(PROFIEL.ticket ? k.x + k.w - 12 : k.x + k.w - 28);
-    k.icoon.setVisible(!PROFIEL.ticket).setAlpha(kan ? 1 : 0.4);
+      : verslagen
+        ? `Al verslagen! Nog eens vechten? Beloning: ${baasBeloning(n)} flesjes.`
+        : `Koop een gevecht. Win je, dan ga je door naar ${levelNaam(n + 1)}! Beloning: ${baasBeloning(n)}.`);
+    k.prijsT.setText(gekocht ? '✔' : String(kost)).setColor(gekocht ? '#3cc8bb' : kan ? '#f2c14e' : '#5a6a9a');
+    k.prijsT.setX(gekocht ? k.x + k.w - 12 : k.x + k.w - 28);
+    k.icoon.setVisible(!gekocht).setAlpha(kan ? 1 : 0.4);
   }
 
   schud(k) {
@@ -440,10 +452,10 @@ class Winkel extends Phaser.Scene {
   koop(k) {
     if (this.kiest) return;
     if (!k.p) {
-      const kost = baasPrijs(PROFIEL.regio);
-      if (PROFIEL.ticket) { this.vechten(); return; }
+      const n = this.baasN(), kost = baasPrijs(n);
+      if (PROFIEL.ticket === n) { this.vechten(); return; }
       if (PROFIEL.flessen < kost) { this.schud(k); return; }
-      PROFIEL.flessen -= kost; PROFIEL.ticket = true;
+      PROFIEL.flessen -= kost; PROFIEL.ticket = n;
       this.gekocht.push({ baas: true, kost });
     } else {
       const lvl = PROFIEL.up[k.p.id], kost = prijs(k.p, lvl);
@@ -494,11 +506,12 @@ class Winkel extends Phaser.Scene {
   }
 
   vechten() {
-    if (this.weg || this.kiest || !PROFIEL.ticket || this.scene.isPaused()) return;
+    if (this.weg || this.kiest || PROFIEL.ticket === false || this.scene.isPaused()) return;
     this.weg = true;
+    const n = PROFIEL.ticket;
     // je ticket is nu op: verlies je, dan moet je opnieuw betalen
     PROFIEL.ticket = false;
     bewaarProfiel();
-    this.scene.start('Spel', { run: nieuweRun(true) });
+    this.scene.start('Spel', { run: nieuweRun(true, n) });
   }
 }

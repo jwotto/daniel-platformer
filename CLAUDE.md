@@ -18,7 +18,7 @@ Dit project is van Daniel, de neef van Jan-Willem. Daniel leert hier vibecoden: 
 - Namen van variabelen en functies in het Nederlands, zodat Daniel ze snapt.
 - Geluid en muziek worden live gemaakt met Web Audio in `js/geluid.js` (geen geluidsbestanden).
 - Voortgang (flesjes, power-ups, regio's) wordt bewaard in localStorage via `PROFIEL` in `js/powerups.js`.
-- Testen zonder te spelen: `index.html#test` (de computer speelt zelf), `#baas0`–`#baas3`, `#ijs`, `#berg`, `#vulkaan`, `#winkel`, `#shop`, `#kebab`, `#spel`. Test-adressen bewaren niks. Fouten verschijnen als rode balk onderaan.
+- Testen zonder te spelen: `index.html#test` (de computer speelt zelf), `#baas0`–`#baas5`, `#ijs`, `#berg`, `#vulkaan`, `#grot`, `#savanne`, `#winkel`, `#shop`, `#kebab`, `#spel`. Test-adressen bewaren niks. Fouten verschijnen als rode balk onderaan.
 - Na elke wijziging: testen dat doodgaan → winkel → "Spelen" blijft werken (dat ging eerder mis).
 - Zet problemen en hun oplossing in de README onder "Problemen en oplossingen".
 - Commit na elke stap die werkt, met een korte Nederlandse commit-boodschap.

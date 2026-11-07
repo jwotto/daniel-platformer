@@ -353,7 +353,119 @@ function tekenPtero(ctx) {
   ctx.restore();
 }
 
+// Grot: een mol met een mijnwerkershelm en lampje
+function tekenMol(ctx) {
+  ctx.save(); ctx.translate(25, 26);
+  ctx.strokeStyle = INKT; ctx.lineWidth = 2.2;
+  ctx.fillStyle = '#5a4a5a'; ctx.beginPath(); ctx.ellipse(0, 4, 18, 14, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#ffb0c0';
+  for (const [x, y] of [[-14, 16], [10, 16]]) { ctx.beginPath(); ctx.ellipse(x, y, 6, 3.5, 0, 0, TAU); ctx.fill(); ctx.stroke(); }
+  ctx.beginPath(); ctx.ellipse(-17, 4, 5, 4, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#f2c14e'; ctx.beginPath(); ctx.moveTo(-14, -6); ctx.quadraticCurveTo(0, -24, 14, -6); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillRect(-16, -8, 32, 4); ctx.strokeRect(-16, -8, 32, 4);
+  ctx.shadowColor = '#fff6a0'; ctx.shadowBlur = 10; ctx.fillStyle = '#fff6a0';
+  ctx.beginPath(); ctx.arc(-4, -14, 3.6, 0, TAU); ctx.fill(); ctx.shadowBlur = 0; ctx.stroke();
+  ctx.fillStyle = INKT; ctx.beginPath(); ctx.arc(-9, 0, 1.8, 0, TAU); ctx.arc(-3, 0, 1.8, 0, TAU); ctx.fill();
+  ctx.restore();
+}
+
+// Savanne: een neushoorn
+function tekenNeushoorn(ctx) {
+  ctx.save();
+  ctx.strokeStyle = INKT; ctx.lineWidth = 2.4;
+  ctx.fillStyle = '#6a6a7a';
+  for (const x of [20, 34, 48, 58]) { rondRect(ctx, x - 5, 36, 10, 14, 3); ctx.fill(); ctx.stroke(); }
+  const g = ctx.createLinearGradient(0, 10, 0, 44);
+  g.addColorStop(0, '#9a9aaa'); g.addColorStop(1, '#5a5a6a');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(40, 28, 26, 16, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(16, 30, 14, 11, -0.2, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#f3ead6';
+  ctx.beginPath(); ctx.moveTo(6, 26); ctx.lineTo(0, 10); ctx.lineTo(12, 22); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(14, 21); ctx.lineTo(12, 13); ctx.lineTo(18, 20); ctx.closePath(); ctx.fill(); ctx.stroke();
+  boosOog(ctx, 18, 26, 2.6, INKT, true);
+  ctx.fillStyle = '#6a6a7a'; ctx.beginPath(); ctx.ellipse(24, 18, 3, 5, 0.4, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.restore();
+}
+
+// Savanne (vliegt): een gier met een kale roze kop
+function tekenGier(ctx) {
+  ctx.save(); ctx.translate(36, 22);
+  ctx.strokeStyle = INKT; ctx.lineWidth = 2;
+  ctx.fillStyle = '#3a2a2a';
+  for (const z of [-1, 1]) {
+    ctx.beginPath(); ctx.moveTo(z * 6, -2); ctx.quadraticCurveTo(z * 20, -18, z * 34, -8);
+    for (let i = 0; i < 4; i++) ctx.lineTo(z * (32 - i * 6), -2 + (i % 2 ? 6 : 0));
+    ctx.lineTo(z * 6, 6); ctx.closePath(); ctx.fill(); ctx.stroke();
+  }
+  ctx.fillStyle = '#5a3a2a'; ctx.beginPath(); ctx.ellipse(0, 2, 10, 11, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#f3ead6'; ctx.beginPath(); ctx.ellipse(-4, -6, 8, 4, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#e88a8a'; ctx.beginPath(); ctx.arc(-9, -11, 6, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#c8c8a0'; ctx.beginPath(); ctx.moveTo(-14, -12); ctx.lineTo(-21, -8); ctx.lineTo(-14, -8); ctx.closePath(); ctx.fill(); ctx.stroke();
+  boosOog(ctx, -10, -12, 2, INKT, true);
+  ctx.restore();
+}
+
+// Eindbaas Grot: de Salamander (lang, oranje met zwarte vlekken)
+function tekenSalamander(ctx) {
+  ctx.save(); ctx.translate(0, 0);
+  ctx.strokeStyle = INKT; lijn(ctx, 3);
+  // staart
+  ctx.fillStyle = '#e8701c';
+  ctx.beginPath(); ctx.moveTo(130, 44); ctx.quadraticCurveTo(170, 30, 198, 52); ctx.quadraticCurveTo(170, 46, 130, 62); ctx.closePath(); ctx.fill(); ctx.stroke();
+  // poten
+  ctx.fillStyle = '#c85a1c';
+  for (const x of [50, 110]) for (const z of [-1, 1]) {
+    ctx.beginPath(); ctx.moveTo(x, 60); ctx.lineTo(x + z * 16, 80); ctx.lineTo(x + z * 16 + 8, 80); ctx.lineTo(x + 8, 58); ctx.closePath(); ctx.fill(); ctx.stroke();
+  }
+  // lijf
+  const g = ctx.createLinearGradient(0, 30, 0, 70);
+  g.addColorStop(0, '#ff9a3c'); g.addColorStop(1, '#c8501c');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(85, 52, 56, 18, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  // kop
+  ctx.beginPath(); ctx.ellipse(30, 48, 28, 18, -0.1, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = INKT;
+  for (const [x, y, r] of [[70, 46, 6], [95, 56, 5], [118, 46, 6], [140, 52, 4], [45, 40, 4], [160, 44, 3]]) { ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill(); }
+  oog(ctx, 24, 38, 7, '#f2c14e');
+  ctx.strokeStyle = INKT; ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.moveTo(4, 52); ctx.quadraticCurveTo(20, 60, 40, 54); ctx.stroke();
+  ctx.restore();
+}
+
+// Eindbaas Savanne: de Lepelaar (roze vogel met een lepelsnavel)
+function tekenLepelaar(ctx) {
+  ctx.save();
+  ctx.strokeStyle = INKT; lijn(ctx, 3);
+  ctx.strokeStyle = INKT; ctx.lineWidth = 6;
+  ctx.beginPath(); ctx.moveTo(70, 100); ctx.lineTo(64, 150); ctx.moveTo(84, 100); ctx.lineTo(90, 150); ctx.stroke();
+  ctx.strokeStyle = '#e8708a'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(70, 100); ctx.lineTo(64, 150); ctx.moveTo(84, 100); ctx.lineTo(90, 150); ctx.stroke();
+  lijn(ctx, 3);
+  const g = ctx.createLinearGradient(0, 50, 0, 110);
+  g.addColorStop(0, '#ffc0d8'); g.addColorStop(1, '#e8708a');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(82, 80, 44, 28, 0.15, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#d0507a'; ctx.beginPath(); ctx.ellipse(96, 76, 28, 16, 0.3, 0, TAU); ctx.fill(); ctx.stroke();
+  // nek en kop
+  ctx.strokeStyle = INKT; ctx.lineWidth = 14; ctx.beginPath(); ctx.moveTo(56, 70); ctx.quadraticCurveTo(40, 40, 52, 24); ctx.stroke();
+  ctx.strokeStyle = '#ffc0d8'; ctx.lineWidth = 9; ctx.beginPath(); ctx.moveTo(56, 70); ctx.quadraticCurveTo(40, 40, 52, 24); ctx.stroke();
+  lijn(ctx, 3); ctx.fillStyle = '#ffc0d8'; ctx.beginPath(); ctx.arc(52, 22, 13, 0, TAU); ctx.fill(); ctx.stroke();
+  // lepelsnavel
+  ctx.fillStyle = '#3a3a4a'; ctx.beginPath(); ctx.moveTo(42, 22); ctx.lineTo(10, 30); ctx.lineTo(12, 34); ctx.lineTo(42, 27); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#f2c14e'; ctx.beginPath(); ctx.ellipse(8, 32, 9, 7, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  oog(ctx, 50, 18, 5, '#d1495b');
+  ctx.restore();
+}
+
 function maakMonsterTexturen(scene) {
+  tekenTextuur(scene, 'mol', 50, 46, tekenMol);
+  tekenTextuur(scene, 'veer', 30, 12, ctx => {
+    ctx.fillStyle = '#ffc0d8'; ctx.strokeStyle = INKT; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.moveTo(2, 6); ctx.quadraticCurveTo(14, -2, 28, 6); ctx.quadraticCurveTo(14, 14, 2, 6); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(2, 6); ctx.lineTo(28, 6); ctx.stroke();
+  });
+  tekenTextuur(scene, 'neushoorn', 70, 52, tekenNeushoorn);
+  tekenTextuur(scene, 'gier', 72, 44, tekenGier);
+  tekenTextuur(scene, 'baas_salamander', 200, 84, tekenSalamander);
+  tekenTextuur(scene, 'baas_lepelaar', 140, 154, tekenLepelaar);
   tekenTextuur(scene, 'vliegvis', 56, 44, tekenVliegvis);
   tekenTextuur(scene, 'vliegpinguin', 58, 44, tekenVliegpinguin);
   tekenTextuur(scene, 'adelaar', 76, 46, tekenAdelaar);

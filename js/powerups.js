@@ -75,6 +75,8 @@ const REGIOS = [
   { id: 'ijs', naam: 'IJsvlakte', baas: 'beer', baasNaam: 'De IJsbierbeer' },
   { id: 'berg', naam: 'Bergen', baas: 'geit', baasNaam: 'De Bokbiergeit' },
   { id: 'vulkaan', naam: 'Vulkaan', baas: 'draak', baasNaam: 'De Brouwdraak' },
+  { id: 'grot', naam: 'Grot', baas: 'salamander', baasNaam: 'De Salamander' },
+  { id: 'savanne', naam: 'Savanne', baas: 'lepelaar', baasNaam: 'De Lepelaar' },
 ];
 
 function regioVan(n) { return REGIOS[n % REGIOS.length]; }
@@ -84,6 +86,8 @@ function levelNaam(n) { const r = rondeVan(n); return regioVan(n).naam + (r > 0 
 function shotWaarde(n) { return 1 + n; }
 // Een gevecht met de eindbaas is duur!
 function baasPrijs(n) { return 15 + n * 12; }
+// Wat je krijgt als je hem verslaat: altijd meer dan je betaalt
+function baasBeloning(n) { return baasPrijs(n) + 10 + n * 5; }
 
 function prijs(p, niveau) { return p.basis * 3 * (niveau + 1); }
 function uitlegVan(p, niveau) { return p.uitleg[Math.min(niveau, p.uitleg.length - 1)]; }
@@ -117,7 +121,7 @@ function hartenMet(id) {
 // ---------- OPSLAAN ----------
 // Je flesjes, power-ups en regio's worden in de browser bewaard, ook als je doodgaat.
 const OPSLAG = 'flesje_profiel_v2';
-const TESTMODUS = ['#test', '#winkel', '#shop', '#kebab', '#baas', '#ijs', '#berg', '#vulkaan', '#spel'].some(h => location.hash.startsWith(h));
+const TESTMODUS = ['#test', '#winkel', '#shop', '#kebab', '#baas', '#ijs', '#berg', '#vulkaan', '#grot', '#savanne', '#spel'].some(h => location.hash.startsWith(h));
 
 function laadProfiel() {
   const p = { up: {}, flessen: 0, shotjes: 0, beste: 0, regio: 0, startRegio: 0, ticket: false, skin: 'standaard', skins: ['standaard'], draaien: 0, keuze: '', bazen: 0 };
@@ -128,7 +132,8 @@ function laadProfiel() {
     if (d) {
       Object.keys(p.up).forEach(k => { p.up[k] = Number(d.up && d.up[k]) || 0; });
       for (const k of ['flessen', 'shotjes', 'beste', 'regio', 'startRegio']) p[k] = Number(d[k]) || 0;
-      p.ticket = !!d.ticket;
+      // ticket = voor welke baas je een gevecht hebt gekocht (of false)
+      p.ticket = d.ticket === true ? p.regio : (typeof d.ticket === 'number' ? d.ticket : false);
       if (typeof d.skin === 'string') p.skin = d.skin;
       if (Array.isArray(d.skins)) p.skins = d.skins.filter(x => typeof x === 'string');
       if (!p.skins.includes('standaard')) p.skins.unshift('standaard');
@@ -150,8 +155,8 @@ function bewaarProfiel() {
 function maxHarten() { return 3 + PROFIEL.up.hart; }
 
 // Een nieuw potje. Je gekozen upgrade geldt alleen voor dit potje, daarna is hij op.
-function nieuweRun(baas) {
-  const level = baas ? PROFIEL.regio : Math.min(PROFIEL.startRegio, PROFIEL.regio);
+function nieuweRun(baas, baasRegio) {
+  const level = baas ? (baasRegio !== undefined ? baasRegio : PROFIEL.regio) : Math.min(PROFIEL.startRegio, PROFIEL.regio);
   const keuze = PROFIEL.keuze || '';
   PROFIEL.keuze = '';
   bewaarProfiel();

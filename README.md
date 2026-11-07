@@ -53,6 +53,8 @@ Elke eindbaas heeft zijn eigen aanvallen, een eigen **ritme** (de pauzes tussen 
 | 🧊 IJsvlakte (je glijdt!) | De IJsbierbeer | 65 | ijspegels uit de lucht, ijsblokjes | **Buikglijden**: stuitert 3× door de arena | traag, traag, snel |
 | ⛰️ Bergen | De Bokbiergeit | 90 | rammen, biervaten rollen | **Bergsprong**: springt uit beeld en knalt neer waar jij staat | snel-snel-snel, lange pauze |
 | 🌋 Vulkaan | De Brouwdraak | 120 | vuurballen, lavaregen, duikvlucht | **Vuurspiraal**: vuurballen in een rondje, 2 golven | steeds sneller |
+| 🦇 Grot (dicht plafond!) | De Salamander | 150 | kruipt razendsnel over vloer, muren en plafond; vlucht naar de overkant als je hem raakt | **Tongslurp**: trekt je met zijn tong naar zich toe en bijt dan (HAP!) | snel-snel-snel, even wachten |
+| 🦒 Savanne | De Lepelaar | 170 | lepelpik (rent op je af), waaier van veren | **Geen zwaartekracht!** Elke 5 seconden 3 seconden zweven, en hij stuitert als een flipperbal rond | elke 5 seconden |
 
 Daarna begint het opnieuw met Rivier 2, en alles is sterker.
 
@@ -66,13 +68,19 @@ Elk monster heeft een eigen manier om hem te verslaan. Het tekentje boven zijn h
 | 🧊 IJsvlakte | IJsklontje ⚔ (breekt in 3), Pinguïn-ober ➶ (gooit glazen bier) | vliegende pinguïn ➶ (torpedo!) |
 | ⛰️ Bergen | Rollend fust ⤓ | adelaar ⚔ (duikt recht naar beneden) |
 | 🌋 Vulkaan | Lavalager ➶ (ontploft), Brouwketel-golem ⤓ (schokgolven) | pterodactyl ⤓ (scheert heen en weer) |
+| 🦇 Grot | Mijnwerkersmol (graaft onder de grond, alleen te raken als hij boven is) | hopvleermuis ⚔ (hangt onder platforms, komt op je af als je dichtbij komt) |
+| 🦒 Savanne | Neushoorn ➶ (stormt op je af) | gieren (in groepjes, vliegen als een raket op je af, 2,5× zo snel) |
 | Overal, zeldzaam | Gouden flesje met pootjes: vang hem voor een heel flesje! | |
 
-Op sommige platforms liggen **spikes**: niet aanraken, ook niet als je erop springt!
+Op sommige platforms liggen **spikes**: niet aanraken, ook niet als je erop springt! In de Grot hangen **stalactieten** aan het plafond: ze vallen als je eronder loopt en doen ook pijn als ze nog hangen.
+
+### Een baas nog eens verslaan
+
+Kies in de winkel bij "Start in" een eerdere regio. Dan staat de baas van die regio op de baaskaart, met een **✔** rechtsboven als je hem al verslagen hebt. Je kunt hem gewoon nog eens bevechten: je betaalt opnieuw, maar de beloning is altijd hoger dan de prijs.
 
 ### Beloning na een eindbaas
 
-Versla je een eindbaas, dan krijg je flink wat flesjes (15, 23, 31, 39 …) en de eerste keer een **baas-skin met een kroon** (Padkoning, IJsbeer, Bokkenrijder, Drakendoder). Die skins kun je niet aan het rad winnen.
+Versla je een eindbaas, dan krijg je flink wat flesjes, altijd meer dan het gevecht kostte (25, 42, 59 …) en de eerste keer een **baas-skin met een kroon** (Padkoning, IJsbeer, Bokkenrijder, Drakendoder). Die skins kun je niet aan het rad winnen.
 
 ### Power-ups (winkel)
 
@@ -108,7 +116,7 @@ Elk liedje is een **akkoordenschema**: één akkoord per maat. De bas, de akkoor
 | **Bergmars** | Bergen, Vulkaan | A mineur | Am Am Dm E7 · Am F G C · F G Em Am · Dm E7 Am Am |
 | **Baaslied** (snel) | eindbazen | D mineur | Dm Dm Bb A7 · Dm Bb C A7 |
 
-Een nieuw liedje maken? Voeg in `LIEDJES` een schema en een rijtje melodie-patronen toe.
+Grot gebruikt de Bergmars, Savanne de Bierpolka. Een nieuw liedje maken? Voeg in `LIEDJES` een schema en een rijtje melodie-patronen toe.
 
 ## Bestanden
 

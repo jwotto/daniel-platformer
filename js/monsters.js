@@ -9,8 +9,9 @@ const ZWAK = {
   klont: 'slash', klontje: 'slash', pinguin: 'pijl', vriesvlok: 'pijl', vliegpinguin: 'pijl',
   fust: 'stamp', vleermuis: 'slash', adelaar: 'slash',
   lava: 'pijl', golem: 'stamp', vuurmot: 'slash', ptero: 'stamp',
+  neushoorn: 'pijl',
 };
-const ZWAK_TEKST = { slash: 'Alleen slaan! ⚔', pijl: 'Alleen schieten! ➶', stamp: 'Spring erop! ⤓' };
+const ZWAK_TEKST = { slash: 'Alleen slaan! ⚔', pijl: 'Alleen schieten! ➶', stamp: 'Spring erop! ⤓', boven: 'Wacht tot hij boven is!' };
 
 class MonsterDeel {
   maakKruiper(x, y, minX, maxX) {
@@ -49,6 +50,10 @@ class MonsterDeel {
     } else if (id === 'vulkaan') {
       if (w >= 200 && r < 0.4) this.maakGolem(x + w / 2, y, x, x + w);
       else this.maakLava(x + w / 2, y, x, x + w);
+    } else if (id === 'grot') {
+      this.maakMol(x + w / 2, y, x, x + w);
+    } else if (id === 'savanne') {
+      this.maakNeushoorn(x + w / 2, y, x, x + w);
     } else {
       this.maakKruiper(x + w / 2, y, x, x + w);
     }
@@ -60,7 +65,36 @@ class MonsterDeel {
     if (id === 'ijs') this.maakVlieger('vliegpinguin', 'vliegpinguin', x + w / 2, hoog);
     else if (id === 'berg') this.maakVlieger('adelaar', 'adelaar', x + w / 2, Phaser.Math.Between(80, 140));
     else if (id === 'vulkaan') this.maakVlieger('ptero', 'ptero', x + w / 2, hoog);
+    else if (id === 'grot') { if (y <= 420) this.maakVleermuis(x + w / 2, y + 48); }
+    else if (id === 'savanne') {
+      // gieren komen in groepjes, maar minder vaak (een groep telt als 4 gewone vliegers)
+      if (Math.random() < 0.25) {
+        const n = Phaser.Math.Between(2, 3);
+        for (let i = 0; i < n; i++) {
+          const g = this.maakVlieger('gier', 'gier', x + w / 2 + i * 50, hoog - i * 30);
+          g.jaagSnelheid *= 2.5;
+        }
+      }
+    }
     else this.maakVlieger('vliegvis', 'vliegvis', x + w / 2, hoog);
+  }
+
+  // Grot: een mol met een mijnlamp. Graaft onder de grond en komt dan boven.
+  maakMol(x, y, minX, maxX) {
+    const L = this.moeilijkheid(x);
+    const v = this.maakLoper('mol', 'mol', x, y, minX, maxX, 34, 34);
+    v.hp = 2 + Math.floor(L * 0.6);
+    v.snelheid = 90 + Math.min(50, L * 8);
+    v.onder = true; v.molT = 1 + Math.random(); v.shots = 3;
+    v.setAlpha(0.35).setScale(1, 0.4);
+  }
+
+  // Savanne: een neushoorn die op je af stormt
+  maakNeushoorn(x, y, minX, maxX) {
+    const L = this.moeilijkheid(x);
+    const v = this.maakLoper('neushoorn', 'neushoorn', x, y, minX, maxX, 54, 38);
+    v.hp = 3 + Math.floor(L * 0.8);
+    v.snelheid = 40; v.storm = 0; v.rust = 0; v.shots = 4;
   }
 
   // een vliegend monster (zonder zwaartekracht)
@@ -268,6 +302,35 @@ class MonsterDeel {
             return;
           }
           patrouille(v, 1);
+        } else if (v.soort === 'mol') {
+          // onder de grond naar je toe graven, dan boven komen (alleen dan kun je hem raken)
+          v.molT -= dt;
+          if (v.onder) {
+            if (Math.abs(dx) > 8) v.richting = Math.sign(dx);
+            patrouille(v, 1);
+            if (v.molT <= 0) {
+              v.onder = false; v.molT = 1.4; v.body.velocity.x = 0;
+              v.setAlpha(1); this.tweens.add({ targets: v, scaleY: 1, duration: 150, ease: 'Back.easeOut' });
+              this.vonken.explode(8, v.x, v.y - 4); Geluid.effect('raak');
+            }
+          } else {
+            v.body.velocity.x = 0; v.setFlipX(dx > 0);
+            if (v.molT <= 0) { v.onder = true; v.molT = 1.8; v.setAlpha(0.35); this.tweens.add({ targets: v, scaleY: 0.4, duration: 150 }); }
+          }
+        } else if (v.soort === 'neushoorn') {
+          // ziet hij je? Dan stormt hij op je af tot de rand van het platform
+          if (v.storm > 0) {
+            v.storm -= dt;
+            v.body.velocity.x = v.richting * 280;
+            if (v.x < v.minX || v.x > v.maxX) { v.storm = 0; v.x = Phaser.Math.Clamp(v.x, v.minX, v.maxX); }
+            if (v.storm <= 0) { v.rust = 1.2; v.body.velocity.x = 0; }
+          } else if (v.rust > 0) {
+            v.rust -= dt; v.body.velocity.x = 0;
+          } else if (inBeeld && Math.abs(dx) < 380 && Math.abs(dy) < 60) {
+            v.richting = Math.sign(dx) || 1; v.setFlipX(v.richting > 0);
+            v.storm = 1.5; Geluid.effect('dash');
+            this.vonken.explode(5, v.x, v.y);
+          } else patrouille(v, 1);
         } else if (v.soort === 'goud') {
           // rent weg als je dichtbij komt
           if (Math.abs(dx) < 260) { v.richting = -Math.sign(dx) || 1; patrouille(v, 4.5); }
@@ -275,6 +338,17 @@ class MonsterDeel {
         } else {
           patrouille(v, 1); // kruiper, ijsklontjes
         }
+      } else if (v.soort === 'gier') {
+        // vliegt als een raket op je af (draait langzaam bij)
+        if (!inBeeld && !v.vx) return;
+        const d = Math.hypot(dx, dy) || 1, sn = v.jaagSnelheid;
+        if (!v.vx) { v.vx = dx / d * sn; v.vy = dy / d * sn; Geluid.effect('duik'); }
+        v.vx += (dx / d * sn - v.vx) * Math.min(1, dt * 1.6);
+        v.vy += (dy / d * sn - v.vy) * Math.min(1, dt * 1.6);
+        v.x += v.vx * dt; v.y += v.vy * dt;
+        v.setFlipX(v.vx > 0);
+        v.rotation = Math.atan2(v.vy, Math.abs(v.vx)) * (v.vx > 0 ? 1 : -1) * 0.6;
+        v.scaleY = 1 + Math.sin(this.tijd * 16) * 0.15;
       } else if (v.soort === 'vliegpinguin') {
         // zweeft op afstand en schiet dan als een torpedo op je af
         v.schietT -= dt;
@@ -344,17 +418,21 @@ class MonsterDeel {
       } else if (v.soort === 'vleermuis' && v.modus === 'hang') {
         // hangt stil tot je eronder loopt
         v.y = v.basisY + Math.sin(this.tijd * 2 + v.fase) * 2;
-        if (Math.abs(dx) < 170 && sp.y > v.y - 10) {
+        // kom je binnen zijn straal? Dan laat hij los en gaat hij op je af
+        if (Math.hypot(dx, dy) < 230) {
           v.modus = 'duik'; v.setFlipY(false);
           const d = Math.hypot(dx, dy) || 1;
-          v.vx = dx / d * 300; v.vy = dy / d * 300; v.duikT = 0.9;
+          v.vx = dx / d * 240; v.vy = dy / d * 240;
           Geluid.effect('duik');
         }
       } else if (v.soort === 'vleermuis' && v.modus === 'duik') {
-        v.x += v.vx * dt; v.y += v.vy * dt; v.duikT -= dt;
+        // blijft je achtervolgen
+        const d = Math.hypot(dx, dy) || 1, sn = 150 + v.jaagSnelheid;
+        v.vx += (dx / d * sn - v.vx) * Math.min(1, dt * 2.2);
+        v.vy += (dy / d * sn - v.vy) * Math.min(1, dt * 2.2);
+        v.x += v.vx * dt; v.y += v.vy * dt;
         v.setFlipX(v.vx > 0);
         v.scaleY = 1 + Math.sin(this.tijd * 30) * 0.2;
-        if (v.duikT <= 0) { v.modus = 'vlieg'; v.basisY = v.y; v.scaleY = 1; }
       } else {
         // dwaallicht (en vleermuis na zijn duik): zweeft en zit je achterna
         v.fase += dt;

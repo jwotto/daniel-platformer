@@ -11,6 +11,10 @@ const BAZEN = {
   // snel-snel-snel, lange pauze
   geit: { hp: 90, kracht: 1.3, woest: 'bergsprong', aanvallen: ['ren', 'vaten', 'bergsprong', 'ren', 'vaten'], ritme: [0.4, 0.4, 0.4, 2.2] },
   // steeds sneller
+  // snel, snel, snel, snel... en dan even wachten
+  salamander: { hp: 150, kracht: 1.6, woest: 'tong', aanvallen: ['kruip', 'tong', 'kruip', 'kruip', 'tong'], ritme: [0.3, 0.6, 0.3, 0.3, 1.2] },
+  // elke 5 seconden geen zwaartekracht (dat regelt hij zelf); daartussen pikken en veren gooien
+  lepelaar: { hp: 170, kracht: 1.7, woest: 'veren', aanvallen: ['pik', 'veren', 'pik'], ritme: [0.6, 0.6, 1.0] },
   draak: { hp: 120, kracht: 1.45, woest: 'spiraal', aanvallen: ['vuur', 'spiraal', 'duik', 'lava', 'spiraal'], ritme: [1.4, 1.2, 1.0, 0.8, 0.6] },
 };
 
@@ -27,7 +31,7 @@ class BaasDeel {
     this.speler.setPosition(150, 468);
 
     const soort = this.reg.baas, info = BAZEN[soort];
-    const vliegt = soort === 'draak';
+    const vliegt = soort === 'draak' || soort === 'salamander';
     const b = this.vijanden.create(vliegt ? 720 : 760, vliegt ? 150 : 468, 'baas_' + soort).setDepth(9);
     b.setOrigin(0.5, vliegt ? 0.5 : 1);
     const w = b.width, h = b.height;
@@ -38,6 +42,8 @@ class BaasDeel {
     b.kracht = info.kracht; b.woest = info.woest; b.woedend = false;
     b.status = 'wacht'; b.timer = 2.2; b.t = 0; b.shots = 0;
     if (vliegt) { b.body.setAllowGravity(false); b.body.setImmovable(true); }
+    if (soort === 'salamander') { b.setOrigin(0.5); b.rand = 0; b.doelRand = 0.5; b.loopRichting = 1; b.status = 'kruip'; }
+    if (soort === 'lepelaar') b.zwaarteT = 5;
     this.baas = b;
 
     const vast = o => o.setScrollFactor(0).setDepth(100);
@@ -85,9 +91,12 @@ class BaasDeel {
     // de tong van de pad: een roze lijn van zijn mond naar het puntje
     this.tongG.clear();
     if (this.tong && this.tong.active) {
-      this.tongG.lineStyle(9, 0x0a1028, 1).lineBetween(b.x + (b.flipX ? 40 : -40), b.y - 62, this.tong.x, this.tong.y);
-      this.tongG.lineStyle(5, 0xff7aa8, 1).lineBetween(b.x + (b.flipX ? 40 : -40), b.y - 62, this.tong.x, this.tong.y);
+      const m = b.baas === 'salamander' ? this.salamanderMond(b) : { x: b.x + (b.flipX ? 40 : -40), y: b.y - 62 };
+      this.tongG.lineStyle(9, 0x0a1028, 1).lineBetween(m.x, m.y, this.tong.x, this.tong.y);
+      this.tongG.lineStyle(5, 0xff7aa8, 1).lineBetween(m.x, m.y, this.tong.x, this.tong.y);
     }
+    if (b.baas === 'salamander') { this.salamanderUpdate(b, dt, woede); return; }
+    if (b.baas === 'lepelaar' && this.lepelaarZwaarte(b, dt)) return;
 
     if (b.vliegt) {
       if (b.status !== 'duik' && b.status !== 'spiraal') {
@@ -215,6 +224,21 @@ class BaasDeel {
       this.time.delayedCall(2100, () => {
         if (b.active && b.status === 'spiraal') { b.status = 'wacht'; b.timer = this.pauze(b); b.t = Math.asin(Phaser.Math.Clamp((b.x - 480) / 300, -1, 1)) / 0.6; }
       });
+    } else if (aanval === 'pik') {
+      // de lepelaar rent op je af en pikt met zijn lepelsnavel
+      this.baasRoep('Lepelpik!');
+      b.status = 'rent';
+      b.setFlipX(naar > 0);
+      b.body.setVelocity(naar * 480 * Math.min(1.5, woede), -200);
+      Geluid.effect('dash');
+    } else if (aanval === 'veren') {
+      // een waaier van scherpe veren
+      for (let i = 0; i < 7; i++) {
+        const hoek = -Math.PI / 2 + (i - 3) * 0.32;
+        this.kogel('veer', b.x, b.y - 100, Math.cos(hoek) * 300, Math.sin(hoek) * 300, 600).setRotation(hoek);
+      }
+      Geluid.effect('schiet');
+      klaar(1.0);
     } else if (aanval === 'sprong') {
       b.status = 'springt';
       b.setFlipX(naar > 0);
@@ -320,10 +344,24 @@ class BaasDeel {
     if (!k.active || this.onkwetsbaar > 0 || this.dood || this.gewonnen) return;
     if (!k.golf && !k.rolt) k.destroy();
     if (k.tong && this.baas) {
-      // de tong trekt je naar de pad toe
-      this.schade(Math.sign(this.baas.x - this.speler.x) || 1);
-      this.speler.body.setVelocity(Math.sign(this.baas.x - this.speler.x) * 420, -200);
+      // de tong trekt je naar de baas toe
+      const b = this.baas, sp = this.speler;
+      this.schade(Math.sign(b.x - sp.x) || 1);
+      const d = Math.hypot(b.x - sp.x, b.y - sp.y) || 1;
+      sp.body.setVelocity((b.x - sp.x) / d * 520, (b.y - sp.y) / d * 520 - 120);
       k.destroy();
+      if (b.baas === 'salamander') {
+        // ...en dan bijt de salamander
+        this.time.delayedCall(420, () => {
+          if (!b.active || this.dood || this.gewonnen) return;
+          if (Phaser.Math.Distance.Between(b.x, b.y, sp.x, sp.y - 20) < 170) {
+            this.onkwetsbaar = 0;
+            this.schade(Math.sign(sp.x - b.x) || 1);
+            this.popTekst('HAP!');
+            Geluid.effect('baasRaak');
+          }
+        });
+      }
       return;
     }
     this.schade(Math.sign(this.speler.x - k.x) || -this.kijk);
@@ -341,7 +379,7 @@ class BaasDeel {
     PROFIEL.startRegio = this.n + 1;
     PROFIEL.ticket = false;
     // de beloning: flink wat flesjes, en de eerste keer een baas-skin met een kroon
-    const flesjes = 15 + this.n * 8;
+    const flesjes = baasBeloning(this.n);
     PROFIEL.flessen += flesjes;
     PROFIEL.bazen = (PROFIEL.bazen || 0) + 1;
     const skin = SKINS.find(k => k.baas === b.baas);
@@ -391,4 +429,112 @@ BaasDeel.prototype.toonBeloning = function (flesjes, skin) {
   }
   this.time.delayedCall(1500, () => Geluid.effect('prijs'));
 };
+// ---------- DE SALAMANDER ----------
+// Kruipt rond over de vloer, de muren en het plafond van de arena.
+// rand = plek op de rand (0 tot 1, met de klok mee: plafond, rechtermuur, vloer, linkermuur)
+const SAL = { L: 44, R: 916, T: 104, B: 440 };
+function salamanderPlek(p) {
+  const W = SAL.R - SAL.L, H = SAL.B - SAL.T, P = 2 * (W + H);
+  let d = ((p % 1) + 1) % 1 * P;
+  if (d < W) return { x: SAL.L + d, y: SAL.T, hoek: 0 };
+  d -= W; if (d < H) return { x: SAL.R, y: SAL.T + d, hoek: Math.PI / 2 };
+  d -= H; if (d < W) return { x: SAL.R - d, y: SAL.B, hoek: Math.PI };
+  d -= W; return { x: SAL.L, y: SAL.B - d, hoek: -Math.PI / 2 };
+}
+function salamanderRand(x, y) {
+  // de dichtstbijzijnde plek op de rand bij (x, y)
+  let best = 0, bestD = Infinity;
+  for (let i = 0; i < 200; i++) { const p = salamanderPlek(i / 200), d = (p.x - x) ** 2 + (p.y - y) ** 2; if (d < bestD) { bestD = d; best = i / 200; } }
+  return best;
+}
+BaasDeel.prototype.salamanderMond = function (b) {
+  const hoek = b.rotation + (b.flipX ? 0 : Math.PI);
+  return { x: b.x + Math.cos(hoek) * 80, y: b.y + Math.sin(hoek) * 80 };
+};
+BaasDeel.prototype.salamanderVlucht = function (b) {
+  if (b.status === 'vlucht') return;
+  // geraakt: vlucht naar de andere kant van de arena
+  b.status = 'vlucht';
+  b.doelRand = b.rand + 0.5;
+  Geluid.effect('dash');
+};
+BaasDeel.prototype.salamanderUpdate = function (b, dt, woede) {
+  const sp = this.speler;
+  b.timer -= dt * woede;
+  if (b.status === 'kruip' || b.status === 'vlucht') {
+    // naar het doel kruipen langs de rand, de kortste kant op
+    let verschil = b.doelRand - b.rand;
+    if (b.status !== 'vlucht') verschil = ((verschil + 0.5) % 1 + 1) % 1 - 0.5;
+    const stap = (b.status === 'vlucht' ? 0.55 : 0.28) * woede * dt;
+    if (Math.abs(verschil) <= stap) {
+      const wasVlucht = b.status === 'vlucht';
+      b.rand = ((b.doelRand % 1) + 1) % 1;
+      b.status = 'wacht'; b.timer = wasVlucht ? 0.2 : this.pauze(b);
+    } else {
+      b.loopRichting = Math.sign(verschil);
+      b.rand += b.loopRichting * stap;
+    }
+  }
+  const p = salamanderPlek(b.rand);
+  b.setPosition(p.x, p.y);
+  b.setRotation(p.hoek + Math.PI);
+  b.setFlipX(b.loopRichting < 0);
+  b.body.reset(p.x, p.y);
+  if (b.status !== 'wacht' || b.timer > 0) return;
+
+  const aanval = b.aanvallen[b.beurt % b.aanvallen.length];
+  b.beurt++;
+  if (aanval === 'kruip') {
+    // snel naar een andere plek
+    b.status = 'kruip';
+    b.doelRand = Math.random() < 0.5 ? salamanderRand(sp.x, sp.y) + Phaser.Math.FloatBetween(-0.15, 0.15) : Math.random();
+  } else if (aanval === 'tong') {
+    this.baasRoep('Tongslurp!');
+    const m = this.salamanderMond(b);
+    const d = Math.hypot(sp.x - m.x, sp.y - 30 - m.y) || 1;
+    const vx = (sp.x - m.x) / d * 900, vy = (sp.y - 30 - m.y) / d * 900;
+    const k = this.kogel('tong', m.x, m.y, vx, vy, 0);
+    k.tong = true; k.leeft = 0.8; k.golf = true;
+    this.tong = k;
+    Geluid.effect('duik');
+    this.time.delayedCall(360, () => { if (k.active) k.setVelocity(-vx, -vy); });
+    b.status = 'bezig';
+    this.time.delayedCall(900, () => { if (b.active && b.status === 'bezig') { b.status = 'wacht'; b.timer = this.pauze(b); } });
+  }
+};
+
+// ---------- DE LEPELAAR ----------
+// Elke 5 seconden haalt hij 3 seconden de zwaartekracht weg en stuitert hij als een flipperbal rond.
+// Geeft true terug als hij aan het flipperen is (dan doet hij verder niks).
+BaasDeel.prototype.lepelaarZwaarte = function (b, dt) {
+  if (b.flipper > 0) {
+    b.flipper -= dt;
+    const v = b.body.velocity;
+    if ((b.x < 80 && v.x < 0) || (b.x > 880 && v.x > 0)) { v.x *= -1; this.cameras.main.shake(80, 0.005); }
+    if ((b.y < 170 && v.y < 0) || (b.y > 468 && v.y > 0)) { v.y *= -1; this.cameras.main.shake(80, 0.005); }
+    b.angle += dt * 720;
+    if (b.flipper <= 0) {
+      this.physics.world.gravity.y = 1500;
+      b.body.setAllowGravity(true); b.angle = 0;
+      b.status = 'wacht'; b.timer = 0.8; b.zwaarteT = 5;
+      this.baasRoep('Zwaartekracht terug!');
+    }
+    return true;
+  }
+  b.zwaarteT -= dt;
+  if (b.zwaarteT <= 0 && b.status === 'wacht') {
+    b.flipper = 3;
+    b.status = 'flipper';
+    this.physics.world.gravity.y = 0;
+    b.body.setAllowGravity(false);
+    const r = Math.random() < 0.5 ? -1 : 1;
+    b.body.setVelocity(r * 520, -460);
+    this.speler.body.setVelocityY(Math.min(this.speler.body.velocity.y, -120));
+    this.baasRoep('Geen zwaartekracht!');
+    Geluid.effect('duik');
+    return true;
+  }
+  return false;
+};
+
 voegToeAanSpel(BaasDeel);

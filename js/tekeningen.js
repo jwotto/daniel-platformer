@@ -40,6 +40,22 @@ const THEMA_KLEUR = {
     kruiper: { lijf: ['#3a3a44', '#16161c'], stekel: '#ff7a2c', oog: '#f2c14e' },
     licht: { lijf: ['#ffd27a', '#c83a1c'], staart: 'rgba(255,122,44,.8)', oog: '#fff6d8' },
   },
+  grot: {
+    lucht: ['#05040c', '#120c22', '#1e1430', '#2a1e3a'],
+    ver: ['#2a2240', '#140f22'], mid: ['#221a36', '#0e0a18'], nabij: ['#1a1428', '#08060e'],
+    boom: '#0a0812', steen: ['#5a4a6a', '#2a2036'], top: '#7ae0c8',
+    pilaar: ['#4a3c5a', '#1e1628'], kasteel: '#140f22', sneeuw: false,
+    kruiper: { lijf: ['#6a5a8a', '#2a2040'], stekel: '#7ae0c8', oog: '#f2c14e' },
+    licht: { lijf: ['#a8ffe8', '#2a8a7a'], staart: 'rgba(122,224,200,.75)', oog: '#f2c14e' },
+  },
+  savanne: {
+    lucht: ['#3a1a3a', '#c8504a', '#f2a03c', '#ffe08a'],
+    ver: ['#c8705a', '#8a3a3a'], mid: ['#b8803a', '#7a4a1c'], nabij: ['#8a5a1c', '#4a2a0e'],
+    boom: '#2a1a0e', steen: ['#c8924a', '#7a4a1c'], top: '#c8c84a',
+    pilaar: ['#b8864a', '#6b4a1c'], kasteel: '#7a3a3a', sneeuw: false,
+    kruiper: { lijf: ['#c8924a', '#6b3a12'], stekel: '#3a2a1a', oog: '#d1495b' },
+    licht: { lijf: ['#ffe08a', '#c87a1c'], staart: 'rgba(255,200,100,.75)', oog: '#3a2a1a' },
+  },
 };
 
 // schaal > 1 = scherper plaatje (bijvoorbeeld voor groot op het titelscherm)
@@ -100,6 +116,8 @@ const SKINS = [
   { id: 'padkoning', naam: 'Padkoning', baas: 'pad', kroon: true, tuniek: ['#2f6b2a', '#7cc45a'], mouw: '#5fae4e', broek: '#1f3a1a', fles: ['#9ad86e', '#2f6b2a'], etiket: '#f2c14e', band: '#d1495b' },
   { id: 'ijsbeer', naam: 'IJsbeer', baas: 'beer', kroon: true, tuniek: ['#cfe0f0', '#ffffff'], mouw: '#e8f0f8', broek: '#6a8ab8', fles: ['#ffffff', '#9ac0e0'], etiket: '#1b2f6b', band: '#3cc8bb' },
   { id: 'bokkenrijder', naam: 'Bokkenrijder', baas: 'geit', kroon: true, tuniek: ['#6b4a2a', '#b8864a'], mouw: '#9a6a3a', broek: '#3a2a1a', fles: ['#c98a4a', '#6b3a12'], etiket: '#f3ead6', band: '#2c4387' },
+  { id: 'grottenjager', naam: 'Grottenjager', baas: 'salamander', kroon: true, tuniek: ['#3a2a4a', '#7ae0c8'], mouw: '#5ab8a8', broek: '#1a1428', fles: ['#ff9a3c', '#3a1a0a'], etiket: '#1a1428', band: '#f2c14e' },
+  { id: 'flipperkoning', naam: 'Flipperkoning', baas: 'lepelaar', kroon: true, tuniek: ['#c04a8a', '#ffb0d8'], mouw: '#e88ab8', broek: '#6b3a12', fles: ['#ffd0e8', '#c0508a'], etiket: '#3a2a1a', band: '#f2a03c' },
   { id: 'drakendoder', naam: 'Drakendoder', baas: 'draak', kroon: true, tuniek: ['#2a0a10', '#8a1a2a'], mouw: '#5a1020', broek: '#0d0f1e', fles: ['#ff6a2c', '#5a0a06'], etiket: '#f2c14e', band: '#0a1028' },
   { id: 'zombie', naam: 'Zombie', tuniek: ['#4a5a3a', '#7a8a5a'], mouw: '#6a7a4a', broek: '#3a2a2a', fles: ['#a0581c', '#4a2a0a'], etiket: '#c8c8a0', band: '#5a8a3a', huid: '#9cc48a' },
 ];
@@ -372,7 +390,16 @@ function tekenLucht(ctx, k, id) {
   const g = ctx.createLinearGradient(0, 0, 0, 540);
   [0, 0.45, 0.78, 1].forEach((s, i) => g.addColorStop(s, k.lucht[i]));
   ctx.fillStyle = g; ctx.fillRect(0, 0, 960, 540);
-  for (let i = 0; i < 80; i++) {
+  if (id === 'grot') {
+    // geen lucht in een grot: gloeiende kristallen in het donker
+    for (let i = 0; i < 40; i++) {
+      const x = (i * 397) % 960, y = 120 + (i * 151) % 380, r = 2 + (i % 4);
+      ctx.fillStyle = ['rgba(122,224,200,.5)', 'rgba(180,140,255,.45)', 'rgba(242,193,78,.4)'][i % 3];
+      ctx.beginPath(); ctx.moveTo(x, y - r * 2.5); ctx.lineTo(x + r, y); ctx.lineTo(x, y + r * 1.2); ctx.lineTo(x - r, y); ctx.closePath(); ctx.fill();
+    }
+    return;
+  }
+  for (let i = 0; i < (id === 'savanne' ? 15 : 80); i++) {
     ctx.fillStyle = `rgba(255,245,220,${0.25 + ((i * 7) % 5) / 8})`;
     ctx.beginPath(); ctx.arc((i * 397) % 960, (i * 151) % 280, (i % 3) * 0.5 + 0.5, 0, TAU); ctx.fill();
   }
@@ -387,10 +414,11 @@ function tekenLucht(ctx, k, id) {
     }
   }
   const zon = { rivier: [720, 110, 42, '#fbe7b0', true], berg: [260, 300, 70, '#ffd27a', false],
-    ijs: [780, 80, 30, '#f4fbff', true], vulkaan: [700, 320, 90, '#ff9a3c', false] }[id];
+    ijs: [780, 80, 30, '#f4fbff', true], vulkaan: [700, 320, 90, '#ff9a3c', false],
+    savanne: [480, 330, 95, '#ffd27a', false] }[id];
   const [mx, my, mr, kleur, sikkel] = zon;
   const gl = ctx.createRadialGradient(mx, my, mr * 0.4, mx, my, mr * 4);
-  gl.addColorStop(0, id === 'vulkaan' || id === 'berg' ? 'rgba(255,170,120,.55)' : 'rgba(255,230,160,.45)');
+  gl.addColorStop(0, id === 'vulkaan' || id === 'berg' || id === 'savanne' ? 'rgba(255,170,120,.55)' : 'rgba(255,230,160,.45)');
   gl.addColorStop(1, 'rgba(255,230,160,0)');
   ctx.fillStyle = gl; ctx.fillRect(0, 0, 960, 540);
   ctx.fillStyle = kleur;
@@ -459,7 +487,15 @@ function tekenAchtergronden(scene, id) {
         ctx.stroke();
       }
     }
-    for (const x of [480, 1450]) tekenKasteel(ctx, x, basis + rug(x, 2048, golven) + 8, k.kasteel);
+    if (id !== 'grot' && id !== 'savanne') for (const x of [480, 1450]) tekenKasteel(ctx, x, basis + rug(x, 2048, golven) + 8, k.kasteel);
+    if (id === 'grot') {
+      // stalagmieten in de verte
+      ctx.fillStyle = k.ver[1];
+      for (let x = 30; x < 2040; x += 90 + (x * 7) % 60) {
+        const h = 120 + (x * 13) % 140, y = basis + rug(x, 2048, golven) + 20;
+        ctx.beginPath(); ctx.moveTo(x - 22, y); ctx.lineTo(x, y - h); ctx.lineTo(x + 22, y); ctx.closePath(); ctx.fill();
+      }
+    }
   });
   tekenTextuur(scene, 'mid_' + id, 2048, 256, ctx => tekenLaag(ctx, 2048, 256, 70, [[4, 30, 1], [9, 16, 2.2], [23, 6, 0.5]], k.mid, k.sneeuw));
   tekenTextuur(scene, 'nabij_' + id, 2048, 256, ctx => {
@@ -473,7 +509,13 @@ function tekenAchtergronden(scene, id) {
         for (const [dx, dy, r] of [[0, -46, 22], [-16, -34, 16], [16, -34, 16], [0, -70, 15]]) {
           ctx.beginPath(); ctx.arc(x + dx * s, y + dy * s, r * s, 0, TAU); ctx.fill();
         }
-      } else if (id === 'vulkaan') {
+      } else if (id === 'savanne') {
+        // acaciabomen met een platte kruin
+        ctx.fillRect(x - 3 * s, y - 50 * s, 6 * s, 54 * s);
+        ctx.beginPath(); ctx.moveTo(x, y - 30 * s); ctx.lineTo(x - 16 * s, y - 52 * s); ctx.lineTo(x - 12 * s, y - 54 * s); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(x - 4 * s, y - 60 * s, 36 * s, 9 * s, 0, 0, TAU); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(x - 20 * s, y - 56 * s, 16 * s, 6 * s, 0, 0, TAU); ctx.fill();
+      } else if (id === 'vulkaan' || id === 'grot') {
         // kale, puntige rotsen
         ctx.beginPath();
         ctx.moveTo(x - 20 * s, y + 4); ctx.lineTo(x - 6 * s, y - 50 * s); ctx.lineTo(x + 2 * s, y - 30 * s);
@@ -496,8 +538,9 @@ function tekenAchtergronden(scene, id) {
     }
   });
   tekenTextuur(scene, 'bodem_' + id, 512, 64, ctx => {
-    if (id === 'rivier' || id === 'ijs' || id === 'vulkaan') {
-      const kl = { rivier: ['#2aa9a6', '#14285e'], ijs: ['#a8e4f5', '#2a5a96'], vulkaan: ['#ffb03c', '#a8200c'] }[id];
+    if (id === 'rivier' || id === 'ijs' || id === 'vulkaan' || id === 'grot' || id === 'savanne') {
+      const kl = { rivier: ['#2aa9a6', '#14285e'], ijs: ['#a8e4f5', '#2a5a96'], vulkaan: ['#ffb03c', '#a8200c'],
+        grot: ['#2a6a7a', '#0a1020'], savanne: ['#c8924a', '#5a3a1a'] }[id];
       const g = ctx.createLinearGradient(0, 0, 0, 64);
       g.addColorStop(0, kl[0]); g.addColorStop(1, kl[1]);
       ctx.fillStyle = g; ctx.fillRect(0, 6, 512, 58);
@@ -545,6 +588,27 @@ function platTex(scene, id, w) {
     ctx.strokeStyle = 'rgba(255,255,255,.4)';
     ctx.beginPath(); ctx.moveTo(12, 5); ctx.lineTo(w * 0.45, 5); ctx.stroke();
   });
+}
+
+// grot: het plafond met stalactieten (herhaalt naadloos)
+function tekenPlafond(ctx) {
+  const g = ctx.createLinearGradient(0, 0, 0, 90);
+  g.addColorStop(0, '#08060e'); g.addColorStop(1, '#2a2036');
+  ctx.fillStyle = g; ctx.strokeStyle = INKT; ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(512, 0);
+  for (let x = 512; x >= 0; x -= 16) ctx.lineTo(x, 58 + Math.sin(x * 0.09) * 6 + ((x / 16) % 3 === 0 ? 14 : 0));
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = 'rgba(122,224,200,.35)';
+  for (const x of [60, 200, 330, 450]) { ctx.beginPath(); ctx.moveTo(x, 40); ctx.lineTo(x + 5, 52); ctx.lineTo(x, 60); ctx.lineTo(x - 5, 52); ctx.closePath(); ctx.fill(); }
+}
+
+// grot: een stalactiet die naar beneden kan vallen
+function tekenStalactiet(ctx) {
+  const g = ctx.createLinearGradient(0, 0, 24, 0);
+  g.addColorStop(0, '#2a2036'); g.addColorStop(0.5, '#8a7aa8'); g.addColorStop(1, '#2a2036');
+  ctx.fillStyle = g; ctx.strokeStyle = INKT; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(1, 1); ctx.lineTo(23, 1); ctx.lineTo(13, 55); ctx.lineTo(11, 55); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(8, 4, 2, 24);
 }
 
 // spikes: een rij metalen punten, w breed
@@ -635,6 +699,8 @@ function maakTexturen(scene) {
     tekenTextuur(scene, 'licht_' + id, 60, 84, ctx => tekenDwaallicht(ctx, THMA(id).licht));
     tekenAchtergronden(scene, id);
   }
+  tekenTextuur(scene, 'plafond_grot', 512, 90, tekenPlafond);
+  tekenTextuur(scene, 'stalactiet', 24, 56, tekenStalactiet);
   tekenTextuur(scene, 'shotje', 24, 28, tekenShotje);
   tekenTextuur(scene, 'kebab', 46, 34, tekenKebab);
   tekenTextuur(scene, 'wolkje', 24, 24, ctx => {

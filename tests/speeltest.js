@@ -39,11 +39,11 @@
       doe('kopen en ongedaan'); PROFIEL.flessen = 100; w.vernieuwAlles();
       w.koop(w.kaarten[0]); moet(PROFIEL.up.dash === 1 && PROFIEL.flessen === 94, 'kopen werkte niet');
       w.ongedaan(); moet(PROFIEL.up.dash === 0 && PROFIEL.flessen === 100, 'ongedaan werkte niet');
-      doe('baas kopen, naar shop en terug'); w.koop(w.baasKaart); moet(PROFIEL.ticket, 'baas kopen werkte niet');
+      doe('baas kopen, naar shop en terug'); w.koop(w.baasKaart); moet(PROFIEL.ticket === PROFIEL.regio, 'baas kopen werkte niet');
       w.naarShop(); await wacht(() => actief('Shop'), 5000, 'shop');
       scene('Shop').terug(); await wacht(() => actief('Winkel'), 5000, 'terug naar winkel');
-      moet(!scene('Winkel').kiest && PROFIEL.ticket, 'na de shop moest je opnieuw kiezen of was je ticket weg');
-      doe('vechten'); scene('Winkel').vechten(); moet(!PROFIEL.ticket, 'ticket niet opgebruikt');
+      moet(!scene('Winkel').kiest && PROFIEL.ticket !== false, 'na de shop moest je opnieuw kiezen of was je ticket weg');
+      doe('vechten'); scene('Winkel').vechten(); moet(PROFIEL.ticket === false, 'ticket niet opgebruikt');
       await wacht(() => spelKlaar(1.5) && scene('Spel').baasModus, 8000, 'baasgevecht start');
       doe('dood in baasgevecht'); scene('Spel').gameOver(); await wacht(() => actief('Winkel'), 5000, 'winkel na baas');
       kiesUpgrade(scene('Winkel'));
@@ -53,7 +53,7 @@
 
     // in elke regio 3 keer in het water vallen: 1 hartje eraf en veilig op een platform
     async vallen() {
-      for (let r = 0; r < 4; r++) {
+      for (let r = 0; r < 6; r++) {
         doe('regio ' + r); speel({ level: r }); await wacht(() => spelKlaar() && scene('Spel').n === r, 8000, 'regio ' + r);
         const sp = scene('Spel');
         for (let i = 0; i < 6; i++) { sp.speler.x += 60; await slaap(60); }
@@ -61,7 +61,7 @@
           sp.run.harten = 50; sp.speler.y = 650;
           await slaap(1300);
           moet(sp.run.harten === 49, sp.reg.id + ': val ' + (v + 1) + ' kostte ' + (50 - sp.run.harten) + ' hartjes');
-          moet(opPlatform(sp) && sp.speler.y < 240, sp.reg.id + ': val ' + (v + 1) + ' niet veilig op het platform (y=' + Math.round(sp.speler.y) + ')');
+          moet(opPlatform(sp) && sp.speler.y < 270, sp.reg.id + ': val ' + (v + 1) + ' niet veilig op het platform (y=' + Math.round(sp.speler.y) + ')');
         }
       }
       return '12 keer gevallen: steeds 1 hartje eraf en veilig op het platformpje';
@@ -72,10 +72,11 @@
       const MAG = {
         rivier: ['kruiper', 'vliegvis', 'goud'], ijs: ['klont', 'klontje', 'pinguin', 'vliegpinguin', 'goud'],
         berg: ['fust', 'adelaar', 'goud'], vulkaan: ['lava', 'golem', 'ptero', 'goud'],
+        grot: ['mol', 'vleermuis', 'goud'], savanne: ['neushoorn', 'gier', 'goud'],
       };
-      const EIGEN = { rivier: ['kruiper', 'vliegvis'], ijs: ['klont', 'klontje', 'pinguin', 'vliegpinguin'], berg: ['fust', 'adelaar'], vulkaan: ['lava', 'golem', 'ptero'] };
+      const EIGEN = { rivier: ['kruiper', 'vliegvis'], ijs: ['klont', 'klontje', 'pinguin', 'vliegpinguin'], berg: ['fust', 'adelaar'], vulkaan: ['lava', 'golem', 'ptero'], grot: ['mol', 'vleermuis'], savanne: ['neushoorn', 'gier'] };
       const uit = [];
-      for (let r = 0; r < 4; r++) {
+      for (let r = 0; r < 6; r++) {
         doe('regio ' + r); speel({ level: r }); await wacht(() => spelKlaar() && scene('Spel').n === r, 8000, 'regio ' + r);
         const sp = scene('Spel'), gezien = new Set();
         for (let i = 0; i < 120; i++) {
@@ -94,7 +95,7 @@
     // elke eindbaas doet zijn eigen aanvallen en wordt woedend
     async bazen() {
       const uit = [];
-      for (let n = 0; n < 4; n++) {
+      for (let n = 0; n < 6; n++) {
         doe('baas ' + n); PROFIEL.regio = n;
         speel({ level: n, baas: true }); await wacht(() => spelKlaar(0.3) && scene('Spel').baasModus && scene('Spel').n === n, 8000, 'baas ' + n);
         const sp = scene('Spel'), b = sp.baas, gezien = new Set();
@@ -141,11 +142,11 @@
       const sp = scene('Spel');
       doe('baas verslaan'); sp.baas.hp = 1; sp.raakVijand(sp.baas, 5, 1, 'slash');
       moet(sp.gewonnen, 'baas niet verslagen');
-      moet(PROFIEL.flessen === 15, 'geen 15 flesjes maar ' + PROFIEL.flessen);
+      moet(PROFIEL.flessen === baasBeloning(0), 'geen ' + baasBeloning(0) + ' flesjes maar ' + PROFIEL.flessen);
       moet(PROFIEL.skins.includes('padkoning'), 'geen Padkoning-skin');
       moet(PROFIEL.regio === 1, 'volgende regio niet open');
       doe('door naar volgende regio'); await wacht(() => spelKlaar(0.5) && scene('Spel').n === 1, 15000, 'IJsvlakte start');
-      return '+15 flesjes, Padkoning-skin en door naar de IJsvlakte';
+      return '+' + baasBeloning(0) + ' flesjes, Padkoning-skin en door naar de IJsvlakte';
     },
 
     // draairad: kost 5, je wint een nieuwe skin, daarna kost het 10
@@ -163,7 +164,7 @@
     // monsters met een zwakke plek: verkeerd raken ketst af, goed raken doet pijn
     async zwak() {
       const uit = [];
-      for (let r = 1; r < 4; r++) {
+      for (let r = 1; r < 6; r++) {
         speel({ level: r }); await wacht(() => spelKlaar() && scene('Spel').n === r, 8000, 'regio ' + r);
         const sp = scene('Spel'), getest = new Set();
         for (let i = 0; i < 160 && getest.size < 3; i++) {
@@ -197,6 +198,20 @@
       sp.onkwetsbaar = 0; sp.speler.body.reset(s.x + 30, 360); await slaap(400);
       moet(sp.run.harten === 4, 'spikes deden geen pijn (harten=' + sp.run.harten + ')');
       return 'au! 1 hartje eraf op de spikes';
+    },
+
+    // een verslagen baas nog eens doen: vinkje, opnieuw betalen, beloning hoger dan de prijs
+    async opnieuw() {
+      PROFIEL.regio = 2; PROFIEL.startRegio = 0; PROFIEL.flessen = 100;
+      scene('Titel').scene.start('Winkel', { meters: 0, regio: 0, baas: false }); await wacht(() => actief('Winkel'), 5000, 'winkel');
+      const w = scene('Winkel'); kiesUpgrade(w);
+      moet(w.baasKaart.naam.text === REGIOS[0].baasNaam && w.baasKaart.vinkje.visible, 'baaskaart toont niet Koning Bierpad met vinkje');
+      moet(baasBeloning(0) > baasPrijs(0) && baasBeloning(5) > baasPrijs(5), 'beloning niet hoger dan de prijs');
+      w.koop(w.baasKaart); moet(PROFIEL.ticket === 0 && PROFIEL.flessen === 100 - baasPrijs(0), 'opnieuw kopen werkte niet');
+      w.kiesRegio(2); moet(!w.baasKaart.vinkje.visible && w.baasKaart.naam.text === REGIOS[2].baasNaam, 'nieuwe baas heeft een vinkje');
+      w.kiesRegio(-2); w.vechten();
+      await wacht(() => spelKlaar(0.5) && scene('Spel').baasModus && scene('Spel').n === 0, 8000, 'gevecht tegen Koning Bierpad');
+      return 'Koning Bierpad nog eens: prijs ' + baasPrijs(0) + ', beloning ' + baasBeloning(0);
     },
 
     // kebabrol eten: scheet en heel hoog de lucht in

@@ -43,6 +43,12 @@ class Spel extends Phaser.Scene {
     this.shotjes = this.physics.add.group();
     this.kebabs = this.physics.add.group({ allowGravity: false });
     this.spikes = this.physics.add.staticGroup();
+    this.pegels = this.physics.add.group({ allowGravity: false });
+    // de zwaartekracht kan door de Lepelaar zijn uitgezet: altijd weer aanzetten
+    this.physics.world.gravity.y = 1500;
+    // grot: een dicht plafond (je kunt niet boven het scherm uit)
+    this.plafondY = this.reg.id === 'grot' ? 70 : (this.baasModus ? 6 : null);
+    if (this.reg.id === 'grot') this.plafond = this.add.tileSprite(0, 0, 960, 90, 'plafond_grot').setOrigin(0).setScrollFactor(0).setDepth(7);
     this.kogels = this.physics.add.group();
     this.decor = this.add.group();
 
@@ -89,6 +95,8 @@ class Spel extends Phaser.Scene {
     this.physics.add.overlap(this.speler, this.shotjes, (sp, s) => this.pakShotje(s));
     this.physics.add.overlap(this.speler, this.kebabs, (sp, k) => this.eetKebab(k));
     this.physics.add.overlap(this.speler, this.spikes, () => this.opSpikes());
+    this.physics.add.overlap(this.speler, this.pegels, () => this.opSpikes());
+    this.physics.add.overlap(this.pegels, this.platforms, (s) => { if (s.valt) { this.vonken.explode(8, s.x, s.y + 40); Geluid.effect('raak'); s.destroy(); } });
     this.physics.add.overlap(this.speler, this.kogels, (sp, k) => this.kogelRaakt(k));
     this.physics.add.overlap(this.pijlen, this.vijanden, (p, v) => this.pijlRaakt(p, v));
     this.physics.add.overlap(this.pijlen, this.pilaren, p => this.pijlStop(p));
@@ -103,7 +111,7 @@ class Spel extends Phaser.Scene {
 
     Geluid.muziekAan();
     // liedje kiezen: Bierpolka voor Rivier en IJsvlakte, Bergmars voor Bergen en Vulkaan, Baaslied bij een eindbaas
-    const lied = this.baasModus ? 'baas' : (this.reg.id === 'rivier' || this.reg.id === 'ijs' ? 'polka' : 'mars');
+    const lied = this.baasModus ? 'baas' : (['rivier', 'ijs', 'savanne'].includes(this.reg.id) ? 'polka' : 'mars');
     Geluid.speelLied(lied, Math.min(30, rondeVan(this.n) * 10));
 
     const titel = this.baasModus ? this.reg.baasNaam : levelNaam(this.n);
@@ -180,6 +188,8 @@ class Spel extends Phaser.Scene {
     if (w >= 150 && this.genX > 1200 && Math.random() < 0.035) this.maakGoud(x + w * 0.3, y, x, x + w);
     // spikes op sommige platforms (niet helemaal aan het begin)
     if (w >= 200 && this.genX > 1400 && Math.random() < Math.min(0.3, 0.1 + 0.05 * L)) this.maakSpikes(x + w * 0.3, y, Math.min(90, w * 0.3));
+    // grot: stalactieten aan het plafond boven het platform
+    if (this.reg.id === 'grot' && this.genX > 1000 && Math.random() < 0.45) this.maakPegel(x + Phaser.Math.Between(20, w - 20));
     // af en toe een kebabrol
     if (this.genX > 1200 && Math.random() < 0.07 * (1 + (this.run.up.kebabradar || 0) * 1.5)) this.maakKebab(x + w * 0.75, y - 40);
     if (Math.random() < 0.3) this.rijShotjes(x + w / 2, y - 34, Phaser.Math.Between(2, 4));
@@ -202,6 +212,38 @@ class Spel extends Phaser.Scene {
       this.rijShotjes(x + 24, y - 205, 3);
     }
     this.genX = x + 48; this.genY = y;
+  }
+
+  // grot: een stalactiet aan het plafond
+  maakPegel(x) {
+    const s = this.pegels.create(x, 58, 'stalactiet').setOrigin(0.5, 0).setDepth(6);
+    s.body.setSize(14, 48).setOffset(5, 4);
+    s.valt = false; s.wiebel = 0;
+  }
+
+  // stalactieten vallen als je eronder loopt
+  pegelsUpdate(dt) {
+    const sp = this.speler;
+    this.pegels.getChildren().slice().forEach(s => {
+      if (!s.valt && s.wiebel <= 0 && Math.abs(sp.x - s.x) < 50 && sp.y > s.y) { s.wiebel = 0.3; Geluid.effect('tink'); }
+      if (s.wiebel > 0) {
+        s.wiebel -= dt;
+        s.x += Math.sin(this.tijd * 60) * 0.8;
+        if (s.wiebel <= 0) { s.valt = true; s.body.setAllowGravity(true); }
+      }
+      if (s.y > 640) s.destroy();
+    });
+  }
+
+  // het plafond: in de grot (en in een baasarena) kun je niet boven het scherm uit
+  plafondUpdate() {
+    if (this.plafond) this.plafond.tilePositionX = this.camX;
+    if (this.plafondY === null) return;
+    const b = this.speler.body;
+    if (b.top < this.plafondY) {
+      this.speler.y += this.plafondY - b.top;
+      if (b.velocity.y < 0) b.velocity.y = 0;
+    }
   }
 
   // een rij scherpe spikes op een platform
@@ -261,6 +303,7 @@ class Spel extends Phaser.Scene {
       grp.getChildren().slice().forEach(o => { if (o.x + o.displayWidth < grens) o.destroy(); });
     }
     this.spikes.getChildren().slice().forEach(o => { if (o.x + o.displayWidth < grens) o.destroy(); });
+    this.pegels.getChildren().slice().forEach(o => { if (o.x < grens || o.y > 640) o.destroy(); });
     for (const grp of [this.vijanden, this.shotjes, this.kebabs]) {
       grp.getChildren().slice().forEach(o => { if (o.x < grens || o.y > 640) o.destroy(); });
     }
@@ -288,6 +331,8 @@ class Spel extends Phaser.Scene {
     this.schildBel.setVisible(this.schilden > 0).setPosition(this.speler.x, this.speler.y - 30);
     this.schildBel.setScale(1 + Math.sin(this.tijd * 4) * 0.04);
     this.spelerUpdate(dt, inp);
+    this.plafondUpdate();
+    this.pegelsUpdate(dt);
     this.vijandenUpdate(dt);
     if (this.baasModus) this.baasUpdate(dt);
     this.kogelsUpdate(dt);
@@ -545,8 +590,11 @@ class Spel extends Phaser.Scene {
     if (v.soort === 'baas') {
       Geluid.effect('baasRaak');
       if (v.hp <= 0) this.baasVerslagen(v);
+      else if (v.baas === 'salamander') this.salamanderVlucht(v);
       return;
     }
+    // de mol kun je alleen raken als hij boven de grond is
+    if (v.onder) { this.ketst(v, 'boven'); return; }
     if (v.soort === 'goud') { this.vangGoud(v); return; }
     if (v.soort === 'golem' || v.soort === 'fust') { /* te zwaar om weg te duwen */ }
     else if (v.loopt) { v.body.setVelocity(richting * 180, -180); v.verdoofd = 0.3; }
@@ -655,6 +703,7 @@ class Spel extends Phaser.Scene {
   spelerRaakt(v) {
     if (!v.active || this.dood || this.gewonnen) return;
     if (v.soort === 'goud') { this.vangGoud(v); return; }
+    if (v.onder) return; // mol onder de grond
     // bierbuik-stamp: van bovenop een monster springen
     const sp = this.speler;
     if ((this.run.up.stomp || ZWAK[v.soort] === 'stamp') && !this.smashing && sp.body.velocity.y > 60 && sp.y < v.getCenter().y) {
@@ -713,9 +762,9 @@ class Spel extends Phaser.Scene {
   // hoog en midden in beeld. Zo kun je nooit meteen nog een hartje verliezen.
   respawn() {
     const sp = this.speler, b = sp.body;
-    const x = this.camX + 380, y = 230;
+    const x = this.camX + 380, y = this.reg.id === 'grot' ? 260 : 230;
     // vijanden en kogels vlak bij de veilige plek weghalen
-    for (const grp of [this.vijanden, this.kogels, this.spikes]) {
+    for (const grp of [this.vijanden, this.kogels, this.spikes, this.pegels]) {
       grp.getChildren().slice().forEach(v => {
         if (v.active && v.soort !== 'baas' && Math.abs(v.x - x) < 220 && Math.abs(v.y - y) < 220) v.destroy();
       });
