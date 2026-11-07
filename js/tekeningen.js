@@ -499,6 +499,12 @@ function maakMonsterTexturen(scene) {
   tekenTextuur(scene, 'lavalager', 38, 50, tekenLavalager);
   tekenTextuur(scene, 'golem', 80, 84, tekenGolem);
   tekenTextuur(scene, 'goudfles', 30, 52, tekenGoudfles);
+  // puntje van de padden-tong
+  tekenTextuur(scene, 'tong', 28, 22, ctx => {
+    ctx.fillStyle = '#ff7aa8'; ctx.strokeStyle = INKT; ctx.lineWidth = 2.4;
+    ctx.beginPath(); ctx.ellipse(14, 11, 11, 8, 0, 0, TAU); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,.6)'; ctx.beginPath(); ctx.arc(10, 8, 2.5, 0, TAU); ctx.fill();
+  });
 }
 
 // ---------- KLEINE DINGEN ----------

@@ -489,6 +489,9 @@ class Winkel extends Phaser.Scene {
   vechten() {
     if (this.weg || this.kiest || !PROFIEL.ticket || this.scene.isPaused()) return;
     this.weg = true;
+    // je ticket is nu op: verlies je, dan moet je opnieuw betalen
+    PROFIEL.ticket = false;
+    bewaarProfiel();
     this.scene.start('Spel', { run: nieuweRun(true) });
   }
 }

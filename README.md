@@ -32,7 +32,7 @@ Een roguelike platformer van Daniel. Het is een HTML-game, gemaakt met [Phaser 3
 - Vijanden laten **shotjes** vallen. 10 shotjes = **1 vol flesje**. In latere regio's zijn shotjes meer waard.
 - Ga je dood, dan kies je eerst **1 van 3 upgrades** voor je volgende potje. Elke upgrade heeft een plus én een min, bijvoorbeeld *Springveer*: 1.2× zo hoog springen, maar 0.8× zo snel lopen. Of *Gulzig*: 1.5× zoveel shotjes, maar maar 1 hartje. De upgrade geldt alleen voor dat ene potje (ook als je daarin een eindbaas verslaat).
 - Daarna kom je in de **winkel**. Daar koop je power-ups met je flesjes. Alles wat je koopt blijft van jou.
-- In de winkel koop je ook een gevecht met de **eindbaas**. Dat is duur! Versla je hem, dan ga je door naar de volgende regio. Verlies je, dan mag je het gratis nog een keer proberen.
+- In de winkel koop je ook een gevecht met de **eindbaas**. Dat is duur! Versla je hem, dan ga je door naar de volgende regio. Je ticket is op zodra je gaat vechten: verlies je, dan moet je opnieuw betalen.
 - Regio's die je hebt vrijgespeeld kun je in de winkel kiezen als startplek.
 - Af en toe zweeft er een **kebabrol**. Eet je hem op, dan laat je een scheet en vlieg je heel hoog de lucht in!
 - Je held draagt een **bierfles als muts**.
@@ -45,12 +45,14 @@ Skins: Gewoon · Groene Fles · Goudkoning · Nachtridder · Rode Duivel · IJsk
 
 ### Regio's en eindbazen
 
-| Regio | Eindbaas | Aanvallen |
-|---|---|---|
-| 🐸 Rivier | Koning Bierpad | springt en maakt schuimgolven, spuugt bierbellen |
-| 🧊 IJsvlakte (je glijdt!) | De IJsbierbeer | rent op je af, ijspegels uit de lucht, gooit ijsblokjes |
-| ⛰️ Bergen | De Bokbiergeit | ramt, rolt biervaten, springt |
-| 🌋 Vulkaan | De Brouwdraak | vliegt, spuwt vuurballen, lavaregen, duikt op je af |
+Elke eindbaas heeft zijn eigen aanvallen, een eigen **ritme** (de pauzes tussen zijn aanvallen) en een **speciale aanval** waarvan de naam groot in beeld komt. Elke baas is sterker dan de vorige. Zakt hij onder de helft van zijn hartjes, dan wordt hij **woedend**: hij kleurt rood, wordt sneller en doet zijn speciale aanval vaker.
+
+| Regio | Eindbaas | Hartjes | Aanvallen | Speciale aanval | Ritme |
+|---|---|---|---|---|---|
+| 🐸 Rivier | Koning Bierpad | 40 | Hop-hop-HOP (2 sprongetjes + een grote met schokgolf), bierbellen | **Tongslurp**: tong schiet uit en trekt je naar hem toe | kort, kort, lang |
+| 🧊 IJsvlakte (je glijdt!) | De IJsbierbeer | 65 | ijspegels uit de lucht, ijsblokjes | **Buikglijden**: stuitert 3× door de arena | traag, traag, snel |
+| ⛰️ Bergen | De Bokbiergeit | 90 | rammen, biervaten rollen | **Bergsprong**: springt uit beeld en knalt neer waar jij staat | snel-snel-snel, lange pauze |
+| 🌋 Vulkaan | De Brouwdraak | 120 | vuurballen, lavaregen, duikvlucht | **Vuurspiraal**: vuurballen in een rondje, 2 golven | steeds sneller |
 
 Daarna begint het opnieuw met Rivier 2, en alles is sterker.
 
