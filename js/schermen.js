@@ -196,7 +196,8 @@ class Winkel extends Phaser.Scene {
     const sub = data.baas
       ? `${regioVan(regio).baasNaam} was te sterk! Word sterker en probeer opnieuw.`
       : `Je kwam ${data.meters} m ver in ${levelNaam(regio)}  ·  beste: ${PROFIEL.beste} m`;
-    this.add.text(480, 52, sub, { fontFamily: FONT, fontSize: '16px', fontStyle: 'bold', color: '#f3ead6' }).setOrigin(0.5, 0);
+    this.subTekst = sub;
+    this.sub = this.add.text(480, 52, sub, { fontFamily: FONT, fontSize: '16px', fontStyle: 'bold', color: '#f3ead6' }).setOrigin(0.5, 0);
     this.add.image(918, 12, 'fles_mini').setOrigin(0, 0);
     this.flesTekst = this.add.text(910, 16, '', {
       fontFamily: FONT, fontSize: '26px', fontStyle: 'bold', color: '#f3ead6', stroke: '#0a1028', strokeThickness: 5,
@@ -218,6 +219,54 @@ class Winkel extends Phaser.Scene {
     this.input.keyboard.on('keydown-ENTER', () => this.spelen());
     this.input.keyboard.on('keydown-SPACE', () => this.spelen());
     this.vernieuwAlles();
+    this.toonKeuzes();
+  }
+
+  // Eerst kiezen: 1 van 3 upgrades voor je volgende potje
+  toonKeuzes() {
+    this.kiest = true;
+    const laag = [];
+    const vast = o => { laag.push(o); return o.setDepth(300); };
+    vast(this.add.rectangle(0, 0, 960, 540, 0x0a1028, 0.94).setOrigin(0).setInteractive());
+    vast(this.add.text(480, 40, 'Kies een upgrade', {
+      fontFamily: FONT_TITEL, fontSize: '40px', color: '#f2c14e', stroke: '#0a1028', strokeThickness: 7,
+    }).setOrigin(0.5, 0));
+    vast(this.add.text(480, 96, 'Hij geldt alleen voor je volgende potje. Elke upgrade heeft een plus én een min!', {
+      fontFamily: FONT, fontSize: '17px', fontStyle: 'bold', color: '#f3ead6',
+    }).setOrigin(0.5, 0));
+    drieKeuzes().forEach((k, i) => {
+      const w = 270, h = 250, x = 30 + i * (w + 30), y = 150;
+      const g = vast(this.add.graphics());
+      const teken = (licht) => {
+        g.clear();
+        g.fillStyle(licht ? 0x22336a : 0x16244f, 1).fillRoundedRect(x, y, w, h, 16);
+        g.lineStyle(licht ? 4 : 3, 0xf2c14e, 1).strokeRoundedRect(x, y, w, h, 16);
+      };
+      teken(false);
+      vast(this.add.text(x + w / 2, y + 22, k.naam, { fontFamily: FONT_TITEL, fontSize: '28px', color: '#f2c14e' }).setOrigin(0.5, 0));
+      vast(this.add.text(x + 20, y + 90, '+  ' + k.plus, {
+        fontFamily: FONT, fontSize: '20px', fontStyle: 'bold', color: '#5fd38a', wordWrap: { width: w - 40 },
+      }));
+      vast(this.add.text(x + 20, y + 160, '−  ' + k.min, {
+        fontFamily: FONT, fontSize: '20px', fontStyle: 'bold', color: '#ff7a8a', wordWrap: { width: w - 40 },
+      }));
+      vast(this.add.text(x + w / 2, y + h + 14, String(i + 1), {
+        fontFamily: FONT, fontSize: '18px', fontStyle: 'bold', color: '#5a6a9a',
+      }).setOrigin(0.5, 0));
+      vast(this.add.zone(x, y, w, h).setOrigin(0).setInteractive({ useHandCursor: true }))
+        .on('pointerover', () => teken(true)).on('pointerout', () => teken(false))
+        .on('pointerup', () => kies(k));
+      this.input.keyboard.once('keydown-' + ['ONE', 'TWO', 'THREE'][i], () => kies(k));
+    });
+    const kies = (k) => {
+      if (!this.kiest || this.scene.isPaused()) return;
+      this.kiest = false;
+      PROFIEL.keuze = k.id;
+      bewaarProfiel();
+      Geluid.effect('koop');
+      laag.forEach(o => o.destroy());
+      this.sub.setText(this.subTekst + '   ·   Volgende potje: ✦ ' + k.naam);
+    };
   }
 
   maakKaart(p, x, y) {
@@ -288,6 +337,7 @@ class Winkel extends Phaser.Scene {
   }
 
   koop(k) {
+    if (this.kiest) return;
     if (!k.p) {
       const kost = baasPrijs(PROFIEL.regio);
       if (PROFIEL.ticket) { this.vechten(); return; }
@@ -304,19 +354,20 @@ class Winkel extends Phaser.Scene {
   }
 
   kiesRegio(r) {
+    if (this.kiest) return;
     PROFIEL.startRegio = Phaser.Math.Clamp(PROFIEL.startRegio + r, 0, PROFIEL.regio);
     bewaarProfiel();
     this.vernieuwAlles();
   }
 
   spelen() {
-    if (this.weg || this.scene.isPaused()) return;
+    if (this.weg || this.kiest || this.scene.isPaused()) return;
     this.weg = true;
     this.scene.start('Spel', { run: nieuweRun(false) });
   }
 
   vechten() {
-    if (this.weg || !PROFIEL.ticket || this.scene.isPaused()) return;
+    if (this.weg || this.kiest || !PROFIEL.ticket || this.scene.isPaused()) return;
     this.weg = true;
     this.scene.start('Spel', { run: nieuweRun(true) });
   }

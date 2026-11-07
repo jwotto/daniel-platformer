@@ -56,13 +56,39 @@ function baasPrijs(n) { return 15 + n * 12; }
 function prijs(p, niveau) { return p.basis * 3 * (niveau + 1); }
 function uitlegVan(p, niveau) { return p.uitleg[Math.min(niveau, p.uitleg.length - 1)]; }
 
+// ---------- KEUZES NA DOODGAAN ----------
+// Na elke keer doodgaan kies je 1 van 3 upgrades voor je volgende potje.
+// Elke upgrade heeft iets goeds (plus) en iets slechts (min).
+// loop/sprong/shot/schade/zwaarte zijn keer-getallen, harten telt erbij op (of 'hartenVast' zet hem vast).
+const KEUZES = [
+  { id: 'springveer', naam: 'Springveer', plus: '1.2× zo hoog springen', min: '0.8× zo snel lopen', sprong: 1.2, loop: 0.8 },
+  { id: 'gulzig', naam: 'Gulzig', plus: '1.5× zoveel shotjes', min: 'maar 1 hartje', shot: 1.5, hartenVast: 1 },
+  { id: 'renner', naam: 'Renner', plus: '1.3× zo snel lopen', min: '0.9× zo hoog springen', loop: 1.3, sprong: 0.9 },
+  { id: 'tank', naam: 'Tank', plus: '2 hartjes extra', min: '0.85× zo snel lopen', harten: 2, loop: 0.85 },
+  { id: 'kanon', naam: 'Glazen kanon', plus: '2× zoveel schade', min: '2 hartjes minder', schade: 2, harten: -2 },
+  { id: 'maan', naam: 'Maanmannetje', plus: 'zweven als op de maan', min: '0.7× zoveel shotjes', zwaarte: 0.7, shot: 0.7 },
+  { id: 'kracht', naam: 'Krachtpatser', plus: '1.5× zoveel schade', min: '0.9× zo hoog springen', schade: 1.5, sprong: 0.9 },
+  { id: 'spaarvarken', naam: 'Spaarvarken', plus: '2× zoveel shotjes', min: '0.6× zoveel schade', shot: 2, schade: 0.6 },
+  { id: 'raket', naam: 'Raket', plus: '1.2× lopen en 1.15× springen', min: '1 hartje minder', loop: 1.2, sprong: 1.15, harten: -1 },
+  { id: 'zwaar', naam: 'Zware jongen', plus: '3 hartjes extra', min: 'zwaarder: je valt sneller', harten: 3, zwaarte: 1.2 },
+];
+const GEEN_KEUZE = { id: '', naam: '', loop: 1, sprong: 1, shot: 1, schade: 1, zwaarte: 1, harten: 0 };
+function keuzeVan(id) { return Object.assign({}, GEEN_KEUZE, KEUZES.find(k => k.id === id) || {}); }
+function drieKeuzes() { return Phaser.Utils.Array.Shuffle(KEUZES.slice()).slice(0, 3); }
+// hoeveel hartjes je hebt met een keuze erbij (altijd minstens 1)
+function hartenMet(id) {
+  const k = keuzeVan(id);
+  if (k.hartenVast) return k.hartenVast;
+  return Math.max(1, maxHarten() + k.harten);
+}
+
 // ---------- OPSLAAN ----------
 // Je flesjes, power-ups en regio's worden in de browser bewaard, ook als je doodgaat.
 const OPSLAG = 'flesje_profiel_v2';
 const TESTMODUS = ['#test', '#winkel', '#shop', '#kebab', '#baas', '#ijs', '#berg', '#vulkaan', '#spel'].some(h => location.hash.startsWith(h));
 
 function laadProfiel() {
-  const p = { up: {}, flessen: 0, shotjes: 0, beste: 0, regio: 0, startRegio: 0, ticket: false, skin: 'standaard', skins: ['standaard'], draaien: 0 };
+  const p = { up: {}, flessen: 0, shotjes: 0, beste: 0, regio: 0, startRegio: 0, ticket: false, skin: 'standaard', skins: ['standaard'], draaien: 0, keuze: '' };
   POWERUPS.forEach(x => { p.up[x.id] = 0; });
   if (TESTMODUS) return p;
   try {
@@ -76,6 +102,7 @@ function laadProfiel() {
       if (!p.skins.includes('standaard')) p.skins.unshift('standaard');
       if (!p.skins.includes(p.skin)) p.skin = 'standaard';
       p.draaien = Number(d.draaien) || 0;
+      if (typeof d.keuze === 'string') p.keuze = d.keuze;
     }
   } catch (e) { /* niks bewaard */ }
   return p;
@@ -89,7 +116,11 @@ function bewaarProfiel() {
 
 function maxHarten() { return 3 + PROFIEL.up.hart; }
 
+// Een nieuw potje. Je gekozen upgrade geldt alleen voor dit potje, daarna is hij op.
 function nieuweRun(baas) {
   const level = baas ? PROFIEL.regio : Math.min(PROFIEL.startRegio, PROFIEL.regio);
-  return { level, up: PROFIEL.up, harten: maxHarten(), baas: !!baas };
+  const keuze = PROFIEL.keuze || '';
+  PROFIEL.keuze = '';
+  bewaarProfiel();
+  return { level, up: PROFIEL.up, harten: hartenMet(keuze), baas: !!baas, keuze };
 }

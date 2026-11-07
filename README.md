@@ -30,7 +30,8 @@ Een roguelike platformer van Daniel. Het is een HTML-game, gemaakt met [Phaser 3
 
 - Elke regio loopt **eindeloos** door en wordt steeds moeilijker: sneller scherm, meer en sterkere vijanden, klimmuren en grote gaten.
 - Vijanden laten **shotjes** vallen. 10 shotjes = **1 vol flesje**. In latere regio's zijn shotjes meer waard.
-- Ga je dood, dan kom je in de **winkel**. Daar koop je power-ups met je flesjes. Alles wat je koopt blijft van jou.
+- Ga je dood, dan kies je eerst **1 van 3 upgrades** voor je volgende potje. Elke upgrade heeft een plus én een min, bijvoorbeeld *Springveer*: 1.2× zo hoog springen, maar 0.8× zo snel lopen. Of *Gulzig*: 1.5× zoveel shotjes, maar maar 1 hartje. De upgrade geldt alleen voor dat ene potje (ook als je daarin een eindbaas verslaat).
+- Daarna kom je in de **winkel**. Daar koop je power-ups met je flesjes. Alles wat je koopt blijft van jou.
 - In de winkel koop je ook een gevecht met de **eindbaas**. Dat is duur! Versla je hem, dan ga je door naar de volgende regio. Verlies je, dan mag je het gratis nog een keer proberen.
 - Regio's die je hebt vrijgespeeld kun je in de winkel kiezen als startplek.
 - Af en toe zweeft er een **kebabrol**. Eet je hem op, dan laat je een scheet en vlieg je heel hoog de lucht in!
@@ -101,4 +102,5 @@ Waarom een versienummer? Je browser bewaart de bestanden van de game een tijdje 
 - **De uitleg van de toetsen op het titelscherm was onzichtbaar.** Oorzaak: de tekst lag achter het water. Oplossing: de tekst een hogere laag geven.
 - **Volledig scherm werkt niet op iPhone.** Oorzaak: Apple staat dat niet toe voor websites. Oplossing: de game op je beginscherm zetten, dan opent hij als app op volledig scherm.
 - **Na "Vecht tegen de baas!" kon je nergens meer op drukken.** Oorzaak: Phaser gebruikt het level steeds opnieuw, en het level onthield nog de meterteller van het vorige potje. Die was al weggegooid, maar het baasgevecht probeerde hem toch bij te werken en liep vast. Oplossing: aan het begin van elk potje die oude dingen leegmaken. Getest: doodgaan → baas kopen → vechten → doodgaan → gewoon spelen.
+- **Na in het water vallen ging je soms meteen weer dood.** Oorzaak: je kwam terug op het platform dat het dichtst bij was, ook als dat smal was of helemaal links in beeld. Het scherm schoof door en duwde je er weer af. Oplossing: je komt nu terug op een breed platform midden in beeld (liefst zonder vijand), en het scherm wacht 2 seconden. Is er geen goed platform, dan komt er een reddingsplatform. Getest door 5 keer in het water te vallen: elke keer 1 hartje kwijt en veilig op een platform.
 - **Fouten zien op je telefoon?** Als er iets misgaat, komt er onderaan een rode balk met de fout. Maak daar een screenshot van en geef hem aan Claude.

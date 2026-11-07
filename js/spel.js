@@ -24,6 +24,10 @@ class Spel extends Phaser.Scene {
     this.ronde = rondeVan(this.n);
     this.baasModus = !!this.run.baas;
     this.waarde = shotWaarde(this.n);
+    // je gekozen upgrade voor dit potje (plus én min)
+    this.mod = keuzeVan(this.run.keuze);
+    this.maxH = hartenMet(this.run.keuze);
+    this.shotRest = 0;
     // Phaser gebruikt dit level-object steeds opnieuw. Dingen van het vorige potje zijn al weg,
     // dus eerst leegmaken. Anders loopt het baasgevecht vast na een normaal potje (en andersom).
     this.baas = null; this.baasBalk = null; this.baasTekst = null;
@@ -56,6 +60,8 @@ class Spel extends Phaser.Scene {
     this.speler = this.physics.add.sprite(150, 418, 'sp_stil').setOrigin(0.5, 1).setDepth(10);
     this.speler.body.setSize(20, 40).setOffset(18, 47);
     this.speler.body.setMaxVelocity(900, 1000);
+    // zwaartekracht anders? (de wereld trekt al met 1500)
+    if (this.mod.zwaarte !== 1) this.speler.body.setGravityY(1500 * (this.mod.zwaarte - 1));
 
     if (this.baasModus) this.maakArena();
     else {
@@ -452,7 +458,8 @@ class Spel extends Phaser.Scene {
     }).setOrigin(0.5).setScrollFactor(0).setDepth(150);
     this.time.delayedCall(4000, () => {
       Geluid.effect('regio');
-      this.scene.start('Spel', { run: { level: this.n + 1, up: PROFIEL.up, harten: maxHarten(), baas: false } });
+      // je upgrade blijft, want het is nog hetzelfde potje
+      this.scene.start('Spel', { run: { level: this.n + 1, up: PROFIEL.up, harten: hartenMet(this.run.keuze), baas: false, keuze: this.run.keuze } });
     });
   }
 
@@ -525,16 +532,16 @@ class Spel extends Phaser.Scene {
       // lopen (op ijs glij je een beetje)
       if (this.muurLock <= 0) {
         const grip = opGrond ? (this.th.id === 'ijs' ? 0.1 : 0.4) : 0.18;
-        b.velocity.x = Phaser.Math.Linear(b.velocity.x, inp.x * LOOPSNELHEID, grip);
+        b.velocity.x = Phaser.Math.Linear(b.velocity.x, inp.x * LOOPSNELHEID * this.mod.loop, grip);
         if (Math.abs(inp.x) > 0.2) this.kijk = Math.sign(inp.x);
       }
       // springen
       if (this.springBuffer > 0) {
         if (this.coyote > 0) {
-          this.spring(SPRONG);
+          this.spring(SPRONG * this.mod.sprong);
           Geluid.effect('spring');
         } else if (this.muurTijd > 0 && !opGrond) {
-          this.spring(-540);
+          this.spring(-540 * this.mod.sprong);
           this.muurTijd = 0;
           if (Math.sign(inp.x) === muurKant) {
             // je duwt tegen de muur: spring vooral omhoog, zo klim je
@@ -550,7 +557,7 @@ class Spel extends Phaser.Scene {
           Geluid.effect('muur');
         } else if (this.extraSprongen > 0) {
           this.extraSprongen--;
-          this.spring(-500);
+          this.spring(-500 * this.mod.sprong);
           this.vonken.explode(8, sp.x, sp.y);
           Geluid.effect('dubbel');
         }
@@ -710,7 +717,7 @@ class Spel extends Phaser.Scene {
 
   raakVijand(v, schade, richting) {
     if (!v.active || v.hp <= 0 || this.gewonnen) return;
-    v.hp -= schade;
+    v.hp -= schade * this.mod.schade;
     v.setTintFill(0xffffff);
     this.time.delayedCall(70, () => { if (v.active) v.clearTint(); });
     if (v.soort === 'baas') {
@@ -812,7 +819,11 @@ class Spel extends Phaser.Scene {
   pakShotje(s) {
     if (!s.active) return;
     s.destroy();
-    PROFIEL.shotjes += this.waarde;
+    // met een upgrade kan een shotje meer (of minder) waard zijn; kommagetallen sparen we op
+    this.shotRest += this.waarde * this.mod.shot;
+    const heel = Math.floor(this.shotRest);
+    this.shotRest -= heel;
+    PROFIEL.shotjes += heel;
     if (PROFIEL.shotjes >= 10) {
       while (PROFIEL.shotjes >= 10) { PROFIEL.shotjes -= 10; PROFIEL.flessen++; }
       this.popTekst('Flesje vol!');
@@ -860,21 +871,33 @@ class Spel extends Phaser.Scene {
     this.respawn();
   }
 
+  // Na in het water vallen: terug op een veilige plek
   respawn() {
     const sp = this.speler, b = sp.body;
-    let beste = null, besteAfstand = Infinity;
+    const doel = this.camX + 400; // lekker midden in beeld, niet vlak bij de linkerkant
+    let beste = null, besteX = 0, besteScore = Infinity;
     this.platforms.getChildren().forEach(p => {
       const l = p.x, r = p.x + p.displayWidth;
-      if (r < this.camX + 140 || l > this.camX + 720) return;
-      const afstand = Math.abs((l + r) / 2 - (this.camX + 320));
-      if (afstand < besteAfstand) { beste = p; besteAfstand = afstand; }
+      if (r - l < 90) return; // te smal
+      if (r < this.camX + 220 || l > this.camX + 860) return; // te ver links of rechts
+      const x = Phaser.Math.Clamp(doel, l + 30, r - 30);
+      // liever geen platform waar een vijand op loopt, en niet helemaal bovenin
+      const vijand = this.vijanden.getChildren().some(v => v.active && v.soort === 'kruiper' && v.x > l - 20 && v.x < r + 20);
+      const score = Math.abs(x - doel) + (vijand ? 400 : 0) + (p.y < 200 ? 200 : 0);
+      if (score < besteScore) { beste = p; besteX = x; besteScore = score; }
     });
-    if (beste) sp.setPosition(Phaser.Math.Clamp(this.camX + 320, beste.x + 20, beste.x + beste.displayWidth - 20), beste.y - 2);
-    else sp.setPosition(this.camX + 320, 100);
+    if (!beste) {
+      // geen goed platform? dan maken we een reddingsplatform
+      beste = this.maakPlatform(this.camX + 300, 380, 200);
+      besteX = this.camX + 400;
+    }
+    sp.setPosition(besteX, beste.y - 2);
     b.setVelocity(0, 0);
     b.setAllowGravity(true);
     this.dashTijd = 0; this.smashing = false;
-    this.onkwetsbaar = 1.6; this.knipper = 1.6;
+    this.onkwetsbaar = 2; this.knipper = 2;
+    // het scherm wacht even, zodat je niet meteen weer van het platform wordt geduwd
+    this.startVertraging = 2;
   }
 
   meters() { return this.baasModus ? 0 : Math.max(0, Math.floor(this.speler.x / 20)); }
@@ -897,7 +920,9 @@ class Spel extends Phaser.Scene {
   maakHud() {
     const vast = o => o.setScrollFactor(0).setDepth(100);
     this.hartIcons = [];
-    for (let i = 0; i < 8; i++) this.hartIcons.push(vast(this.add.image(28 + i * 28, 26, 'hart')));
+    // veel hartjes? dan kleiner en dichter op elkaar
+    const veel = this.maxH > 8;
+    for (let i = 0; i < 12; i++) this.hartIcons.push(vast(this.add.image(28 + i * (veel ? 22 : 28), 26, 'hart').setScale(veel ? 0.8 : 1)));
     this.flesGlas = vast(this.add.image(30, 84, 'fles_glas'));
     this.flesBier = vast(this.add.image(30, 84, 'fles_bier'));
     this.flesRand = vast(this.add.image(30, 84, 'fles_rand'));
@@ -905,6 +930,7 @@ class Spel extends Phaser.Scene {
     this.flesTekst = vast(this.add.text(52, 66, '', stijl));
     this.shotTekst = vast(this.add.text(52, 94, '', { ...stijl, fontSize: '15px', color: '#f2c14e' }));
     this.dashG = vast(this.add.graphics());
+    if (this.mod.id) this.add.text(14, 136, '✦ ' + this.mod.naam, { ...stijl, fontSize: '15px', color: '#3cc8bb' }).setScrollFactor(0).setDepth(100);
     const rechts = kanVolledigScherm(this) ? 840 : 890;
     if (!this.baasModus) {
       this.levelTekst = vast(this.add.text(rechts, 12, levelNaam(this.n), { ...stijl, fontFamily: FONT_TITEL, fontSize: '26px', color: '#f2c14e' }).setOrigin(1, 0));
@@ -922,7 +948,7 @@ class Spel extends Phaser.Scene {
   }
 
   updateHud() {
-    const max = maxHarten();
+    const max = this.maxH;
     this.hartIcons.forEach((h, i) => { h.setVisible(i < max); h.setTexture(i < this.run.harten ? 'hart' : 'hart_leeg'); });
     const vul = Math.round(70 * PROFIEL.shotjes / 10);
     this.flesBier.setCrop(0, 74 - vul, 32, vul);
