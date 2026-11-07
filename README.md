@@ -6,8 +6,11 @@ Een roguelike platformer van Daniel. Het is een HTML-game, gemaakt met [Phaser 3
 
 ## Spelen
 
-- **Op de computer:** open `index.html` in Chrome of Edge.
-- **Op je telefoon:** open de link van de game en houd je telefoon dwars.
+**▶ https://jwotto.github.io/daniel-platformer/**
+
+- Werkt op de computer en op je telefoon. Houd je telefoon dwars.
+- Na een wijziging duurt het ongeveer een minuut voordat de link de nieuwe versie laat zien.
+- Zonder internet: open `index.html` in Chrome of Edge.
 
 ### Besturing
 
