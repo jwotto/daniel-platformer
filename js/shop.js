@@ -4,7 +4,8 @@
 
 function draaiPrijs() { return 5 + PROFIEL.draaien * 5; }
 // de skins die je kunt winnen (de gewone heb je al)
-const RAD_SKINS = SKINS.filter(k => k.id !== 'standaard');
+// de skins die je aan het rad kunt winnen (de gewone heb je al, baas-skins win je door een baas te verslaan)
+const RAD_SKINS = SKINS.filter(k => k.id !== 'standaard' && !k.baas);
 
 class Shop extends Phaser.Scene {
   constructor() { super('Shop'); }
@@ -75,12 +76,14 @@ class Shop extends Phaser.Scene {
       fontFamily: FONT, fontSize: '17px', fontStyle: 'bold', color: '#f3ead6',
     }).setOrigin(0.5, 0);
     this.vakjes = SKINS.map((k, i) => {
-      const x = 500 + (i % 4) * 110, y = 94 + Math.floor(i / 4) * 150, w = 100, h = 140;
+      // 6 per rij, 2 rijen
+      const x = 492 + (i % 6) * 75, y = 92 + Math.floor(i / 6) * 152, w = 70, h = 144;
       const v = {
         k, x, y, w, h,
         g: this.add.graphics(),
-        img: this.add.image(x + w / 2, y + 112, 'skin_' + k.id).setOrigin(0.5, 1).setScale(0.36),
-        naam: this.add.text(x + w / 2, y + h - 6, k.naam, { fontFamily: FONT, fontSize: '14px', fontStyle: 'bold', color: '#f3ead6' }).setOrigin(0.5, 1),
+        img: this.add.image(x + w / 2, y + 108, 'skin_' + k.id).setOrigin(0.5, 1).setScale(0.3),
+        naam: this.add.text(x + w / 2, y + h - 6, k.naam, { fontFamily: FONT, fontSize: '12px', fontStyle: 'bold', color: '#f3ead6', align: 'center', wordWrap: { width: w - 4 }, lineSpacing: -3 }).setOrigin(0.5, 1),
+        kroon: k.baas ? this.add.text(x + w - 4, y + 4, '♛', { fontFamily: FONT, fontSize: '16px', color: '#f2c14e' }).setOrigin(1, 0) : null,
         slot: this.add.text(x + w / 2, y + 58, '?', { fontFamily: FONT_TITEL, fontSize: '40px', color: '#5a6a9a' }).setOrigin(0.5),
       };
       this.add.zone(x, y, w, h).setOrigin(0).setInteractive({ useHandCursor: true }).on('pointerup', () => this.trekAan(v));
@@ -100,7 +103,7 @@ class Shop extends Phaser.Scene {
       v.g.lineStyle(aan ? 4 : 2, aan ? 0xf2c14e : 0x2c4387, 1).strokeRoundedRect(v.x, v.y, v.w, v.h, 12);
       v.img.setVisible(heb);
       v.slot.setVisible(!heb);
-      v.naam.setColor(heb ? '#f3ead6' : '#5a6a9a').setText(heb ? v.k.naam : '???');
+      v.naam.setColor(heb ? '#f3ead6' : '#5a6a9a').setText(heb ? v.k.naam : v.k.baas ? 'Versla de baas' : '???');
     }
     RAD_SKINS.forEach((k, i) => this.radPlaatjes[i].setAlpha(PROFIEL.skins.includes(k.id) ? 0.35 : 1));
     const alles = this.nogTeWinnen().length === 0;

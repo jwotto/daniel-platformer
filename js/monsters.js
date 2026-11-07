@@ -6,9 +6,9 @@
 // Hoe versla je hem? Staat er niks, dan kan alles.
 // 'slash' = alleen slaan, 'pijl' = alleen schieten, 'stamp' = alleen erbovenop springen
 const ZWAK = {
-  klont: 'slash', klontje: 'slash', pinguin: 'pijl', vriesvlok: 'pijl',
-  fust: 'stamp', vleermuis: 'slash',
-  lava: 'pijl', golem: 'stamp', vuurmot: 'slash',
+  klont: 'slash', klontje: 'slash', pinguin: 'pijl', vriesvlok: 'pijl', vliegpinguin: 'pijl',
+  fust: 'stamp', vleermuis: 'slash', adelaar: 'slash',
+  lava: 'pijl', golem: 'stamp', vuurmot: 'slash', ptero: 'stamp',
 };
 const ZWAK_TEKST = { slash: 'Alleen slaan! ⚔', pijl: 'Alleen schieten! ➶', stamp: 'Spring erop! ⤓' };
 
@@ -56,12 +56,11 @@ class MonsterDeel {
 
   maakLuchtVijand(x, y, w) {
     const id = this.reg.id, hoog = Phaser.Math.Between(110, Math.max(130, y - 110));
-    if (id === 'berg') {
-      // de hopvleermuis hangt ondersteboven onder een platform
-      if (y <= 400) this.maakVleermuis(x + w / 2, y + 48);
-    } else if (id === 'ijs') this.maakVlieger('vriesvlok', 'vriesvlok', x + w / 2, hoog);
-    else if (id === 'vulkaan') this.maakVlieger('vuurmot', 'vuurmot', x + w / 2, hoog);
-    else this.maakDwaallicht(x + w / 2, hoog);
+    // elke regio heeft zijn eigen vliegende monster
+    if (id === 'ijs') this.maakVlieger('vliegpinguin', 'vliegpinguin', x + w / 2, hoog);
+    else if (id === 'berg') this.maakVlieger('adelaar', 'adelaar', x + w / 2, Phaser.Math.Between(80, 140));
+    else if (id === 'vulkaan') this.maakVlieger('ptero', 'ptero', x + w / 2, hoog);
+    else this.maakVlieger('vliegvis', 'vliegvis', x + w / 2, hoog);
   }
 
   // een vliegend monster (zonder zwaartekracht)
@@ -276,6 +275,50 @@ class MonsterDeel {
         } else {
           patrouille(v, 1); // kruiper, ijsklontjes
         }
+      } else if (v.soort === 'vliegpinguin') {
+        // zweeft op afstand en schiet dan als een torpedo op je af
+        v.schietT -= dt;
+        if (v.torpedo > 0) {
+          v.torpedo -= dt;
+          v.x += v.vx * dt; v.y += v.vy * dt;
+          v.rotation = Math.atan2(v.vy, Math.abs(v.vx)) * (v.vx < 0 ? -1 : 1);
+          if (v.torpedo <= 0) { v.basisY = Phaser.Math.Clamp(v.y, 90, 380); v.rotation = 0; }
+        } else {
+          v.fase += dt;
+          if (Math.abs(dx) > 220) v.x += Math.sign(dx) * v.jaagSnelheid * dt;
+          v.y = v.basisY + Math.sin(v.fase * 3) * 10;
+          v.setFlipX(dx > 0);
+          v.rotation = Math.sin(this.tijd * 12) * 0.12; // spartelen in de lucht
+          if (v.schietT <= 0 && inBeeld && Math.abs(dx) < 420) {
+            const d = Math.hypot(dx, dy) || 1;
+            v.vx = dx / d * 420; v.vy = dy / d * 420; v.torpedo = 0.9; v.schietT = 2.6;
+            Geluid.effect('duik');
+          }
+        }
+      } else if (v.soort === 'adelaar') {
+        // cirkelt hoog en duikt recht naar beneden als hij boven je is
+        if (v.duik) {
+          v.y += v.duik * dt;
+          if (v.duik > 0 && (v.y > sp.y - 10 || v.y > 470)) v.duik = -260;
+          if (v.duik < 0 && v.y <= v.basisY) { v.duik = 0; v.y = v.basisY; v.schietT = 1.6; }
+        } else {
+          v.fase += dt;
+          v.x += Math.sign(dx || 1) * Math.min(Math.abs(dx), v.jaagSnelheid * 1.3 * dt);
+          v.y = v.basisY + Math.sin(v.fase * 2) * 8;
+          v.setFlipX(dx > 0);
+          v.schietT -= dt;
+          if (v.schietT <= 0 && inBeeld && Math.abs(dx) < 50 && sp.y > v.y + 60) { v.duik = 520; Geluid.effect('duik'); }
+        }
+        v.scaleY = v.duik > 0 ? 0.8 : 1 + Math.sin(this.tijd * 10) * 0.18;
+      } else if (v.soort === 'ptero') {
+        // scheert laag heen en weer door het beeld
+        if (!v.richting) v.richting = -1;
+        v.x += v.richting * (v.jaagSnelheid * 2.4) * dt;
+        v.basisY += Math.sign((sp.y - 70) - v.basisY) * Math.min(Math.abs((sp.y - 70) - v.basisY), 40 * dt);
+        v.y = v.basisY + Math.sin(this.tijd * 3 + v.fase) * 10;
+        if (v.x < this.camX + 40) v.richting = 1; else if (v.x > this.camX + 920) v.richting = -1;
+        v.setFlipX(v.richting > 0);
+        v.scaleY = 1 + Math.sin(this.tijd * 8 + v.fase) * 0.2;
       } else if (v.soort === 'vriesvlok') {
         // zweeft zigzag boven je en laat ijsscherfjes vallen
         v.fase += dt;
@@ -323,6 +366,7 @@ class MonsterDeel {
         v.y = v.basisY + Math.sin(v.fase * 2.2) * 16;
         v.setFlipX(dx > 0);
         if (v.soort === 'vleermuis') v.scaleY = 1 + Math.sin(this.tijd * 22) * 0.15;
+        if (v.soort === 'vliegvis') { v.scaleY = 1 + Math.sin(this.tijd * 14) * 0.12; v.rotation = Math.sin(v.fase * 2.2) * 0.25; }
       }
     });
   }

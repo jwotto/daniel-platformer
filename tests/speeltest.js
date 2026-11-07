@@ -70,10 +70,10 @@
     // elke regio heeft zijn eigen monsters
     async monsters() {
       const MAG = {
-        rivier: ['kruiper', 'licht', 'goud'], ijs: ['klont', 'klontje', 'pinguin', 'vriesvlok', 'goud'],
-        berg: ['fust', 'vleermuis', 'goud'], vulkaan: ['lava', 'golem', 'vuurmot', 'goud'],
+        rivier: ['kruiper', 'vliegvis', 'goud'], ijs: ['klont', 'klontje', 'pinguin', 'vliegpinguin', 'goud'],
+        berg: ['fust', 'adelaar', 'goud'], vulkaan: ['lava', 'golem', 'ptero', 'goud'],
       };
-      const EIGEN = { rivier: ['kruiper'], ijs: ['klont', 'pinguin'], berg: ['fust', 'vleermuis'], vulkaan: ['lava', 'golem'] };
+      const EIGEN = { rivier: ['kruiper', 'vliegvis'], ijs: ['klont', 'klontje', 'pinguin', 'vliegpinguin'], berg: ['fust', 'adelaar'], vulkaan: ['lava', 'golem', 'ptero'] };
       const uit = [];
       for (let r = 0; r < 4; r++) {
         doe('regio ' + r); speel({ level: r }); await wacht(() => spelKlaar() && scene('Spel').n === r, 8000, 'regio ' + r);
@@ -134,6 +134,20 @@
       return 'schild, reservevat, stampen en flesmaatje werken (maatje versloeg ' + (sp.verslagen - voor) + ' monsters)';
     },
 
+    // eindbaas verslaan: flesjes, baas-skin en door naar de volgende regio
+    async beloning() {
+      PROFIEL.regio = 0; PROFIEL.flessen = 0;
+      speel({ level: 0, baas: true }); await wacht(() => spelKlaar(1) && scene('Spel').baasModus, 8000, 'baasgevecht');
+      const sp = scene('Spel');
+      doe('baas verslaan'); sp.baas.hp = 1; sp.raakVijand(sp.baas, 5, 1, 'slash');
+      moet(sp.gewonnen, 'baas niet verslagen');
+      moet(PROFIEL.flessen === 15, 'geen 15 flesjes maar ' + PROFIEL.flessen);
+      moet(PROFIEL.skins.includes('padkoning'), 'geen Padkoning-skin');
+      moet(PROFIEL.regio === 1, 'volgende regio niet open');
+      doe('door naar volgende regio'); await wacht(() => spelKlaar(0.5) && scene('Spel').n === 1, 15000, 'IJsvlakte start');
+      return '+15 flesjes, Padkoning-skin en door naar de IJsvlakte';
+    },
+
     // draairad: kost 5, je wint een nieuwe skin, daarna kost het 10
     async shop() {
       PROFIEL.flessen = 200;
@@ -170,6 +184,19 @@
       }
       moet(uit.length >= 5, 'te weinig monsters getest: ' + uit.join(','));
       return uit.join('  ');
+    },
+
+    // spikes doen pijn, ook als je erop springt
+    async spikes() {
+      speel({ level: 1, harten: 5 }); await wacht(() => spelKlaar(0.5), 8000, 'spel start');
+      const sp = scene('Spel');
+      const p = sp.maakPlatform(sp.speler.x + 200, 380, 240);
+      sp.maakSpikes(p.x + 80, 380, 60);
+      moet(sp.spikes.countActive() >= 1, 'geen spikes');
+      const s = sp.spikes.getChildren()[sp.spikes.getChildren().length - 1];
+      sp.onkwetsbaar = 0; sp.speler.body.reset(s.x + 30, 360); await slaap(400);
+      moet(sp.run.harten === 4, 'spikes deden geen pijn (harten=' + sp.run.harten + ')');
+      return 'au! 1 hartje eraf op de spikes';
     },
 
     // kebabrol eten: scheet en heel hoog de lucht in

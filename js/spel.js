@@ -42,6 +42,7 @@ class Spel extends Phaser.Scene {
     this.pijlen = this.physics.add.group({ allowGravity: false });
     this.shotjes = this.physics.add.group();
     this.kebabs = this.physics.add.group({ allowGravity: false });
+    this.spikes = this.physics.add.staticGroup();
     this.kogels = this.physics.add.group();
     this.decor = this.add.group();
 
@@ -87,6 +88,7 @@ class Spel extends Phaser.Scene {
     this.physics.add.overlap(this.speler, this.vijanden, (sp, v) => this.spelerRaakt(v));
     this.physics.add.overlap(this.speler, this.shotjes, (sp, s) => this.pakShotje(s));
     this.physics.add.overlap(this.speler, this.kebabs, (sp, k) => this.eetKebab(k));
+    this.physics.add.overlap(this.speler, this.spikes, () => this.opSpikes());
     this.physics.add.overlap(this.speler, this.kogels, (sp, k) => this.kogelRaakt(k));
     this.physics.add.overlap(this.pijlen, this.vijanden, (p, v) => this.pijlRaakt(p, v));
     this.physics.add.overlap(this.pijlen, this.pilaren, p => this.pijlStop(p));
@@ -176,6 +178,8 @@ class Spel extends Phaser.Scene {
     if (Math.random() < Math.min(0.7, 0.2 + 0.1 * L)) this.maakLuchtVijand(x, y, w);
     // heel soms: een gouden flesje met pootjes
     if (w >= 150 && this.genX > 1200 && Math.random() < 0.035) this.maakGoud(x + w * 0.3, y, x, x + w);
+    // spikes op sommige platforms (niet helemaal aan het begin)
+    if (w >= 200 && this.genX > 1400 && Math.random() < Math.min(0.3, 0.1 + 0.05 * L)) this.maakSpikes(x + w * 0.3, y, Math.min(90, w * 0.3));
     // af en toe een kebabrol
     if (this.genX > 1200 && Math.random() < 0.07 * (1 + (this.run.up.kebabradar || 0) * 1.5)) this.maakKebab(x + w * 0.75, y - 40);
     if (Math.random() < 0.3) this.rijShotjes(x + w / 2, y - 34, Phaser.Math.Between(2, 4));
@@ -198,6 +202,21 @@ class Spel extends Phaser.Scene {
       this.rijShotjes(x + 24, y - 205, 3);
     }
     this.genX = x + 48; this.genY = y;
+  }
+
+  // een rij scherpe spikes op een platform
+  maakSpikes(x, y, w) {
+    w = Math.round(w / 15) * 15;
+    const s = this.spikes.create(x, y + 2, spikesTex(this, w)).setOrigin(0, 1).setDepth(6);
+    s.body.setSize(w - 8, 10).setOffset(4, 6);
+    s.refreshBody();
+  }
+
+  // op de spikes gestapt: au, en je stuitert omhoog
+  opSpikes() {
+    if (this.onkwetsbaar > 0 || this.dood || this.gewonnen) return;
+    this.schade(-this.kijk);
+    this.speler.body.setVelocityY(-480);
   }
 
   bordje(x, y, tekst) {
@@ -241,6 +260,7 @@ class Spel extends Phaser.Scene {
     for (const grp of [this.platforms, this.pilaren]) {
       grp.getChildren().slice().forEach(o => { if (o.x + o.displayWidth < grens) o.destroy(); });
     }
+    this.spikes.getChildren().slice().forEach(o => { if (o.x + o.displayWidth < grens) o.destroy(); });
     for (const grp of [this.vijanden, this.shotjes, this.kebabs]) {
       grp.getChildren().slice().forEach(o => { if (o.x < grens || o.y > 640) o.destroy(); });
     }
@@ -695,7 +715,7 @@ class Spel extends Phaser.Scene {
     const sp = this.speler, b = sp.body;
     const x = this.camX + 380, y = 230;
     // vijanden en kogels vlak bij de veilige plek weghalen
-    for (const grp of [this.vijanden, this.kogels]) {
+    for (const grp of [this.vijanden, this.kogels, this.spikes]) {
       grp.getChildren().slice().forEach(v => {
         if (v.active && v.soort !== 'baas' && Math.abs(v.x - x) < 220 && Math.abs(v.y - y) < 220) v.destroy();
       });

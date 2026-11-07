@@ -120,7 +120,7 @@ const OPSLAG = 'flesje_profiel_v2';
 const TESTMODUS = ['#test', '#winkel', '#shop', '#kebab', '#baas', '#ijs', '#berg', '#vulkaan', '#spel'].some(h => location.hash.startsWith(h));
 
 function laadProfiel() {
-  const p = { up: {}, flessen: 0, shotjes: 0, beste: 0, regio: 0, startRegio: 0, ticket: false, skin: 'standaard', skins: ['standaard'], draaien: 0, keuze: '' };
+  const p = { up: {}, flessen: 0, shotjes: 0, beste: 0, regio: 0, startRegio: 0, ticket: false, skin: 'standaard', skins: ['standaard'], draaien: 0, keuze: '', bazen: 0 };
   POWERUPS.forEach(x => { p.up[x.id] = 0; });
   if (TESTMODUS) return p;
   try {
@@ -134,6 +134,7 @@ function laadProfiel() {
       if (!p.skins.includes('standaard')) p.skins.unshift('standaard');
       if (!p.skins.includes(p.skin)) p.skin = 'standaard';
       p.draaien = Number(d.draaien) || 0;
+      p.bazen = Number(d.bazen) || 0;
       if (typeof d.keuze === 'string') p.keuze = d.keuze;
     }
   } catch (e) { /* niks bewaard */ }

@@ -113,8 +113,15 @@ class Instellingen extends Phaser.Scene {
         teken();
       });
     });
-    knop(this, 360, 395, 240, 52, 'Verder spelen', 0x3cc8bb, () => this.sluit());
+    // onderaan: verder spelen, of terug naar het hoofdscherm
+    knop(this, 280, 395, 190, 52, 'Verder spelen', 0x3cc8bb, () => this.sluit(), 22);
+    knop(this, 490, 395, 190, 52, '⌂ Hoofdscherm', 0xf2c14e, () => this.naarHoofdscherm(), 22);
     this.input.keyboard.on('keydown-ESC', () => this.sluit());
+  }
+  naarHoofdscherm() {
+    if (this.terug === 'Titel') { this.sluit(); return; }
+    this.scene.stop(this.terug);
+    this.scene.start('Titel');
   }
   sluit() {
     this.scene.resume(this.terug);
@@ -173,7 +180,7 @@ class Titel extends Phaser.Scene {
       fontFamily: FONT, fontSize: '17px', color: '#f3ead6', stroke: '#0a1028', strokeThickness: 5,
     }).setOrigin(0.5).setDepth(20);
     if (PROFIEL.flessen > 0 || PROFIEL.beste > 0) {
-      this.add.text(20, 14, `Beste: ${PROFIEL.beste} m   ·   ${PROFIEL.flessen} flesjes`, {
+      this.add.text(20, 14, `Beste: ${PROFIEL.beste} m   ·   ${PROFIEL.flessen} flesjes` + (PROFIEL.bazen ? `   ·   🏆 ${PROFIEL.bazen} bazen verslagen` : ''), {
         fontFamily: FONT, fontSize: '18px', fontStyle: 'bold', color: '#f2c14e', stroke: '#0a1028', strokeThickness: 5,
       }).setDepth(20);
     }

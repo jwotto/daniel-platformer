@@ -58,16 +58,21 @@ Daarna begint het opnieuw met Rivier 2, en alles is sterker.
 
 ### Monsters per regio
 
-Boven sommige monsters staat een tekentje: zo versla je hem. Raak je hem op een andere manier, dan ketst het af.
-⚔ = alleen slaan · ➶ = alleen schieten · ⤓ = alleen erbovenop springen (smash telt ook). Geen tekentje = alles mag.
+Elk monster heeft een eigen manier om hem te verslaan. Het tekentje boven zijn hoofd laat zien hoe: ⚔ alleen slaan, ➶ alleen schieten, ⤓ alleen erbovenop springen. Geen tekentje = alles mag.
 
 | Regio | Op de grond | In de lucht |
 |---|---|---|
-| 🐸 Rivier | kruiper | dwaallicht |
-| 🧊 IJsvlakte | **IJsklontje** ⚔ (breekt in 3 kleintjes) · **Pinguïn-ober** ➶ (gooit glazen bier, vangt je zwaard met zijn dienblad) | **Vriesvlokje** ➶ (zigzagt en laat ijsscherven vallen) |
-| ⛰️ Bergen | **Rollend fust** ⤓ (rolt op je af) | **Hopvleermuis** ⚔ (hangt onder platforms en duikt op je af) |
-| 🌋 Vulkaan | **Lavalager** ➶ (ontploft als je te dichtbij komt) · **Brouwketel-golem** ⤓ (groot, stampt schokgolven) | **Vuurmot** ⚔ (vliegt rondjes om je heen) |
-| Overal, zeldzaam | **Gouden flesje met pootjes**: rent weg, vang hem voor een heel flesje! | |
+| 🐸 Rivier | kruiper | vliegende vis |
+| 🧊 IJsvlakte | IJsklontje ⚔ (breekt in 3), Pinguïn-ober ➶ (gooit glazen bier) | vliegende pinguïn ➶ (torpedo!) |
+| ⛰️ Bergen | Rollend fust ⤓ | adelaar ⚔ (duikt recht naar beneden) |
+| 🌋 Vulkaan | Lavalager ➶ (ontploft), Brouwketel-golem ⤓ (schokgolven) | pterodactyl ⤓ (scheert heen en weer) |
+| Overal, zeldzaam | Gouden flesje met pootjes: vang hem voor een heel flesje! | |
+
+Op sommige platforms liggen **spikes**: niet aanraken, ook niet als je erop springt!
+
+### Beloning na een eindbaas
+
+Versla je een eindbaas, dan krijg je flink wat flesjes (15, 23, 31, 39 …) en de eerste keer een **baas-skin met een kroon** (Padkoning, IJsbeer, Bokkenrijder, Drakendoder). Die skins kun je niet aan het rad winnen.
 
 ### Power-ups (winkel)
 

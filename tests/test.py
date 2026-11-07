@@ -11,8 +11,8 @@ Fouten in de game (de rode balk) tellen ook als FOUT.
 import http.server, os, socketserver, subprocess, sys, tempfile, threading, time, urllib.parse, shutil
 
 MAP = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ONDERDELEN = ['ronde', 'vallen', 'monsters', 'zwak', 'bazen', 'powerups', 'shop', 'kebab']
-TIJD = {'ronde': 40, 'vallen': 70, 'monsters': 70, 'bazen': 100, 'powerups': 40, 'shop': 30, 'zwak': 60, 'kebab': 20}
+ONDERDELEN = ['ronde', 'vallen', 'monsters', 'zwak', 'bazen', 'beloning', 'powerups', 'shop', 'spikes', 'kebab']
+TIJD = {'ronde': 40, 'vallen': 70, 'monsters': 70, 'bazen': 100, 'powerups': 40, 'shop': 30, 'zwak': 60, 'beloning': 40, 'kebab': 20, 'spikes': 20}
 uitslag = {}
 
 

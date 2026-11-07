@@ -96,6 +96,11 @@ const SKINS = [
   { id: 'duivel', naam: 'Rode Duivel', tuniek: ['#8a1a2a', '#d1495b'], mouw: '#b8343f', broek: '#2a0a10', fles: ['#ff6a4a', '#8a1a10'], etiket: '#0a1028', band: '#f2c14e' },
   { id: 'ijs', naam: 'IJskoud', tuniek: ['#6aa8d8', '#cfeaff'], mouw: '#9ccbec', broek: '#2c4387', fles: ['#e8f6ff', '#7ab8e0'], etiket: '#2c4387', band: '#3cc8bb' },
   { id: 'roze', naam: 'Roze Rosé', tuniek: ['#c04a8a', '#ff8ac8'], mouw: '#e070aa', broek: '#4a1a3a', fles: ['#ffb0d8', '#c0508a'], etiket: '#fff6fb', band: '#7a2a5a' },
+  // baas-skins: alleen te winnen door die eindbaas te verslaan (met een gouden kroon)
+  { id: 'padkoning', naam: 'Padkoning', baas: 'pad', kroon: true, tuniek: ['#2f6b2a', '#7cc45a'], mouw: '#5fae4e', broek: '#1f3a1a', fles: ['#9ad86e', '#2f6b2a'], etiket: '#f2c14e', band: '#d1495b' },
+  { id: 'ijsbeer', naam: 'IJsbeer', baas: 'beer', kroon: true, tuniek: ['#cfe0f0', '#ffffff'], mouw: '#e8f0f8', broek: '#6a8ab8', fles: ['#ffffff', '#9ac0e0'], etiket: '#1b2f6b', band: '#3cc8bb' },
+  { id: 'bokkenrijder', naam: 'Bokkenrijder', baas: 'geit', kroon: true, tuniek: ['#6b4a2a', '#b8864a'], mouw: '#9a6a3a', broek: '#3a2a1a', fles: ['#c98a4a', '#6b3a12'], etiket: '#f3ead6', band: '#2c4387' },
+  { id: 'drakendoder', naam: 'Drakendoder', baas: 'draak', kroon: true, tuniek: ['#2a0a10', '#8a1a2a'], mouw: '#5a1020', broek: '#0d0f1e', fles: ['#ff6a2c', '#5a0a06'], etiket: '#f2c14e', band: '#0a1028' },
   { id: 'zombie', naam: 'Zombie', tuniek: ['#4a5a3a', '#7a8a5a'], mouw: '#6a7a4a', broek: '#3a2a2a', fles: ['#a0581c', '#4a2a0a'], etiket: '#c8c8a0', band: '#5a8a3a', huid: '#9cc48a' },
 ];
 function skinVan(id) { return SKINS.find(k => k.id === id) || SKINS[0]; }
@@ -199,6 +204,12 @@ function tekenSpeler(ctx, pose, skin) {
   ctx.beginPath();
   for (let i = 0; i <= 8; i++) { const xx = 25 + i; ctx.lineTo(xx, i % 2 ? -12.2 : -14.6); }
   ctx.lineTo(33, -11); ctx.lineTo(25, -11); ctx.closePath(); ctx.fill(); ctx.stroke();
+  // baas-skin: een gouden kroontje op de fles
+  if (K.kroon) {
+    ctx.fillStyle = '#ffd24a'; ctx.strokeStyle = INKT; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.moveTo(21, 3); ctx.lineTo(21, -5); ctx.lineTo(24.5, -1); ctx.lineTo(29, -8); ctx.lineTo(33.5, -1); ctx.lineTo(37, -5); ctx.lineTo(37, 3); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#d1495b'; ctx.beginPath(); ctx.arc(29, 0, 1.8, 0, TAU); ctx.fill();
+  }
   // rand van de muts over het voorhoofd
   ctx.fillStyle = K.fles[1]; ctx.lineWidth = 2;
   rondRect(ctx, 17.5, 18.5, 23, 4.5, 2.2); ctx.fill(); ctx.stroke();
@@ -533,6 +544,18 @@ function platTex(scene, id, w) {
     krul(ctx, 14, h - 9, 5, 1); krul(ctx, w - 14, h - 9, 5, -1);
     ctx.strokeStyle = 'rgba(255,255,255,.4)';
     ctx.beginPath(); ctx.moveTo(12, 5); ctx.lineTo(w * 0.45, 5); ctx.stroke();
+  });
+}
+
+// spikes: een rij metalen punten, w breed
+function spikesTex(scene, w) {
+  return tekenTextuur(scene, 'spikes_' + w, w, 18, ctx => {
+    for (let x = 0; x < w; x += 15) {
+      const g = ctx.createLinearGradient(x, 0, x + 15, 0);
+      g.addColorStop(0, '#6a7488'); g.addColorStop(0.5, '#e6ecf5'); g.addColorStop(1, '#6a7488');
+      ctx.fillStyle = g; ctx.strokeStyle = INKT; ctx.lineWidth = 1.8;
+      ctx.beginPath(); ctx.moveTo(x + 1, 17); ctx.lineTo(x + 7.5, 1); ctx.lineTo(x + 14, 17); ctx.closePath(); ctx.fill(); ctx.stroke();
+    }
   });
 }
 

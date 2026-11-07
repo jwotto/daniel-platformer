@@ -286,7 +286,78 @@ function tekenVuurmot(ctx) {
   ctx.restore();
 }
 
+// Rivier (vliegt): een goudvis met vinnen als vleugels
+function tekenVliegvis(ctx) {
+  ctx.save(); ctx.translate(28, 22);
+  ctx.strokeStyle = INKT; ctx.lineWidth = 2;
+  ctx.fillStyle = 'rgba(169,220,255,.85)';
+  for (const z of [-1, 1]) { ctx.beginPath(); ctx.moveTo(-2, 0); ctx.quadraticCurveTo(6, z * 22, 18, z * 18); ctx.quadraticCurveTo(10, z * 6, 6, 0); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+  const g = ctx.createLinearGradient(0, -10, 0, 10);
+  g.addColorStop(0, '#ffb04a'); g.addColorStop(1, '#d1495b');
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.ellipse(-4, 0, 16, 10, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(24, -10); ctx.lineTo(22, 0); ctx.lineTo(24, 10); ctx.closePath(); ctx.fill(); ctx.stroke();
+  boosOog(ctx, -12, -2, 3.4, INKT, true);
+  ctx.beginPath(); ctx.arc(-19, 3, 2, 0, TAU); ctx.stroke();
+  ctx.restore();
+}
+
+// IJsvlakte (vliegt): een pinguïn zonder vleugels, met een vliegbril en snelheidsstreepjes
+function tekenVliegpinguin(ctx) {
+  ctx.save();
+  ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 2.5;
+  for (const y of [14, 22, 30]) { ctx.beginPath(); ctx.moveTo(42, y); ctx.lineTo(56, y); ctx.stroke(); }
+  ctx.translate(24, 22);
+  ctx.strokeStyle = INKT; ctx.lineWidth = 2.2;
+  ctx.fillStyle = '#1a1f36'; ctx.beginPath(); ctx.ellipse(0, 0, 20, 12, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#f3ead6'; ctx.beginPath(); ctx.ellipse(-2, 4, 14, 7, 0, 0, TAU); ctx.fill();
+  ctx.fillStyle = '#ff9a2c'; ctx.beginPath(); ctx.moveTo(-19, -2); ctx.lineTo(-27, 0); ctx.lineTo(-19, 3); ctx.closePath(); ctx.fill(); ctx.stroke();
+  for (const fx of [16, 20]) { ctx.beginPath(); ctx.ellipse(fx, 9, 4, 2.2, 0.4, 0, TAU); ctx.fill(); ctx.stroke(); }
+  // vliegbril
+  ctx.fillStyle = '#8a4a1c'; ctx.fillRect(-14, -7, 18, 3);
+  ctx.fillStyle = '#9ad8ff'; ctx.lineWidth = 1.6;
+  for (const bx of [-12, -5]) { ctx.beginPath(); ctx.arc(bx, -5, 3.4, 0, TAU); ctx.fill(); ctx.stroke(); }
+  ctx.restore();
+}
+
+// Bergen (vliegt): een adelaar met gespreide vleugels
+function tekenAdelaar(ctx) {
+  ctx.save(); ctx.translate(38, 24);
+  ctx.strokeStyle = INKT; ctx.lineWidth = 2;
+  ctx.fillStyle = '#6b3a12';
+  for (const z of [-1, 1]) {
+    ctx.beginPath(); ctx.moveTo(z * 6, -2);
+    ctx.quadraticCurveTo(z * 22, -20, z * 36, -12);
+    for (let i = 0; i < 4; i++) ctx.lineTo(z * (34 - i * 6), -6 + i * 2 + (i % 2 ? 4 : 0));
+    ctx.lineTo(z * 8, 6); ctx.closePath(); ctx.fill(); ctx.stroke();
+  }
+  ctx.fillStyle = '#8a5a2a'; ctx.beginPath(); ctx.ellipse(0, 2, 10, 13, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#f3ead6'; ctx.beginPath(); ctx.arc(-4, -10, 7, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#f2c14e'; ctx.beginPath(); ctx.moveTo(-10, -11); ctx.lineTo(-17, -8); ctx.lineTo(-10, -6); ctx.closePath(); ctx.fill(); ctx.stroke();
+  boosOog(ctx, -6, -12, 2.2, INKT, true);
+  ctx.restore();
+}
+
+// Vulkaan (vliegt): een pterodactyl met een kam op zijn kop
+function tekenPtero(ctx) {
+  ctx.save(); ctx.translate(46, 26);
+  ctx.strokeStyle = INKT; ctx.lineWidth = 2;
+  ctx.fillStyle = '#8a2a3a';
+  for (const z of [-1, 1]) { ctx.beginPath(); ctx.moveTo(z * 4, -4); ctx.lineTo(z * 40, -18); ctx.quadraticCurveTo(z * 30, -2, z * 34, 8); ctx.quadraticCurveTo(z * 20, 2, z * 6, 8); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+  ctx.fillStyle = '#c84a4a'; ctx.beginPath(); ctx.ellipse(0, 2, 8, 12, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#c84a4a';
+  ctx.beginPath(); ctx.moveTo(-2, -10); ctx.lineTo(-24, -6); ctx.lineTo(-4, -4); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0, -12); ctx.lineTo(10, -24); ctx.lineTo(4, -8); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.arc(-2, -9, 5, 0, TAU); ctx.fill(); ctx.stroke();
+  boosOog(ctx, -4, -10, 2.2, '#f2c14e', true);
+  ctx.restore();
+}
+
 function maakMonsterTexturen(scene) {
+  tekenTextuur(scene, 'vliegvis', 56, 44, tekenVliegvis);
+  tekenTextuur(scene, 'vliegpinguin', 58, 44, tekenVliegpinguin);
+  tekenTextuur(scene, 'adelaar', 76, 46, tekenAdelaar);
+  tekenTextuur(scene, 'ptero', 92, 54, tekenPtero);
   tekenTextuur(scene, 'vriesvlok', 52, 52, tekenVriesvlok);
   tekenTextuur(scene, 'vuurmot', 56, 44, tekenVuurmot);
   tekenTextuur(scene, 'ijsscherf', 12, 22, ctx => {

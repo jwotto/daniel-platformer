@@ -340,15 +340,55 @@ class BaasDeel {
     PROFIEL.regio = Math.max(PROFIEL.regio, this.n + 1);
     PROFIEL.startRegio = this.n + 1;
     PROFIEL.ticket = false;
+    // de beloning: flink wat flesjes, en de eerste keer een baas-skin met een kroon
+    const flesjes = 15 + this.n * 8;
+    PROFIEL.flessen += flesjes;
+    PROFIEL.bazen = (PROFIEL.bazen || 0) + 1;
+    const skin = SKINS.find(k => k.baas === b.baas);
+    const nieuweSkin = skin && !PROFIEL.skins.includes(skin.id);
+    if (nieuweSkin) PROFIEL.skins.push(skin.id);
     bewaarProfiel();
-    const t = this.add.text(480, 200, `Gewonnen!\nOp naar ${levelNaam(this.n + 1)}!`, {
-      fontFamily: FONT_TITEL, fontSize: '48px', color: '#f2c14e', stroke: '#0a1028', strokeThickness: 8, align: 'center',
-    }).setOrigin(0.5).setScrollFactor(0).setDepth(150);
-    this.time.delayedCall(4000, () => {
+    this.toonBeloning(flesjes, nieuweSkin ? skin : null);
+    this.time.delayedCall(5500, () => {
       Geluid.effect('regio');
       // je upgrade blijft, want het is nog hetzelfde potje
       this.scene.start('Spel', { run: { level: this.n + 1, up: PROFIEL.up, harten: hartenMet(this.run.keuze), baas: false, keuze: this.run.keuze } });
     });
   }
 }
+// Het beloningsscherm na het verslaan van een eindbaas
+BaasDeel.prototype.toonBeloning = function (flesjes, skin) {
+  const vast = o => o.setScrollFactor(0).setDepth(160);
+  const bord = vast(this.add.graphics());
+  bord.fillStyle(0x0a1028, 0.88).fillRoundedRect(250, 90, 460, 330, 24);
+  bord.lineStyle(5, 0xf2c14e, 1).strokeRoundedRect(250, 90, 460, 330, 24);
+  const delen = [bord];
+  delen.push(vast(this.add.text(480, 112, 'Baas verslagen!', {
+    fontFamily: FONT_TITEL, fontSize: '44px', color: '#f2c14e', stroke: '#0a1028', strokeThickness: 8,
+  }).setOrigin(0.5, 0)));
+  const fles = vast(this.add.text(480, 180, '+' + flesjes + ' flesjes!', {
+    fontFamily: FONT, fontSize: '34px', fontStyle: 'bold', color: '#f3ead6', stroke: '#0a1028', strokeThickness: 6,
+  }).setOrigin(0.5, 0).setScale(0.2));
+  delen.push(fles);
+  this.tweens.add({ targets: fles, scale: 1, delay: 300, duration: 400, ease: 'Back.easeOut' });
+  if (skin) {
+    const img = vast(this.add.image(480, 372, 'skin_' + skin.id).setOrigin(0.5, 1).setScale(0.55).setAlpha(0));
+    const t = vast(this.add.text(480, 380, 'Nieuwe skin: ' + skin.naam + ' ♛', {
+      fontFamily: FONT, fontSize: '22px', fontStyle: 'bold', color: '#3cc8bb', stroke: '#0a1028', strokeThickness: 5,
+    }).setOrigin(0.5, 0).setAlpha(0));
+    delen.push(img, t);
+    this.tweens.add({ targets: [img, t], alpha: 1, delay: 900, duration: 400 });
+    this.tweens.add({ targets: img, y: 362, yoyo: true, repeat: -1, delay: 1300, duration: 500, ease: 'Sine.easeInOut' });
+  } else {
+    delen.push(vast(this.add.text(480, 270, 'Op naar ' + levelNaam(this.n + 1) + '!', {
+      fontFamily: FONT_TITEL, fontSize: '32px', color: '#3cc8bb', stroke: '#0a1028', strokeThickness: 6,
+    }).setOrigin(0.5)));
+  }
+  // confetti van shotjes en vonken
+  for (let i = 0; i < 40; i++) {
+    const c = vast(this.add.image(Phaser.Math.Between(80, 880), -20, i % 3 ? 'vonk' : 'shotje').setScale(i % 3 ? 2 : 1));
+    this.tweens.add({ targets: c, y: 560, angle: Phaser.Math.Between(-360, 360), delay: Phaser.Math.Between(0, 1500), duration: Phaser.Math.Between(1500, 2600), onComplete: () => c.destroy() });
+  }
+  this.time.delayedCall(1500, () => Geluid.effect('prijs'));
+};
 voegToeAanSpel(BaasDeel);
