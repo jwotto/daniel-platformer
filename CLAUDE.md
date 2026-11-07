@@ -16,6 +16,9 @@ Dit project is van Daniel, de neef van Jan-Willem. Daniel leert hier vibecoden: 
 - Spelgrootte 960×540, schaalt mee met het scherm (`Scale.FIT`). Moet altijd op mobiel werken: touch-knoppen staan in `js/besturing.js`.
 - Alle plaatjes worden met canvas-code getekend in `js/tekeningen.js`. Stijl: sprookjesachtig 2D, sierlijke vormen, donkere contouren (`INKT`), kleuren rood, goudgeel, turquoise en diepblauw.
 - Namen van variabelen en functies in het Nederlands, zodat Daniel ze snapt.
-- Testen zonder te spelen: `index.html#test` (de computer speelt zelf), `#winkel`, `#berg`. Fouten verschijnen als rode balk onderaan.
+- Geluid en muziek worden live gemaakt met Web Audio in `js/geluid.js` (geen geluidsbestanden).
+- Voortgang (flesjes, power-ups, regio's) wordt bewaard in localStorage via `PROFIEL` in `js/powerups.js`.
+- Testen zonder te spelen: `index.html#test` (de computer speelt zelf), `#baas0`–`#baas3`, `#ijs`, `#berg`, `#vulkaan`, `#winkel`, `#spel`. Test-adressen bewaren niks. Fouten verschijnen als rode balk onderaan.
+- Na elke wijziging: testen dat doodgaan → winkel → "Spelen" blijft werken (dat ging eerder mis).
 - Zet problemen en hun oplossing in de README onder "Problemen en oplossingen".
 - Commit na elke stap die werkt, met een korte Nederlandse commit-boodschap.

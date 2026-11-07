@@ -24,6 +24,22 @@ const THEMA_KLEUR = {
     kruiper: { lijf: ['#a9c4ee', '#3b4f8a'], stekel: '#eef6ff', oog: '#1b2f6b' },
     licht: { lijf: ['#8ff5e8', '#1f6f84'], staart: 'rgba(60,200,187,.75)', oog: '#f2c14e' },
   },
+  ijs: {
+    lucht: ['#06122e', '#14306a', '#3a7fb0', '#bfe8f5'],
+    ver: ['#7fa6d8', '#34508f'], mid: ['#5c86c0', '#26407a'], nabij: ['#3a5f98', '#1a2d5c'],
+    boom: '#14284e', steen: ['#7fb8e0', '#2f5a96'], top: '#f4fbff',
+    pilaar: ['#9fd8f0', '#3a6aa8'], kasteel: '#2a4a86', sneeuw: true,
+    kruiper: { lijf: ['#e8f4ff', '#6a8fc8'], stekel: '#9fe8ff', oog: '#d1495b' },
+    licht: { lijf: ['#d8f8ff', '#3a8fc0'], staart: 'rgba(160,230,255,.75)', oog: '#f2c14e' },
+  },
+  vulkaan: {
+    lucht: ['#1a0610', '#4a0f1c', '#a8321e', '#f2a03c'],
+    ver: ['#4a1a28', '#240a14'], mid: ['#3a1220', '#1c0610'], nabij: ['#2a0a14', '#12040a'],
+    boom: '#0e0308', steen: ['#4a2a2a', '#1c0e0e'], top: '#ff7a2c',
+    pilaar: ['#5a2a2a', '#240e0e'], kasteel: '#1c0810', sneeuw: false,
+    kruiper: { lijf: ['#3a3a44', '#16161c'], stekel: '#ff7a2c', oog: '#f2c14e' },
+    licht: { lijf: ['#ffd27a', '#c83a1c'], staart: 'rgba(255,122,44,.8)', oog: '#fff6d8' },
+  },
 };
 
 function tekenTextuur(scene, key, w, h, tekenFn) {
@@ -340,16 +356,32 @@ function tekenLucht(ctx, k, id) {
     ctx.fillStyle = `rgba(255,245,220,${0.25 + ((i * 7) % 5) / 8})`;
     ctx.beginPath(); ctx.arc((i * 397) % 960, (i * 151) % 280, (i % 3) * 0.5 + 0.5, 0, TAU); ctx.fill();
   }
-  const [mx, my, mr] = id === 'rivier' ? [720, 110, 42] : [260, 300, 70];
+  if (id === 'ijs') {
+    // noorderlicht
+    for (let b = 0; b < 3; b++) {
+      ctx.strokeStyle = ['rgba(60,200,187,.22)', 'rgba(120,255,180,.16)', 'rgba(160,120,255,.12)'][b];
+      ctx.lineWidth = 40 - b * 10;
+      ctx.beginPath();
+      for (let x = -20; x <= 980; x += 10) ctx.lineTo(x, 90 + b * 35 + Math.sin(x / 120 + b) * 30 + Math.sin(x / 47) * 8);
+      ctx.stroke();
+    }
+  }
+  const zon = { rivier: [720, 110, 42, '#fbe7b0', true], berg: [260, 300, 70, '#ffd27a', false],
+    ijs: [780, 80, 30, '#f4fbff', true], vulkaan: [700, 320, 90, '#ff9a3c', false] }[id];
+  const [mx, my, mr, kleur, sikkel] = zon;
   const gl = ctx.createRadialGradient(mx, my, mr * 0.4, mx, my, mr * 4);
-  gl.addColorStop(0, id === 'rivier' ? 'rgba(255,230,160,.5)' : 'rgba(255,170,120,.55)');
+  gl.addColorStop(0, id === 'vulkaan' || id === 'berg' ? 'rgba(255,170,120,.55)' : 'rgba(255,230,160,.45)');
   gl.addColorStop(1, 'rgba(255,230,160,0)');
   ctx.fillStyle = gl; ctx.fillRect(0, 0, 960, 540);
-  ctx.fillStyle = id === 'rivier' ? '#fbe7b0' : '#ffd27a';
+  ctx.fillStyle = kleur;
   ctx.beginPath(); ctx.arc(mx, my, mr, 0, TAU);
   // maansikkel: tweede cirkel andersom tekenen maakt er een gat in
-  if (id === 'rivier') ctx.arc(mx + 17, my - 10, mr * 0.92, 0, TAU, true);
+  if (sikkel) ctx.arc(mx + mr * 0.4, my - mr * 0.24, mr * 0.92, 0, TAU, true);
   ctx.fill();
+  if (id === 'vulkaan') {
+    ctx.fillStyle = 'rgba(20,6,10,.35)';
+    for (const [cx, cy, rx] of [[200, 120, 200], [600, 80, 240], [880, 160, 160]]) { ctx.beginPath(); ctx.ellipse(cx, cy, rx, rx * 0.22, 0, 0, TAU); ctx.fill(); }
+  }
   ctx.fillStyle = 'rgba(255,255,255,.06)';
   for (const [cx, cy, rx] of [[150, 90, 120], [520, 60, 160], [860, 200, 110]]) {
     ctx.beginPath(); ctx.ellipse(cx, cy, rx, rx * 0.18, 0, 0, TAU); ctx.fill();
@@ -393,9 +425,20 @@ function tekenAchtergronden(scene, id) {
   const k = THMA(id);
   tekenTextuur(scene, 'lucht_' + id, 960, 540, ctx => tekenLucht(ctx, k, id));
   tekenTextuur(scene, 'ver_' + id, 2048, 512, ctx => {
-    const golven = id === 'rivier' ? [[3, 45, 0.3], [7, 22, 1.2], [17, 8, 2]] : [[3, 75, 0.5], [8, 32, 1.1], [19, 10, 2.4]];
+    const golven = id === 'rivier' ? [[3, 45, 0.3], [7, 22, 1.2], [17, 8, 2]]
+      : id === 'vulkaan' ? [[2, 90, 0.9], [5, 30, 0.2], [13, 12, 1.4]] : [[3, 75, 0.5], [8, 32, 1.1], [19, 10, 2.4]];
     const basis = id === 'rivier' ? 250 : 270;
     tekenLaag(ctx, 2048, 512, basis, golven, k.ver, k.sneeuw);
+    if (id === 'vulkaan') {
+      // gloeiende lavastromen op de vulkanen
+      ctx.strokeStyle = 'rgba(255,122,44,.7)'; ctx.lineWidth = 4;
+      for (const x0 of [300, 1100, 1700]) {
+        const y0 = basis + rug(x0, 2048, golven);
+        ctx.beginPath(); ctx.moveTo(x0, y0);
+        for (let s = 1; s < 12; s++) ctx.lineTo(x0 + Math.sin(s) * 14, y0 + s * 18);
+        ctx.stroke();
+      }
+    }
     for (const x of [480, 1450]) tekenKasteel(ctx, x, basis + rug(x, 2048, golven) + 8, k.kasteel);
   });
   tekenTextuur(scene, 'mid_' + id, 2048, 256, ctx => tekenLaag(ctx, 2048, 256, 70, [[4, 30, 1], [9, 16, 2.2], [23, 6, 0.5]], k.mid, k.sneeuw));
@@ -410,6 +453,12 @@ function tekenAchtergronden(scene, id) {
         for (const [dx, dy, r] of [[0, -46, 22], [-16, -34, 16], [16, -34, 16], [0, -70, 15]]) {
           ctx.beginPath(); ctx.arc(x + dx * s, y + dy * s, r * s, 0, TAU); ctx.fill();
         }
+      } else if (id === 'vulkaan') {
+        // kale, puntige rotsen
+        ctx.beginPath();
+        ctx.moveTo(x - 20 * s, y + 4); ctx.lineTo(x - 6 * s, y - 50 * s); ctx.lineTo(x + 2 * s, y - 30 * s);
+        ctx.lineTo(x + 10 * s, y - 64 * s); ctx.lineTo(x + 22 * s, y + 4);
+        ctx.closePath(); ctx.fill();
       } else {
         for (let t = 0; t < 3; t++) {
           ctx.beginPath();
@@ -417,14 +466,20 @@ function tekenAchtergronden(scene, id) {
           ctx.lineTo(x, y - (40 + t * 22) * s);
           ctx.lineTo(x + (22 - t * 5) * s, y - t * 22 * s);
           ctx.closePath(); ctx.fill();
+          if (id === 'ijs') {
+            ctx.fillStyle = 'rgba(244,251,255,.85)';
+            ctx.beginPath(); ctx.moveTo(x - 8 * s, y - (28 + t * 22) * s); ctx.lineTo(x, y - (40 + t * 22) * s); ctx.lineTo(x + 8 * s, y - (28 + t * 22) * s); ctx.closePath(); ctx.fill();
+            ctx.fillStyle = k.boom;
+          }
         }
       }
     }
   });
   tekenTextuur(scene, 'bodem_' + id, 512, 64, ctx => {
-    if (id === 'rivier') {
+    if (id === 'rivier' || id === 'ijs' || id === 'vulkaan') {
+      const kl = { rivier: ['#2aa9a6', '#14285e'], ijs: ['#a8e4f5', '#2a5a96'], vulkaan: ['#ffb03c', '#a8200c'] }[id];
       const g = ctx.createLinearGradient(0, 0, 0, 64);
-      g.addColorStop(0, '#2aa9a6'); g.addColorStop(1, '#14285e');
+      g.addColorStop(0, kl[0]); g.addColorStop(1, kl[1]);
       ctx.fillStyle = g; ctx.fillRect(0, 6, 512, 58);
       ctx.strokeStyle = 'rgba(230,255,250,.7)'; ctx.lineWidth = 2;
       ctx.beginPath();
@@ -493,8 +548,193 @@ function pilaarTex(scene, id, h) {
   });
 }
 
+// ---------- EINDBAZEN (kijken naar links) ----------
+function lijn(ctx, w) { ctx.strokeStyle = INKT; ctx.lineWidth = w || 3; }
+function ovaal(ctx, x, y, rx, ry, kleur, rot) {
+  ctx.fillStyle = kleur; ctx.beginPath(); ctx.ellipse(x, y, rx, ry, rot || 0, 0, TAU); ctx.fill(); ctx.stroke();
+}
+function schuim(ctx, punten) {
+  ctx.fillStyle = '#fffaf0'; lijn(ctx, 2);
+  for (const [x, y, r] of punten) { ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill(); ctx.stroke(); }
+}
+function kroonkurk(ctx, x, y, r) {
+  ctx.fillStyle = '#f2c14e'; lijn(ctx, 2.5);
+  ctx.beginPath();
+  for (let i = 0; i < 9; i++) { const xx = x - r + i * (2 * r / 8); ctx.lineTo(xx, y - (i % 2 ? r * 0.6 : r * 1.3)); }
+  ctx.lineTo(x + r, y); ctx.lineTo(x - r, y); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#d1495b'; ctx.beginPath(); ctx.arc(x, y - r * 0.45, r * 0.25, 0, TAU); ctx.fill();
+}
+function oog(ctx, x, y, r, iris) {
+  ovaal(ctx, x, y, r, r, '#fff');
+  ctx.fillStyle = iris || INKT; ctx.beginPath(); ctx.arc(x - r * 0.35, y + r * 0.1, r * 0.5, 0, TAU); ctx.fill();
+  ctx.fillStyle = INKT; ctx.beginPath(); ctx.arc(x - r * 0.4, y + r * 0.1, r * 0.25, 0, TAU); ctx.fill();
+}
+
+function tekenPad(ctx) {
+  ctx.save(); ctx.translate(90, 128); lijn(ctx);
+  ovaal(ctx, -56, -12, 30, 16, '#8a5a14'); ovaal(ctx, 56, -12, 30, 16, '#8a5a14');
+  const g = ctx.createRadialGradient(-10, -70, 10, 0, -44, 90);
+  g.addColorStop(0, '#f6c454'); g.addColorStop(1, '#9a5a14');
+  ovaal(ctx, 0, -46, 78, 46, g);
+  ctx.fillStyle = '#fff3d6'; ctx.beginPath(); ctx.ellipse(-8, -30, 48, 24, 0, 0, TAU); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.45)';
+  for (const [x, y, r] of [[30, -62, 5], [44, -44, 4], [14, -76, 3.5], [52, -64, 3]]) { ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill(); }
+  lijn(ctx, 3); ctx.beginPath(); ctx.moveTo(-74, -54); ctx.quadraticCurveTo(-30, -36, 18, -50); ctx.stroke();
+  ovaal(ctx, -40, -6, 15, 8, '#8a5a14'); ovaal(ctx, 16, -6, 15, 8, '#8a5a14');
+  schuim(ctx, [[-44, -84, 10], [-26, -92, 11], [-6, -94, 11], [12, -88, 10], [26, -80, 8]]);
+  oog(ctx, -44, -94, 14, '#3a6a1c'); oog(ctx, 8, -98, 14, '#3a6a1c');
+  kroonkurk(ctx, -18, -110, 18);
+  ctx.restore();
+}
+
+function tekenBeer(ctx) {
+  ctx.save(); ctx.translate(85, 148); lijn(ctx);
+  for (const x of [-34, -10, 30, 52]) ovaal(ctx, x, -14, 13, 16, '#dde9f6');
+  const g = ctx.createLinearGradient(0, -100, 0, 0);
+  g.addColorStop(0, '#ffffff'); g.addColorStop(1, '#9fbede');
+  ovaal(ctx, 12, -56, 64, 44, g);
+  ovaal(ctx, -64, -114, 10, 10, '#eef4fb'); ovaal(ctx, -30, -118, 10, 10, '#eef4fb');
+  ovaal(ctx, -48, -92, 32, 30, '#f4f8fd');
+  ovaal(ctx, -74, -82, 15, 11, '#e2ecf7');
+  ctx.fillStyle = INKT; ctx.beginPath(); ctx.ellipse(-86, -86, 5, 4, 0, 0, TAU); ctx.fill();
+  ctx.beginPath(); ctx.arc(-54, -100, 4, 0, TAU); ctx.fill();
+  ctx.beginPath(); ctx.arc(-34, -102, 4, 0, TAU); ctx.fill();
+  // rode sjaal
+  ctx.fillStyle = '#d1495b'; lijn(ctx, 2.5);
+  ctx.beginPath(); ctx.moveTo(-60, -66); ctx.quadraticCurveTo(-30, -54, -14, -70); ctx.lineTo(-12, -60); ctx.quadraticCurveTo(-30, -44, -62, -56); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillRect(-22, -62, 10, 28); ctx.strokeRect(-22, -62, 10, 28);
+  // bevroren bierpul
+  ctx.save(); ctx.translate(-96, -52);
+  ctx.strokeStyle = '#bfe8f5'; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(26, 14, 9, -1.4, 1.4); ctx.stroke();
+  const bg = ctx.createLinearGradient(0, 0, 0, 34); bg.addColorStop(0, '#f6b544'); bg.addColorStop(1, '#b8651a');
+  ctx.fillStyle = bg; lijn(ctx, 2.5); rondRect(ctx, 0, 0, 26, 34, 4); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = 'rgba(200,240,255,.6)'; ctx.fillRect(3, 4, 5, 26);
+  schuim(ctx, [[4, 0, 6], [13, -3, 7], [22, 0, 6]]);
+  ctx.restore();
+  ovaal(ctx, -76, -44, 13, 11, '#f4f8fd');
+  ctx.restore();
+}
+
+function tekenGeit(ctx) {
+  ctx.save(); ctx.translate(85, 148); lijn(ctx);
+  for (const x of [-30, -14, 26, 42]) {
+    ctx.fillStyle = '#6a4424'; ctx.fillRect(x - 5, -44, 10, 40); ctx.strokeRect(x - 5, -44, 10, 40);
+    ovaal(ctx, x, -3, 7, 4, '#2a1a10');
+  }
+  const g = ctx.createLinearGradient(0, -90, 0, -30);
+  g.addColorStop(0, '#e0b87a'); g.addColorStop(1, '#8a5a30');
+  ovaal(ctx, 8, -62, 58, 30, g);
+  // biervat op de rug
+  ctx.fillStyle = '#8a4a1c'; rondRect(ctx, -12, -116, 56, 36, 12); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#f2c14e';
+  for (const x of [-2, 30]) { ctx.fillRect(x, -116, 6, 36); ctx.strokeRect(x, -116, 6, 36); }
+  ctx.fillStyle = '#b8862a'; ctx.fillRect(44, -102, 10, 6); ctx.strokeRect(44, -102, 10, 6);
+  // nek en kop
+  ctx.fillStyle = '#c89a62'; ctx.beginPath(); ctx.moveTo(-40, -70); ctx.lineTo(-56, -100); ctx.lineTo(-36, -108); ctx.lineTo(-22, -76); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ovaal(ctx, -56, -104, 22, 15, '#d8aa70', -0.3);
+  ovaal(ctx, -74, -96, 10, 8, '#e8c08a', -0.3);
+  ctx.fillStyle = '#fffaf0'; ctx.beginPath(); ctx.moveTo(-74, -90); ctx.lineTo(-64, -66); ctx.lineTo(-58, -92); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ovaal(ctx, -54, -110, 6, 5, '#f2c14e');
+  ctx.fillStyle = INKT; ctx.fillRect(-58, -111, 8, 2.5);
+  // gouden krulhoorns
+  for (const [x, r] of [[-46, 18], [-36, 16]]) {
+    ctx.strokeStyle = INKT; ctx.lineWidth = 10; ctx.beginPath(); ctx.arc(x + 8, -124, r, Math.PI * 0.9, Math.PI * 2.3); ctx.stroke();
+    ctx.strokeStyle = '#e8c070'; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(x + 8, -124, r, Math.PI * 0.9, Math.PI * 2.3); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function tekenDraak(ctx) {
+  ctx.save(); ctx.translate(110, 142); lijn(ctx);
+  // vleugels
+  for (const [dx, a] of [[30, 1], [0, 0.75]]) {
+    ctx.globalAlpha = a;
+    ctx.fillStyle = '#8e1f3c';
+    ctx.beginPath(); ctx.moveTo(dx, -80); ctx.lineTo(dx + 40, -128); ctx.lineTo(dx + 70, -118); ctx.lineTo(dx + 60, -90);
+    ctx.quadraticCurveTo(dx + 50, -76, dx + 30, -70); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = '#f2c14e'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(dx + 6, -80); ctx.lineTo(dx + 40, -124); ctx.moveTo(dx + 10, -78); ctx.lineTo(dx + 66, -116); ctx.stroke();
+    lijn(ctx);
+  }
+  ctx.globalAlpha = 1;
+  // staart
+  ctx.strokeStyle = INKT; ctx.lineWidth = 16; ctx.beginPath(); ctx.moveTo(60, -60); ctx.quadraticCurveTo(100, -40, 84, -10); ctx.stroke();
+  ctx.strokeStyle = '#c8321e'; ctx.lineWidth = 11; ctx.beginPath(); ctx.moveTo(60, -60); ctx.quadraticCurveTo(100, -40, 84, -10); ctx.stroke();
+  ctx.fillStyle = '#f2c14e'; lijn(ctx, 2); ctx.beginPath(); ctx.moveTo(78, -14); ctx.lineTo(84, 2); ctx.lineTo(92, -12); ctx.closePath(); ctx.fill(); ctx.stroke();
+  // lijf
+  const g = ctx.createLinearGradient(0, -100, 0, -40);
+  g.addColorStop(0, '#f0603c'); g.addColorStop(1, '#7a1424');
+  lijn(ctx); ovaal(ctx, 20, -66, 54, 30, g);
+  ctx.strokeStyle = '#f2c14e'; ctx.lineWidth = 3;
+  for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.arc(10 + i * 4, -66, 20 + i * 5, 1.9, 2.6); ctx.stroke(); }
+  // nek en kop
+  lijn(ctx); ctx.fillStyle = '#d8402a';
+  ctx.beginPath(); ctx.moveTo(-20, -80); ctx.quadraticCurveTo(-40, -100, -54, -96); ctx.lineTo(-48, -76); ctx.quadraticCurveTo(-32, -70, -18, -58); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ovaal(ctx, -64, -92, 30, 19, '#e8503c');
+  ovaal(ctx, -92, -86, 14, 10, '#e8503c');
+  ctx.fillStyle = '#fff'; for (const x of [-100, -92, -84]) { ctx.beginPath(); ctx.moveTo(x, -78); ctx.lineTo(x + 3, -71); ctx.lineTo(x + 6, -78); ctx.closePath(); ctx.fill(); }
+  ctx.fillStyle = '#f2c14e'; lijn(ctx, 2);
+  for (const x of [-60, -46]) { ctx.beginPath(); ctx.moveTo(x, -108); ctx.lineTo(x + 12, -132); ctx.lineTo(x + 8, -106); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+  ctx.save(); ctx.shadowColor = '#f2c14e'; ctx.shadowBlur = 10; ovaal(ctx, -68, -98, 7, 6, '#f2c14e'); ctx.restore();
+  ctx.fillStyle = INKT; ctx.fillRect(-72, -99, 7, 2.5);
+  // bierschuim druipt uit de bek
+  schuim(ctx, [[-104, -80, 5], [-98, -74, 4], [-104, -68, 3.5]]);
+  ctx.restore();
+}
+
+function tekenProjectielen(scene) {
+  tekenTextuur(scene, 'bubbel', 30, 30, ctx => {
+    const g = ctx.createRadialGradient(11, 11, 2, 15, 15, 14);
+    g.addColorStop(0, '#fffaf0'); g.addColorStop(0.6, 'rgba(246,181,68,.85)'); g.addColorStop(1, 'rgba(184,101,26,.9)');
+    ctx.fillStyle = g; lijn(ctx, 2); ctx.beginPath(); ctx.arc(15, 15, 13, 0, TAU); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(10, 10, 3.5, 0, TAU); ctx.fill();
+  });
+  tekenTextuur(scene, 'ijsblok', 28, 28, ctx => {
+    ctx.fillStyle = 'rgba(190,235,255,.9)'; lijn(ctx, 2.5); rondRect(ctx, 3, 3, 22, 22, 4); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(8, 8); ctx.lineTo(16, 8); ctx.moveTo(8, 8); ctx.lineTo(8, 16); ctx.stroke();
+  });
+  tekenTextuur(scene, 'ijspegel', 22, 50, ctx => {
+    const g = ctx.createLinearGradient(0, 0, 22, 0); g.addColorStop(0, '#9fd8f0'); g.addColorStop(0.5, '#f4fbff'); g.addColorStop(1, '#6aa8d8');
+    ctx.fillStyle = g; lijn(ctx, 2); ctx.beginPath(); ctx.moveTo(2, 2); ctx.lineTo(20, 2); ctx.lineTo(11, 48); ctx.closePath(); ctx.fill(); ctx.stroke();
+  });
+  tekenTextuur(scene, 'vat', 44, 44, ctx => {
+    ovaal(ctx, 22, 22, 19, 19, '#8a4a1c');
+    ctx.strokeStyle = '#f2c14e'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.arc(22, 22, 13, 0, TAU); ctx.stroke();
+    lijn(ctx, 2); ctx.beginPath(); ctx.moveTo(22, 4); ctx.lineTo(22, 40); ctx.moveTo(4, 22); ctx.lineTo(40, 22); ctx.stroke();
+    ovaal(ctx, 22, 22, 5, 5, '#f6b544');
+  });
+  tekenTextuur(scene, 'vuurbal', 34, 34, ctx => {
+    ctx.shadowColor = '#ff7a2c'; ctx.shadowBlur = 10;
+    const g = ctx.createRadialGradient(14, 14, 2, 17, 17, 14);
+    g.addColorStop(0, '#fff6d8'); g.addColorStop(0.5, '#ffb03c'); g.addColorStop(1, '#c8321e');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(17, 17, 13, 0, TAU); ctx.fill();
+  });
+  tekenTextuur(scene, 'golf', 46, 28, ctx => {
+    ctx.fillStyle = 'rgba(255,250,240,.95)'; lijn(ctx, 2);
+    ctx.beginPath(); ctx.moveTo(2, 26); ctx.quadraticCurveTo(6, 4, 22, 4); ctx.quadraticCurveTo(40, 4, 44, 26); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = 'rgba(246,181,68,.8)'; ctx.fillRect(6, 18, 34, 7);
+  });
+  tekenTextuur(scene, 'schaduw', 40, 12, ctx => {
+    ctx.fillStyle = 'rgba(209,73,91,.55)'; ctx.beginPath(); ctx.ellipse(20, 6, 18, 5, 0, 0, TAU); ctx.fill();
+  });
+}
+
 // Maakt alle vaste plaatjes één keer aan het begin
 function maakTexturen(scene) {
+  tekenTextuur(scene, 'baas_pad', 180, 132, tekenPad);
+  tekenTextuur(scene, 'baas_beer', 170, 152, tekenBeer);
+  tekenTextuur(scene, 'baas_geit', 170, 152, tekenGeit);
+  tekenTextuur(scene, 'baas_draak', 220, 152, tekenDraak);
+  tekenProjectielen(scene);
+  tekenTextuur(scene, 'tandwiel', 40, 40, ctx => {
+    ctx.fillStyle = 'rgba(10,16,40,.55)'; rondRect(ctx, 1, 1, 38, 38, 9); ctx.fill();
+    ctx.fillStyle = '#f3ead6';
+    ctx.beginPath();
+    for (let i = 0; i < 16; i++) { const a = i * TAU / 16, r = i % 2 ? 9 : 13; ctx.lineTo(20 + Math.cos(a) * r, 20 + Math.sin(a) * r); }
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#1b2f6b'; ctx.beginPath(); ctx.arc(20, 20, 4.5, 0, TAU); ctx.fill();
+  });
   for (const [key, pose] of Object.entries(POSES)) tekenTextuur(scene, key, 56, 72, ctx => tekenSpeler(ctx, pose));
   for (const id of Object.keys(THEMA_KLEUR)) {
     tekenTextuur(scene, 'kruiper_' + id, 70, 50, ctx => tekenKruiper(ctx, THMA(id).kruiper));
@@ -535,6 +775,14 @@ function maakTexturen(scene) {
     const g = ctx.createRadialGradient(5, 5, 0, 5, 5, 5);
     g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = g; ctx.fillRect(0, 0, 10, 10);
+  });
+  tekenTextuur(scene, 'volscherm', 40, 40, ctx => {
+    ctx.fillStyle = 'rgba(10,16,40,.55)';
+    rondRect(ctx, 1, 1, 38, 38, 9); ctx.fill();
+    ctx.strokeStyle = '#f3ead6'; ctx.lineWidth = 3;
+    for (const [x, y, dx, dy] of [[10, 10, 1, 1], [30, 10, -1, 1], [10, 30, 1, -1], [30, 30, -1, -1]]) {
+      ctx.beginPath(); ctx.moveTo(x, y + dy * 8); ctx.lineTo(x, y); ctx.lineTo(x + dx * 8, y); ctx.stroke();
+    }
   });
   tekenTextuur(scene, 'mist', 960, 540, ctx => {
     const g = ctx.createLinearGradient(0, 250, 0, 470);
