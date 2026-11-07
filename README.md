@@ -33,6 +33,14 @@ Een roguelike platformer van Daniel. Het is een HTML-game, gemaakt met [Phaser 3
 - Ga je dood, dan kom je in de **winkel**. Daar koop je power-ups met je flesjes. Alles wat je koopt blijft van jou.
 - In de winkel koop je ook een gevecht met de **eindbaas**. Dat is duur! Versla je hem, dan ga je door naar de volgende regio. Verlies je, dan mag je het gratis nog een keer proberen.
 - Regio's die je hebt vrijgespeeld kun je in de winkel kiezen als startplek.
+- Af en toe zweeft er een **kebabrol**. Eet je hem op, dan laat je een scheet en vlieg je heel hoog de lucht in!
+- Je held draagt een **bierfles als muts**.
+
+### Shop en skins
+
+Op het titelscherm zit de **Shop**. Daar draai je aan een rad en win je een nieuwe **skin**: andere kleren en een ander flesje op je hoofd. De eerste keer draaien kost 5 flesjes, daarna elke keer 5 meer (10, 15, 20 …). Je wint altijd een skin die je nog niet had. Bij "Jouw skins" tik je een skin aan om hem aan te trekken.
+
+Skins: Gewoon · Groene Fles · Goudkoning · Nachtridder · Rode Duivel · IJskoud · Roze Rosé · Zombie.
 
 ### Regio's en eindbazen
 
@@ -65,6 +73,7 @@ Elke power-up kun je meerdere keren kopen. Hij wordt dan beter én duurder.
 | `js/besturing.js` | toetsenbord en touch-knoppen |
 | `js/spel.js` | het level en de eindbaas-gevechten |
 | `js/schermen.js` | titelscherm, instellingen en winkel |
+| `js/shop.js` | de shop met het draairad en je skins |
 | `js/main.js` | zet alles aan |
 | `manifest.webmanifest`, `icoon-*.png` | zodat de game als app op je beginscherm kan |
 
@@ -75,6 +84,8 @@ Zet dit achter het adres van de game (je opgeslagen spel wordt dan niet aangeraa
 - `#baas0` t/m `#baas3`: meteen vechten tegen een eindbaas (de computer speelt)
 - `#ijs`, `#berg`, `#vulkaan`: meteen naar die regio
 - `#winkel`: meteen naar de winkel, met 60 flesjes
+- `#shop`: meteen naar de shop met het draairad, met 200 flesjes
+- `#kebab`: meteen spelen met een kebabrol voor je neus
 
 ## Online zetten
 

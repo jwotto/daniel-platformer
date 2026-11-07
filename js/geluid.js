@@ -84,6 +84,16 @@ const Geluid = (() => {
     smash: () => { toon(170, 38, 0.32, 'square', 0.4); ruisje(0.3, 'lowpass', 1500, 100, 0.55); },
     boem: () => { ruisje(0.45, 'lowpass', 3500, 120, 0.75); toon(130, 30, 0.35, 'square', 0.3); },
     koop: () => rijtje([1047, 1568], 0.07, 'square', 0.22),
+    // een lange, flubberige scheet en dan een raket-zoef omhoog
+    scheet: () => {
+      if (!ctx) return;
+      const t = ctx.currentTime;
+      for (let i = 0; i < 12; i++) toon(120 - i * 5 + Math.random() * 25, 60, 0.07, 'sawtooth', 0.4, sfx, t + i * 0.045);
+      ruisje(0.55, 'lowpass', 700, 120, 0.6, sfx, t);
+      toon(180, 1200, 0.45, 'square', 0.18, sfx, t + 0.4);
+    },
+    draai: () => toon(900, 700, 0.03, 'square', 0.12),
+    prijs: () => rijtje([523, 659, 784, 1047, 1319, 1568], 0.07, 'square', 0.24),
     nee: () => toon(110, 90, 0.18, 'square', 0.25),
     baasRaak: () => toon(160, 70, 0.1, 'sawtooth', 0.28),
     baasWeg: () => rijtje([392, 523, 659, 784, 1047, 784, 1047, 1319], 0.08, 'square', 0.25),

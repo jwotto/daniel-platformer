@@ -35,6 +35,7 @@ class Spel extends Phaser.Scene {
     this.vijanden = this.physics.add.group();
     this.pijlen = this.physics.add.group({ allowGravity: false });
     this.shotjes = this.physics.add.group();
+    this.kebabs = this.physics.add.group({ allowGravity: false });
     this.kogels = this.physics.add.group();
     this.decor = this.add.group();
 
@@ -61,6 +62,7 @@ class Spel extends Phaser.Scene {
       const start = this.maakPlatform(-40, 420, 560);
       this.genX = start.x + start.displayWidth;
       this.genereer(1500);
+      if (this.run.kebab) this.maakKebab(320, 380); // test: #kebab
     }
 
     // wie botst met wie
@@ -72,6 +74,7 @@ class Spel extends Phaser.Scene {
     this.physics.add.collider(this.shotjes, this.pilaren);
     this.physics.add.overlap(this.speler, this.vijanden, (sp, v) => this.spelerRaakt(v));
     this.physics.add.overlap(this.speler, this.shotjes, (sp, s) => this.pakShotje(s));
+    this.physics.add.overlap(this.speler, this.kebabs, (sp, k) => this.eetKebab(k));
     this.physics.add.overlap(this.speler, this.kogels, (sp, k) => this.kogelRaakt(k));
     this.physics.add.overlap(this.pijlen, this.vijanden, (p, v) => this.pijlRaakt(p, v));
     this.physics.add.overlap(this.pijlen, this.pilaren, p => this.pijlStop(p));
@@ -180,6 +183,8 @@ class Spel extends Phaser.Scene {
     const vijandKans = Math.min(0.85, 0.3 + 0.12 * L);
     if (w >= 170 && Math.random() < vijandKans) this.maakKruiper(x + w / 2, y, x, x + w);
     if (Math.random() < Math.min(0.7, 0.2 + 0.1 * L)) this.maakDwaallicht(x + w / 2, Phaser.Math.Between(110, Math.max(130, y - 110)));
+    // af en toe een kebabrol
+    if (this.genX > 1200 && Math.random() < 0.07) this.maakKebab(x + w * 0.75, y - 40);
     if (Math.random() < 0.3) this.rijShotjes(x + w / 2, y - 34, Phaser.Math.Between(2, 4));
     else if (Math.random() < 0.25 && y > 330) {
       // hoog bonusplatform: alleen te halen met dubbele sprong
@@ -243,7 +248,7 @@ class Spel extends Phaser.Scene {
     for (const grp of [this.platforms, this.pilaren]) {
       grp.getChildren().slice().forEach(o => { if (o.x + o.displayWidth < grens) o.destroy(); });
     }
-    for (const grp of [this.vijanden, this.shotjes]) {
+    for (const grp of [this.vijanden, this.shotjes, this.kebabs]) {
       grp.getChildren().slice().forEach(o => { if (o.x < grens || o.y > 640) o.destroy(); });
     }
     this.decor.getChildren().slice().forEach(o => { if (o.x < grens) o.destroy(); });
@@ -759,8 +764,38 @@ class Spel extends Phaser.Scene {
     });
   }
 
+  maakKebab(x, y) {
+    const k = this.kebabs.create(x, y, 'kebab').setDepth(8);
+    k.body.setSize(36, 24);
+    k.basisY = y;
+  }
+
+  // Kebab op: scheet laten en heel hoog de lucht in!
+  eetKebab(k) {
+    if (!k.active || this.dood) return;
+    k.destroy();
+    const sp = this.speler;
+    Geluid.effect('scheet');
+    this.popTekst('PRRRRT!');
+    // even harder omhoog mogen dan normaal
+    sp.body.maxVelocity.y = 1300;
+    sp.body.setVelocityY(-1250);
+    this.smashing = false; this.zweeft = false;
+    this.extraSprongen = this.run.up.dubbel;
+    this.time.delayedCall(1200, () => { if (sp.body) sp.body.maxVelocity.y = 1000; });
+    // scheetwolkjes onder je billen
+    for (let i = 0; i < 7; i++) {
+      const w = this.add.image(sp.x + Phaser.Math.Between(-10, 10), sp.y - 8, 'wolkje').setDepth(9).setScale(0.6);
+      this.tweens.add({
+        targets: w, x: w.x + Phaser.Math.Between(-45, 45), y: w.y + Phaser.Math.Between(10, 40),
+        scale: Phaser.Math.FloatBetween(1.4, 2.2), alpha: 0, duration: 900 + i * 60, onComplete: () => w.destroy(),
+      });
+    }
+  }
+
   shotjesUpdate() {
     const sp = this.speler;
+    this.kebabs.getChildren().forEach(k => { k.y = k.basisY + Math.sin(this.tijd * 2.5 + k.x) * 5; k.rotation = Math.sin(this.tijd * 2 + k.x) * 0.15; });
     this.shotjes.getChildren().forEach(s => {
       if (!s.active) return;
       const dx = sp.x - s.x, dy = (sp.y - 30) - s.y, d = Math.hypot(dx, dy);

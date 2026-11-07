@@ -59,7 +59,7 @@ function uitlegVan(p, niveau) { return p.uitleg[Math.min(niveau, p.uitleg.length
 // ---------- OPSLAAN ----------
 // Je flesjes, power-ups en regio's worden in de browser bewaard, ook als je doodgaat.
 const OPSLAG = 'flesje_profiel_v2';
-const TESTMODUS = ['#test', '#winkel', '#baas', '#ijs', '#berg', '#vulkaan', '#spel'].some(h => location.hash.startsWith(h));
+const TESTMODUS = ['#test', '#winkel', '#shop', '#kebab', '#baas', '#ijs', '#berg', '#vulkaan', '#spel'].some(h => location.hash.startsWith(h));
 
 function laadProfiel() {
   const p = { up: {}, flessen: 0, shotjes: 0, beste: 0, regio: 0, startRegio: 0, ticket: false, skin: 'standaard', skins: ['standaard'], draaien: 0 };

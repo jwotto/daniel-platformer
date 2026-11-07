@@ -65,6 +65,12 @@ class Boot extends Phaser.Scene {
       this.scene.start('Spel', { run: { level: PROFIEL.regio, up: PROFIEL.up, harten: 99, baas: true } });
     } else if (regios[h] !== undefined) {
       this.scene.start('Spel', { run: { level: regios[h], up: PROFIEL.up, harten: maxHarten(), baas: false } });
+    } else if (h === '#shop') {
+      PROFIEL.flessen = 200;
+      this.scene.start('Shop');
+    } else if (h === '#kebab') {
+      // meteen een kebabrol voor je neus
+      this.scene.start('Spel', { run: { level: 0, up: PROFIEL.up, harten: 99, baas: false, kebab: true } });
     } else if (h === '#winkel') {
       PROFIEL.flessen = 60; PROFIEL.regio = 1;
       this.scene.start('Winkel', { meters: 123, regio: 0, baas: false });
@@ -154,8 +160,15 @@ class Titel extends Phaser.Scene {
       this.scene.start('Spel', { run: nieuweRun() });
     };
     // de Start-knop: klik erop (of druk op spatie/Enter) om te beginnen
-    const startKnop = knop(this, 380, 414, 200, 56, '▶  Start', 0xf2c14e, begin);
+    const startKnop = knop(this, 270, 414, 200, 56, '▶  Start', 0xf2c14e, begin);
     for (const o of Object.values(startKnop)) o.setDepth(20);
+    // de Shop-knop: naar het draairad met skins
+    const shopKnop = knop(this, 490, 414, 200, 56, '🎡  Shop', 0x3cc8bb, () => {
+      if (this.gestart || this.scene.isPaused()) return;
+      this.gestart = true;
+      this.scene.start('Shop');
+    });
+    for (const o of Object.values(shopKnop)) o.setDepth(20);
     // de knop zachtjes laten kloppen, zodat je ziet dat je erop moet drukken
     this.tweens.add({ targets: [startKnop.g, startKnop.t], alpha: 0.75, yoyo: true, repeat: -1, duration: 650 });
     this.input.keyboard.on('keydown-SPACE', () => begin());

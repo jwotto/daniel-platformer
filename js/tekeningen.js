@@ -308,6 +308,31 @@ function tekenShotje(ctx) {
   ctx.beginPath(); ctx.moveTo(8, 9); ctx.lineTo(9, 20); ctx.stroke();
 }
 
+// Een kebabrol (dürüm): opgerold brood met vlees, sla en tomaat, onderin een papiertje
+function tekenKebab(ctx) {
+  ctx.save();
+  ctx.translate(23, 18); ctx.rotate(-0.35);
+  // brood
+  const bg = ctx.createLinearGradient(0, -9, 0, 9);
+  bg.addColorStop(0, '#f6dca0'); bg.addColorStop(1, '#c8924a');
+  ctx.fillStyle = bg; ctx.strokeStyle = INKT; ctx.lineWidth = 2;
+  rondRect(ctx, -19, -8, 34, 16, 8); ctx.fill(); ctx.stroke();
+  // bruine bakvlekjes
+  ctx.fillStyle = 'rgba(140,80,30,.6)';
+  for (const [x, y] of [[-10, -3], [-3, 3], [4, -4], [-14, 3]]) { ctx.beginPath(); ctx.arc(x, y, 1.4, 0, TAU); ctx.fill(); }
+  // vulling aan de open kant: sla, tomaat, vlees
+  ctx.lineWidth = 1.3;
+  ctx.fillStyle = '#5fae4e'; ctx.beginPath(); ctx.ellipse(16, -5, 4, 3, 0.4, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#8a4a1c'; ctx.beginPath(); ctx.ellipse(17, 0, 4.5, 4.5, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#d1495b'; ctx.beginPath(); ctx.arc(15.5, 5, 2.6, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#f3ead6'; ctx.beginPath(); ctx.arc(19.5, -3, 1.6, 0, TAU); ctx.fill();
+  // papiertje
+  ctx.fillStyle = '#f3ead6'; ctx.lineWidth = 1.6;
+  ctx.beginPath(); ctx.moveTo(-20, -9); ctx.lineTo(-8, -9); ctx.lineTo(-11, 9); ctx.lineTo(-20, 9); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#d1495b'; ctx.fillRect(-18, -2, 8, 3);
+  ctx.restore();
+}
+
 function tekenHart(ctx, vol) {
   ctx.save(); ctx.translate(14, 13); ctx.scale(0.55, 0.55);
   ctx.fillStyle = vol ? '#d1495b' : 'rgba(255,255,255,.18)';
@@ -791,6 +816,11 @@ function maakTexturen(scene) {
     tekenAchtergronden(scene, id);
   }
   tekenTextuur(scene, 'shotje', 24, 28, tekenShotje);
+  tekenTextuur(scene, 'kebab', 46, 34, tekenKebab);
+  tekenTextuur(scene, 'wolkje', 24, 24, ctx => {
+    ctx.fillStyle = 'rgba(150,170,70,.85)'; ctx.beginPath(); ctx.arc(12, 12, 11, 0, TAU); ctx.fill();
+    ctx.fillStyle = 'rgba(120,90,40,.6)'; ctx.beginPath(); ctx.arc(9, 10, 6, 0, TAU); ctx.fill();
+  });
   tekenTextuur(scene, 'hart', 28, 26, ctx => tekenHart(ctx, true));
   tekenTextuur(scene, 'hart_leeg', 28, 26, ctx => tekenHart(ctx, false));
   tekenTextuur(scene, 'fles_glas', 32, 78, ctx => { flesPad(ctx); ctx.fillStyle = 'rgba(20,30,70,.8)'; ctx.fill(); });
