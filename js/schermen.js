@@ -52,7 +52,7 @@ class Boot extends Phaser.Scene {
   create() {
     maakTexturen(this);
     const h = location.hash;
-    const regios = { '#ijs': 1, '#berg': 2, '#vulkaan': 3, '#grot': 4, '#savanne': 5 };
+    const regios = { '#ijs': 1, '#berg': 2, '#vulkaan': 3, '#grot': 4, '#savanne': 5, '#kroeg': 6, '#fabriek': 7, '#speeltuin': 8, '#maan': 9 };
     if (h === '#spel') {
       this.scene.start('Spel', { run: nieuweRun() });
     } else if (h === '#test') {
@@ -65,6 +65,8 @@ class Boot extends Phaser.Scene {
       this.scene.start('Spel', { run: { level: PROFIEL.regio, up: PROFIEL.up, harten: 99, baas: true } });
     } else if (regios[h] !== undefined) {
       this.scene.start('Spel', { run: { level: regios[h], up: PROFIEL.up, harten: maxHarten(), baas: false } });
+    } else if (h === '#prestaties') {
+      this.scene.start('Prestaties');
     } else if (h === '#shop') {
       PROFIEL.flessen = 200;
       this.scene.start('Shop');
@@ -194,15 +196,18 @@ class Titel extends Phaser.Scene {
       this.scene.start('Spel', { run: nieuweRun() });
     };
     // de Start-knop: klik erop (of druk op spatie/Enter) om te beginnen
-    const startKnop = knop(this, 270, 414, 200, 56, '▶  Start', 0xf2c14e, begin);
+    const startKnop = knop(this, 190, 414, 180, 56, '▶  Start', 0xf2c14e, begin);
     for (const o of Object.values(startKnop)) o.setDepth(20);
-    // de Shop-knop: naar het draairad met skins
-    const shopKnop = knop(this, 490, 414, 200, 56, '🎡  Shop', 0x3cc8bb, () => {
+    const naar = (scene) => () => {
       if (this.gestart || this.scene.isPaused()) return;
       this.gestart = true;
-      this.scene.start('Shop');
-    });
+      this.scene.start(scene);
+    };
+    // de Shop-knop (draairad met skins) en de Prestaties-knop
+    const shopKnop = knop(this, 390, 414, 180, 56, '🎡  Shop', 0x3cc8bb, naar('Shop'));
     for (const o of Object.values(shopKnop)) o.setDepth(20);
+    const prestKnop = knop(this, 590, 414, 180, 56, '🏆  Prestaties', 0xa9c4ee, naar('Prestaties'), 21);
+    for (const o of Object.values(prestKnop)) o.setDepth(20);
     // de knop zachtjes laten kloppen, zodat je ziet dat je erop moet drukken
     this.tweens.add({ targets: [startKnop.g, startKnop.t], alpha: 0.75, yoyo: true, repeat: -1, duration: 650 });
     this.input.keyboard.on('keydown-SPACE', () => begin());
@@ -277,6 +282,7 @@ class Winkel extends Phaser.Scene {
       const k = keuzeVan(PROFIEL.keuze);
       if (k.id) this.sub.setText(this.subTekst + '   ·   Volgende potje: ✦ ' + k.naam);
     } else this.toonKeuzes();
+    meldOpenPrestaties(this);
   }
 
   // Eerst kiezen: 1 van 3 upgrades voor je volgende potje
@@ -334,7 +340,10 @@ class Winkel extends Phaser.Scene {
       g: this.add.graphics(),
       naam: this.add.text(x + 12, y + 10, p ? p.naam : 'Eindbaas', { fontFamily: FONT_TITEL, fontSize: p && p.naam.length > 13 && !p.naam.includes(' ') ? '15px' : '18px', color: p ? '#f3ead6' : '#ff8a8a', wordWrap: { width: p ? w - 58 : w - 20 }, lineSpacing: -4 }),
       plaatje: p ? this.add.image(x + w - 24, y + 24, 'icoon_' + p.id).setScale(0.38) : null,
-      uitleg: this.add.text(x + 12, y + 60, '', { fontFamily: FONT, fontSize: '14px', color: '#a9b6d8', wordWrap: { width: w - 22 } }),
+      uitleg: this.add.text(x + 12, y + (p ? 70 : 60), '', { fontFamily: FONT, fontSize: '14px', color: '#a9b6d8', wordWrap: { width: w - 22 } }),
+      // links: welk niveau AAN staat (met pijltjes), rechts: wat je HEBT
+      aanT: p ? this.add.text(x + 36, y + 52, '', { fontFamily: FONT, fontSize: '14px', fontStyle: 'bold', color: '#3cc8bb' }).setOrigin(0.5) : null,
+      hebT: p ? this.add.text(x + w - 12, y + 52, '', { fontFamily: FONT, fontSize: '14px', fontStyle: 'bold', color: '#f2c14e' }).setOrigin(1, 0.5) : null,
       prijsT: this.add.text(x + w - 28, y + h - 8, '', { fontFamily: FONT, fontSize: '22px', fontStyle: 'bold', color: '#f2c14e' }).setOrigin(1, 1),
       icoon: this.add.image(x + w - 8, y + h - 8, 'fles_mini').setOrigin(1, 1).setScale(0.7),
     };
@@ -345,6 +354,20 @@ class Winkel extends Phaser.Scene {
     });
     this.lijst.add([kaart.g, kaart.naam, kaart.uitleg, kaart.prijsT, kaart.icoon, zone]);
     if (kaart.plaatje) this.lijst.add(kaart.plaatje);
+    if (p) {
+      this.lijst.add([kaart.aanT, kaart.hebT]);
+      // pijltjes om het niveau dat aan staat lager of hoger te zetten
+      const pijl = (dx, r) => {
+        const t = this.add.text(x + dx, y + 52, r < 0 ? '◀' : '▶', { fontFamily: FONT, fontSize: '16px', color: '#3cc8bb' }).setOrigin(0.5);
+        const z = this.add.zone(x + dx, y + 52, 26, 26).setInteractive({ useHandCursor: true }).on('pointerup', (ptr) => {
+          if (this.gesleept || this.kiest || ptr.y < WINKEL_BOVEN || ptr.y > WINKEL_ONDER) return;
+          this.zetAan(kaart, r);
+        });
+        this.lijst.add([t, z]);
+        return t;
+      };
+      kaart.pijlL = pijl(12, -1); kaart.pijlR = pijl(60, 1);
+    }
     return kaart;
   }
 
@@ -405,9 +428,24 @@ class Winkel extends Phaser.Scene {
       k.g.fillStyle(i < lvl ? 0x3cc8bb : 0x2c4387, 1).fillCircle(k.x + 18 + i * 15, k.y + k.h - 20, 5);
     }
     k.uitleg.setText(vol ? 'Helemaal vol!' : uitlegVan(k.p, lvl));
+    const aan = aanNiveau(k.p.id);
+    for (const o of [k.aanT, k.hebT, k.pijlL, k.pijlR]) o.setVisible(lvl > 0);
+    k.aanT.setText(aan === 0 ? 'uit' : 'aan ' + aan);
+    k.hebT.setText('heb ' + (vol ? 'MAX' : lvl));
+    k.pijlL.setAlpha(aan > 0 ? 1 : 0.25); k.pijlR.setAlpha(aan < lvl ? 1 : 0.25);
     k.prijsT.setText(vol ? 'MAX' : String(kost)).setColor(kan ? '#f2c14e' : '#5a6a9a');
     k.prijsT.setX(vol ? k.x + k.w - 12 : k.x + k.w - 28);
     k.icoon.setVisible(!vol).setAlpha(kan ? 1 : 0.4);
+  }
+
+  // een power-up lager (of weer hoger) zetten, zonder iets te verliezen
+  zetAan(k, r) {
+    const heb = PROFIEL.up[k.p.id], nieuw = Phaser.Math.Clamp(aanNiveau(k.p.id) + r, 0, heb);
+    if (nieuw === aanNiveau(k.p.id)) { Geluid.effect('nee'); return; }
+    PROFIEL.aan[k.p.id] = nieuw;
+    bewaarProfiel();
+    Geluid.effect('draai');
+    this.vernieuw(k);
   }
 
   // de baas van de regio waar je start (kies een eerdere regio om een verslagen baas nog eens te doen)
@@ -461,6 +499,9 @@ class Winkel extends Phaser.Scene {
       const lvl = PROFIEL.up[k.p.id], kost = prijs(k.p, lvl);
       if (lvl >= k.p.max || PROFIEL.flessen < kost) { this.schud(k); return; }
       PROFIEL.flessen -= kost; PROFIEL.up[k.p.id]++;
+      delete PROFIEL.aan[k.p.id]; // wat je net koopt staat meteen aan
+      statTel('koop');
+      checkPrestaties(this);
       this.gekocht.push({ id: k.p.id, kost });
     }
     bewaarProfiel();

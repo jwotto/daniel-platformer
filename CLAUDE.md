@@ -18,9 +18,9 @@ Dit project is van Daniel, de neef van Jan-Willem. Daniel leert hier vibecoden: 
 - Namen van variabelen en functies in het Nederlands, zodat Daniel ze snapt.
 - Geluid en muziek worden live gemaakt met Web Audio in `js/geluid.js` (geen geluidsbestanden).
 - Voortgang (flesjes, power-ups, regio's) wordt bewaard in localStorage via `PROFIEL` in `js/powerups.js`.
-- Testen zonder te spelen: `index.html#test` (de computer speelt zelf), `#baas0`–`#baas5`, `#ijs`, `#berg`, `#vulkaan`, `#grot`, `#savanne`, `#winkel`, `#shop`, `#kebab`, `#spel`. Test-adressen bewaren niks. Fouten verschijnen als rode balk onderaan.
-- Na elke wijziging: testen dat doodgaan → winkel → "Spelen" blijft werken (dat ging eerder mis).
+- Testen zonder te spelen: `index.html#test` (de computer speelt zelf), `#baas0`–`#baas9`, `#ijs`, `#berg`, `#vulkaan`, `#grot`, `#savanne`, `#kroeg`, `#fabriek`, `#speeltuin`, `#maan`, `#prestaties`, `#winkel`, `#shop`, `#kebab`, `#spel`. Test-adressen bewaren niks. Fouten verschijnen als rode balk onderaan.
+- Aan het eind van een blok: testen dat doodgaan → winkel → "Spelen" blijft werken (dat ging eerder mis); de test `ronde` doet dat.
 - Zet problemen en hun oplossing in de README onder "Problemen en oplossingen".
 - Commit na elke stap die werkt, met een korte Nederlandse commit-boodschap.
 - Online zetten gaat altijd met `./zet-online.sh` (niet met een losse `git push`). Dat script geeft alle bestanden een nieuw versienummer (`?v=...` in `index.html` en `versie.txt`), zodat browsers niet de oude versie uit hun cache laden. Bij het opstarten kijkt de game in `versie.txt` of er een nieuwere versie is en laadt dan zelf opnieuw.
-- Vaste speeltest: `python3 tests/test.py` (alle onderdelen) of `python3 tests/test.py ronde` (één onderdeel). Draai hem na elke wijziging, vóór je commit. Nieuwe functie? Voeg een onderdeel toe in `tests/speeltest.js` en `tests/test.py`.
+- Vaste speeltest: `python3 tests/test.py` (alle onderdelen) of `python3 tests/test.py ronde` (één onderdeel). Werkwijze van Jan-Willem: eerst alles bouwen, pas aan het eind van een blok alle tests draaien (dat gaat sneller). Nieuwe functie? Voeg een onderdeel toe in `tests/speeltest.js` en `tests/test.py`.

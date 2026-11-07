@@ -24,6 +24,8 @@ class Spel extends Phaser.Scene {
     this.mod = keuzeVan(this.run.keuze);
     this.maxH = hartenMet(this.run.keuze);
     this.shotRest = 0;
+    // voor de prestaties
+    this.potjeMonsters = 0; this.baasGeraakt = false; this.prestT = 1;
     // power-ups die per potje opladen
     const up0 = this.run.up;
     this.schilden = up0.schild || 0;
@@ -34,6 +36,7 @@ class Spel extends Phaser.Scene {
     // dus eerst leegmaken. Anders loopt het baasgevecht vast na een normaal potje (en andersom).
     this.baas = null; this.baasBalk = null; this.baasTekst = null;
     this.levelTekst = null; this.meterTekst = null;
+    this.donker = null; this.splat = null; this.straalG = null; this.tong = null;
     this.achtergrond = maakAchtergrond(this, this.reg.id);
 
     this.platforms = this.physics.add.staticGroup();
@@ -46,6 +49,13 @@ class Spel extends Phaser.Scene {
     this.pegels = this.physics.add.group({ allowGravity: false });
     // de zwaartekracht kan door de Lepelaar zijn uitgezet: altijd weer aanzetten
     this.physics.world.gravity.y = 1500;
+    // op de maan is de zwaartekracht laag: je springt veel hoger
+    if (this.reg.id === 'maan') this.physics.world.gravity.y = 760;
+    // regio-trucjes: bierplassen (kroeg), lopende banden (fabriek), trampolines (speeltuin)
+    this.plassen = this.physics.add.staticGroup();
+    this.trampolines = this.physics.add.staticGroup();
+    this.banden = [];
+    this.bandNu = 0; this.glad = 0;
     // grot: een dicht plafond (je kunt niet boven het scherm uit)
     this.plafondY = this.reg.id === 'grot' ? 70 : (this.baasModus ? 6 : null);
     if (this.reg.id === 'grot') this.plafond = this.add.tileSprite(0, 0, 960, 90, 'plafond_grot').setOrigin(0).setScrollFactor(0).setDepth(7);
@@ -85,7 +95,9 @@ class Spel extends Phaser.Scene {
     }
 
     // wie botst met wie
-    this.physics.add.collider(this.speler, this.platforms);
+    this.physics.add.collider(this.speler, this.platforms, (sp, p) => { if (p.band && sp.body.touching.down) this.bandNu = p.band; });
+    this.physics.add.overlap(this.speler, this.plassen, () => { this.glad = 0.15; });
+    this.physics.add.overlap(this.speler, this.trampolines, (sp, t) => this.opTrampoline(t));
     this.physics.add.collider(this.speler, this.pilaren);
     this.physics.add.collider(this.vijanden, this.platforms, null, v => v.loopt || (v.soort === 'baas' && !v.vliegt));
     this.physics.add.collider(this.vijanden, this.pilaren, null, v => v.soort === 'baas' && !v.vliegt);
@@ -107,11 +119,12 @@ class Spel extends Phaser.Scene {
     }).setDepth(12);
 
     this.besturing = new Besturing(this);
+    this.time.delayedCall(800, () => checkPrestaties(this));
     this.maakHud();
 
     Geluid.muziekAan();
     // liedje kiezen: Bierpolka voor Rivier en IJsvlakte, Bergmars voor Bergen en Vulkaan, Baaslied bij een eindbaas
-    const lied = this.baasModus ? 'baas' : (['rivier', 'ijs', 'savanne'].includes(this.reg.id) ? 'polka' : 'mars');
+    const lied = this.baasModus ? 'baas' : (['rivier', 'ijs', 'savanne', 'kroeg', 'speeltuin'].includes(this.reg.id) ? 'polka' : 'mars');
     Geluid.speelLied(lied, Math.min(30, rondeVan(this.n) * 10));
 
     const titel = this.baasModus ? this.reg.baasNaam : levelNaam(this.n);
@@ -188,6 +201,12 @@ class Spel extends Phaser.Scene {
     if (w >= 150 && this.genX > 1200 && Math.random() < 0.035) this.maakGoud(x + w * 0.3, y, x, x + w);
     // spikes op sommige platforms (niet helemaal aan het begin)
     if (w >= 200 && this.genX > 1400 && Math.random() < Math.min(0.3, 0.1 + 0.05 * L)) this.maakSpikes(x + w * 0.3, y, Math.min(90, w * 0.3));
+    // kroeg: gladde bierplassen
+    if (this.reg.id === 'kroeg' && w >= 160 && Math.random() < 0.45) this.maakPlas(x + Phaser.Math.Between(10, w - 90), y);
+    // fabriek: lopende banden
+    if (this.reg.id === 'fabriek' && Math.random() < 0.45) this.maakBand(p, Math.random() < 0.5 ? -1 : 1);
+    // speeltuin: trampolines
+    if (this.reg.id === 'speeltuin' && w >= 140 && Math.random() < 0.35) this.maakTrampoline(x + w * 0.65, y);
     // grot: stalactieten aan het plafond boven het platform
     if (this.reg.id === 'grot' && this.genX > 1000 && Math.random() < 0.45) this.maakPegel(x + Phaser.Math.Between(20, w - 20));
     // af en toe een kebabrol
@@ -212,6 +231,38 @@ class Spel extends Phaser.Scene {
       this.rijShotjes(x + 24, y - 205, 3);
     }
     this.genX = x + 48; this.genY = y;
+  }
+
+  // kroeg: een plas bier waar je op uitglijdt
+  maakPlas(x, y) {
+    const p = this.plassen.create(x, y + 4, 'plas').setOrigin(0, 1).setDepth(6);
+    p.body.setSize(76, 10).setOffset(2, -6);
+    p.refreshBody();
+  }
+
+  // fabriek: maak van een platform een lopende band
+  maakBand(p, richting) {
+    p.band = richting;
+    const b = this.add.tileSprite(p.x + 6, p.y + 2, p.displayWidth - 12, 10, 'band').setOrigin(0, 0).setDepth(6);
+    b.richting = richting; b.setFlipX(richting < 0);
+    this.decor.add(b);
+    this.banden.push(b);
+  }
+
+  // speeltuin: een trampoline op een platform
+  maakTrampoline(x, y) {
+    const t = this.trampolines.create(x, y + 1, 'trampoline').setOrigin(0.5, 1).setDepth(7);
+    t.body.setSize(52, 10).setOffset(6, 0);
+    t.refreshBody();
+  }
+
+  opTrampoline(t) {
+    const b = this.speler.body;
+    if (b.velocity.y < 0) return;
+    b.setVelocityY(-980);
+    this.extraSprongen = this.run.up.dubbel;
+    Geluid.effect('boing');
+    this.tweens.add({ targets: t, scaleY: 0.6, yoyo: true, duration: 90 });
   }
 
   // grot: een stalactiet aan het plafond
@@ -304,6 +355,7 @@ class Spel extends Phaser.Scene {
     }
     this.spikes.getChildren().slice().forEach(o => { if (o.x + o.displayWidth < grens) o.destroy(); });
     this.pegels.getChildren().slice().forEach(o => { if (o.x < grens || o.y > 640) o.destroy(); });
+    for (const grp of [this.plassen, this.trampolines]) grp.getChildren().slice().forEach(o => { if (o.x + o.displayWidth < grens) o.destroy(); });
     for (const grp of [this.vijanden, this.shotjes, this.kebabs]) {
       grp.getChildren().slice().forEach(o => { if (o.x < grens || o.y > 640) o.destroy(); });
     }
@@ -332,6 +384,15 @@ class Spel extends Phaser.Scene {
     this.schildBel.setScale(1 + Math.sin(this.tijd * 4) * 0.04);
     this.spelerUpdate(dt, inp);
     this.plafondUpdate();
+    // elke seconde: hoe ver ben je? (voor de meter-prestaties)
+    this.prestT -= dt;
+    if (this.prestT <= 0 && !this.baasModus) { this.prestT = 1; statMax('meters', this.meters()); checkPrestaties(this); }
+    // lopende band: duwt je mee
+    if (this.bandNu) this.speler.x += this.bandNu * 120 * dt;
+    this.bandNu = 0;
+    if (this.glad > 0) this.glad -= dt;
+    this.banden = this.banden.filter(b => b.active);
+    for (const b of this.banden) b.tilePositionX -= b.richting * 120 * dt;
     this.pegelsUpdate(dt);
     this.vijandenUpdate(dt);
     if (this.baasModus) this.baasUpdate(dt);
@@ -384,7 +445,7 @@ class Spel extends Phaser.Scene {
     } else {
       // lopen (op ijs glij je een beetje)
       if (this.muurLock <= 0) {
-        const grip = opGrond ? (this.th.id === 'ijs' ? 0.1 : 0.4) : 0.18;
+        const grip = opGrond ? (this.th.id === 'ijs' || this.glad > 0 ? 0.08 : 0.4) : 0.18;
         b.velocity.x = Phaser.Math.Linear(b.velocity.x, inp.x * LOOPSNELHEID * this.mod.loop, grip);
         if (Math.abs(inp.x) > 0.2) this.kijk = Math.sign(inp.x);
       }
@@ -603,6 +664,12 @@ class Spel extends Phaser.Scene {
       const my = v.y - (v.loopt ? v.displayHeight / 2 : 0);
       this.vonken.explode(16, v.x, my);
       this.dropShotjes(v.x, my, v.shots + (this.run.up.statiegeld || 0));
+      // tellen voor de prestaties
+      statTel('monsters');
+      this.potjeMonsters++; statMax('potjeMonsters', this.potjeMonsters);
+      if (bron === 'slash' || bron === 'pijl') statTel(bron);
+      if (bron === 'stamp' || bron === 'smash') statTel('stamp');
+      checkPrestaties(this);
       // herstelslok: na genoeg verslagen monsters een hartje terug
       this.verslagen++;
       const nodig = [0, 20, 12][this.run.up.slok || 0];
@@ -647,6 +714,7 @@ class Spel extends Phaser.Scene {
     k.destroy();
     const sp = this.speler;
     Geluid.effect('scheet');
+    statTel('kebab'); checkPrestaties(this);
     this.popTekst('PRRRRT!');
     // even harder omhoog mogen dan normaal
     sp.body.maxVelocity.y = 1300;
@@ -689,7 +757,8 @@ class Spel extends Phaser.Scene {
     this.shotRest -= heel;
     PROFIEL.shotjes += heel;
     if (PROFIEL.shotjes >= 10) {
-      while (PROFIEL.shotjes >= 10) { PROFIEL.shotjes -= 10; PROFIEL.flessen++; }
+      while (PROFIEL.shotjes >= 10) { PROFIEL.shotjes -= 10; PROFIEL.flessen++; statTel('flesVol'); statTel('flessenTotaal'); }
+      checkPrestaties(this);
       this.popTekst('Flesje vol!');
       Geluid.effect('flesVol');
       this.tweens.add({ targets: [this.flesGlas, this.flesBier, this.flesRand], scale: 1.25, yoyo: true, duration: 150 });
@@ -726,6 +795,7 @@ class Spel extends Phaser.Scene {
 
   schade(richting) {
     const b = this.speler.body;
+    if (this.baasModus) this.baasGeraakt = true;
     if (this.schilden > 0) {
       // de schuimbel vangt de klap op
       this.schilden--;
@@ -750,6 +820,7 @@ class Spel extends Phaser.Scene {
 
   valSchade() {
     if (this.dood) return;
+    statTel('plons');
     this.run.harten -= 1;
     this.cameras.main.shake(150, 0.01);
     this.cameras.main.flash(120, 209, 73, 91);
@@ -793,6 +864,8 @@ class Spel extends Phaser.Scene {
     Geluid.effect('gameOver');
     const meters = this.meters();
     PROFIEL.beste = Math.max(PROFIEL.beste, meters);
+    statTel('dood'); statMax('meters', meters);
+    checkPrestaties(null);
     bewaarProfiel();
     this.add.text(480, 230, 'Oei!', {
       fontFamily: FONT_TITEL, fontSize: '64px', color: '#d1495b', stroke: '#0a1028', strokeThickness: 8,

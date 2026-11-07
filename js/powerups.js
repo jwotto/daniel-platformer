@@ -77,6 +77,10 @@ const REGIOS = [
   { id: 'vulkaan', naam: 'Vulkaan', baas: 'draak', baasNaam: 'De Brouwdraak' },
   { id: 'grot', naam: 'Grot', baas: 'salamander', baasNaam: 'De Salamander' },
   { id: 'savanne', naam: 'Savanne', baas: 'lepelaar', baasNaam: 'De Lepelaar' },
+  { id: 'kroeg', naam: 'Kroeg', baas: 'kroegbaas', baasNaam: 'De Kroegbaas' },
+  { id: 'fabriek', naam: 'Fabriek', baas: 'machine', baasNaam: 'De Brouwmachine' },
+  { id: 'speeltuin', naam: 'Speeltuin', baas: 'clown', baasNaam: 'De Eenwielerclown' },
+  { id: 'maan', naam: 'Maan', baas: 'moederschip', baasNaam: 'Het Moederschip' },
 ];
 
 function regioVan(n) { return REGIOS[n % REGIOS.length]; }
@@ -121,10 +125,10 @@ function hartenMet(id) {
 // ---------- OPSLAAN ----------
 // Je flesjes, power-ups en regio's worden in de browser bewaard, ook als je doodgaat.
 const OPSLAG = 'flesje_profiel_v2';
-const TESTMODUS = ['#test', '#winkel', '#shop', '#kebab', '#baas', '#ijs', '#berg', '#vulkaan', '#grot', '#savanne', '#spel'].some(h => location.hash.startsWith(h));
+const TESTMODUS = ['#test', '#winkel', '#shop', '#kebab', '#baas', '#ijs', '#berg', '#vulkaan', '#grot', '#savanne', '#kroeg', '#fabriek', '#speeltuin', '#maan', '#prestaties', '#spel'].some(h => location.hash.startsWith(h));
 
 function laadProfiel() {
-  const p = { up: {}, flessen: 0, shotjes: 0, beste: 0, regio: 0, startRegio: 0, ticket: false, skin: 'standaard', skins: ['standaard'], draaien: 0, keuze: '', bazen: 0 };
+  const p = { up: {}, flessen: 0, shotjes: 0, beste: 0, regio: 0, startRegio: 0, ticket: false, skin: 'standaard', skins: ['standaard'], draaien: 0, keuze: '', bazen: 0, aan: {}, stats: {}, prestaties: [] };
   POWERUPS.forEach(x => { p.up[x.id] = 0; });
   if (TESTMODUS) return p;
   try {
@@ -140,6 +144,9 @@ function laadProfiel() {
       if (!p.skins.includes(p.skin)) p.skin = 'standaard';
       p.draaien = Number(d.draaien) || 0;
       p.bazen = Number(d.bazen) || 0;
+      if (d.stats && typeof d.stats === 'object') for (const [k, w] of Object.entries(d.stats)) if (typeof w === 'number') p.stats[k] = w;
+      if (Array.isArray(d.prestaties)) p.prestaties = d.prestaties.filter(x => typeof x === 'string');
+      if (d.aan && typeof d.aan === 'object') for (const k of Object.keys(p.up)) if (typeof d.aan[k] === 'number') p.aan[k] = d.aan[k];
       if (typeof d.keuze === 'string') p.keuze = d.keuze;
     }
   } catch (e) { /* niks bewaard */ }
@@ -152,13 +159,24 @@ function bewaarProfiel() {
   try { localStorage.setItem(OPSLAG, JSON.stringify(PROFIEL)); } catch (e) { /* lukt niet in privé-venster */ }
 }
 
-function maxHarten() { return 3 + PROFIEL.up.hart; }
+// Het niveau dat AAN staat (je kunt een power-up lager zetten dan wat je gekocht hebt)
+function aanNiveau(id) {
+  const heb = PROFIEL.up[id] || 0, aan = PROFIEL.aan[id];
+  return aan === undefined ? heb : Math.min(aan, heb);
+}
+function actieveUp() {
+  const up = {};
+  POWERUPS.forEach(p => { up[p.id] = aanNiveau(p.id); });
+  return up;
+}
+function maxHarten() { return 3 + aanNiveau('hart'); }
 
 // Een nieuw potje. Je gekozen upgrade geldt alleen voor dit potje, daarna is hij op.
 function nieuweRun(baas, baasRegio) {
   const level = baas ? (baasRegio !== undefined ? baasRegio : PROFIEL.regio) : Math.min(PROFIEL.startRegio, PROFIEL.regio);
   const keuze = PROFIEL.keuze || '';
   PROFIEL.keuze = '';
+  statTel('potjes');
   bewaarProfiel();
-  return { level, up: PROFIEL.up, harten: hartenMet(keuze), baas: !!baas, keuze };
+  return { level, up: actieveUp(), harten: hartenMet(keuze), baas: !!baas, keuze };
 }

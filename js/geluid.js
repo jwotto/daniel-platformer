@@ -96,6 +96,9 @@ const Geluid = (() => {
     lont: () => rijtje([1400, 1500, 1400, 1500, 1400, 1500, 1400, 1500], 0.09, 'square', 0.12),
     duik: () => toon(1200, 300, 0.25, 'sawtooth', 0.15),
     tink: () => toon(2200, 1800, 0.05, 'triangle', 0.18),
+    boing: () => toon(180, 760, 0.25, 'sine', 0.35),
+    laser: () => toon(1800, 300, 0.15, 'sawtooth', 0.14),
+    plop: () => toon(600, 1200, 0.08, 'square', 0.2),
     boer: () => {
       if (!ctx) return;
       const t = ctx.currentTime;

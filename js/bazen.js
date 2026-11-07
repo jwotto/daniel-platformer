@@ -15,6 +15,14 @@ const BAZEN = {
   salamander: { hp: 150, kracht: 1.6, woest: 'tong', aanvallen: ['kruip', 'tong', 'kruip', 'kruip', 'tong'], ritme: [0.3, 0.6, 0.3, 0.3, 1.2] },
   // elke 5 seconden geen zwaartekracht (dat regelt hij zelf); daartussen pikken en veren gooien
   lepelaar: { hp: 170, kracht: 1.7, woest: 'veren', aanvallen: ['pik', 'veren', 'pik'], ritme: [0.6, 0.6, 1.0] },
+  // tik-tak-tik-tak: altijd even lang
+  kroegbaas: { hp: 190, kracht: 1.75, woest: 'donker', aanvallen: ['pullen', 'flessen', 'pullen', 'donker'], ritme: [0.8, 0.8, 0.8, 0.8] },
+  // machine: tuf, tuf, tuf-tuf
+  machine: { hp: 210, kracht: 1.8, woest: 'pers', aanvallen: ['kurken', 'band', 'kurken', 'pers'], ritme: [1.0, 1.0, 0.5, 0.5] },
+  // circus: hop... hop-hop... hop
+  clown: { hp: 230, kracht: 1.9, woest: 'taart', aanvallen: ['rijden', 'jongleren', 'rijden', 'taart'], ritme: [0.5, 1.0, 0.5, 1.0] },
+  // bliep... bloep
+  moederschip: { hp: 260, kracht: 2.0, woest: 'straal', aanvallen: ['laser', 'minis', 'laser', 'straal'], ritme: [1.2, 0.6, 1.2, 0.6] },
   draak: { hp: 120, kracht: 1.45, woest: 'spiraal', aanvallen: ['vuur', 'spiraal', 'duik', 'lava', 'spiraal'], ritme: [1.4, 1.2, 1.0, 0.8, 0.6] },
 };
 
@@ -31,7 +39,7 @@ class BaasDeel {
     this.speler.setPosition(150, 468);
 
     const soort = this.reg.baas, info = BAZEN[soort];
-    const vliegt = soort === 'draak' || soort === 'salamander';
+    const vliegt = soort === 'draak' || soort === 'salamander' || soort === 'moederschip';
     const b = this.vijanden.create(vliegt ? 720 : 760, vliegt ? 150 : 468, 'baas_' + soort).setDepth(9);
     b.setOrigin(0.5, vliegt ? 0.5 : 1);
     const w = b.width, h = b.height;
@@ -44,6 +52,8 @@ class BaasDeel {
     if (vliegt) { b.body.setAllowGravity(false); b.body.setImmovable(true); }
     if (soort === 'salamander') { b.setOrigin(0.5); b.rand = 0; b.doelRand = 0.5; b.loopRichting = 1; b.status = 'kruip'; }
     if (soort === 'lepelaar') b.zwaarteT = 5;
+    if (soort === 'machine') { b.body.setImmovable(true); b.x = 800; }
+    this.arenaBand = 0;
     this.baas = b;
 
     const vast = o => o.setScrollFactor(0).setDepth(100);
@@ -97,9 +107,23 @@ class BaasDeel {
     }
     if (b.baas === 'salamander') { this.salamanderUpdate(b, dt, woede); return; }
     if (b.baas === 'lepelaar' && this.lepelaarZwaarte(b, dt)) return;
+    // licht uit: het gat in het donker volgt jou
+    if (this.donker && this.donker.visible) this.donker.setPosition(sp.x, sp.y - 30);
+    // moederschip: de trekstraal trekt je omhoog
+    if (b.status === 'straal' && this.straalG) {
+      this.straalG.setPosition(b.x, b.y + 20);
+      if (Math.abs(sp.x - b.x) < 70 && sp.y > b.y) sp.body.setVelocityY(Math.max(sp.body.velocity.y - 90, -300));
+    }
+    // machine: de vloer is een lopende band naar hem toe
+    if (this.arenaBand) sp.x += this.arenaBand * 140 * dt;
+    if (b.baas === 'machine') b.body.velocity.x = 0;
 
     if (b.vliegt) {
-      if (b.status !== 'duik' && b.status !== 'spiraal') {
+      if (b.status === 'straal') {
+        // moederschip: hangt boven je met zijn trekstraal
+        b.x += Phaser.Math.Clamp(sp.x - b.x, -260 * dt, 260 * dt);
+        b.y += (130 - b.y) * Math.min(1, dt * 3);
+      } else if (b.status !== 'duik' && b.status !== 'spiraal') {
         b.x = 480 + Math.sin(b.t * 0.6) * 300;
         b.y = 140 + Math.sin(b.t * 1.4) * 40;
       }
@@ -224,6 +248,108 @@ class BaasDeel {
       this.time.delayedCall(2100, () => {
         if (b.active && b.status === 'spiraal') { b.status = 'wacht'; b.timer = this.pauze(b); b.t = Math.asin(Phaser.Math.Clamp((b.x - 480) / 300, -1, 1)) / 0.6; }
       });
+    } else if (aanval === 'pullen') {
+      // schuift bierpullen over de vloer naar je toe
+      this.baasRoep('Rondje van de zaak!');
+      for (let i = 0; i < 3; i++) this.time.delayedCall(i * 300, () => {
+        if (!b.active) return;
+        const k = this.kogel('bierglas', b.x + naar * 50, 452, naar * (360 + i * 60), 0, 0);
+        k.golf = true; k.setScale(1.4);
+        Geluid.effect('dash');
+      });
+      klaar(1.4);
+    } else if (aanval === 'flessen') {
+      // gooit flessen die op de vloer in scherven springen
+      for (let i = 0; i < 3; i++) this.time.delayedCall(i * 250, () => {
+        if (!b.active) return;
+        const k = this.kogel('flesbom', b.x, b.y - 110, Phaser.Math.Clamp((sp.x - b.x) * 0.8, -380, 380) + Phaser.Math.Between(-80, 80), -480, 900);
+        k.splits = true;
+        Geluid.effect('schiet');
+      });
+      klaar(1.4);
+    } else if (aanval === 'donker') {
+      // "Laatste ronde!": het licht gaat uit en hij stormt op je af
+      this.baasRoep('Laatste ronde! Licht uit!');
+      if (!this.donker) this.donker = this.add.image(0, 0, 'donker').setScale(2).setDepth(95).setScrollFactor(0);
+      this.donker.setVisible(true).setAlpha(0);
+      this.tweens.add({ targets: this.donker, alpha: 1, duration: 300 });
+      this.time.delayedCall(3000, () => { if (this.donker) this.tweens.add({ targets: this.donker, alpha: 0, duration: 400, onComplete: () => this.donker.setVisible(false) }); });
+      b.status = 'rent';
+      b.setFlipX(naar > 0);
+      b.body.setVelocityX(naar * 380 * Math.min(1.5, woede));
+    } else if (aanval === 'kurken') {
+      // spuit een boog van kroonkurken
+      for (let i = 0; i < 8; i++) {
+        const hoek = -Math.PI / 2 + naar * (0.3 + i * 0.12);
+        this.kogel('kurkje', b.x + naar * 40, b.y - 120, Math.cos(hoek) * 420, Math.sin(hoek) * 420, 900).setScale(1.4);
+      }
+      Geluid.effect('tink');
+      klaar(1.2);
+    } else if (aanval === 'band') {
+      // de hele vloer wordt een lopende band naar de machine toe
+      this.baasRoep('Lopende band!');
+      this.arenaBand = Math.sign(b.x - sp.x) || 1;
+      this.time.delayedCall(3200, () => { this.arenaBand = 0; });
+      klaar(3.2);
+    } else if (aanval === 'pers') {
+      // een enorme pers komt naar beneden waar jij staat
+      this.baasRoep('De Pers!');
+      for (let i = 0; i < 2; i++) {
+        const x = i === 0 ? sp.x : Phaser.Math.Clamp(sp.x + Phaser.Math.Between(-200, 200), 80, 880);
+        this.time.delayedCall(i * 700, () => this.waarschuwing(x, 0.9, () => {
+          const k = this.kogel('persblok', x, -40, 0, 1100, 0); k.golf = true; k.leeft = 0.9;
+          this.time.delayedCall(420, () => { this.cameras.main.shake(160, 0.012); Geluid.effect('smash'); });
+        }));
+      }
+      klaar(2.6);
+    } else if (aanval === 'rijden') {
+      // op de eenwieler heen en weer door de arena
+      this.baasRoep('Eenwieler!');
+      b.status = 'glijdt'; b.muren = 0; b.richting = naar;
+      b.glijSnelheid = 460 * Math.min(1.4, woede);
+      b.setFlipX(naar > 0);
+      Geluid.effect('dash');
+    } else if (aanval === 'jongleren') {
+      // gooit stuiterballen
+      for (let i = 0; i < 3; i++) this.time.delayedCall(i * 220, () => {
+        if (!b.active) return;
+        const k = this.kogel('bal', b.x, b.y - 120, naar * (180 + i * 90), -420, 1000);
+        k.stuiter = 3;
+        Geluid.effect('boing');
+      });
+      klaar(1.3);
+    } else if (aanval === 'taart') {
+      // een taart recht in je gezicht!
+      this.baasRoep('Taart in je gezicht!');
+      const k = this.kogel('taart', b.x + naar * 40, b.y - 110, Phaser.Math.Clamp((sp.x - b.x) * 1.1, -520, 520), -380, 900);
+      k.taart = true;
+      Geluid.effect('schiet');
+      klaar(1.2);
+    } else if (aanval === 'laser') {
+      for (let i = 0; i < 5; i++) this.time.delayedCall(i * 140, () => {
+        if (!b.active) return;
+        const hoek = Math.atan2(sp.y - 30 - b.y, sp.x - b.x) + Phaser.Math.FloatBetween(-0.12, 0.12);
+        this.kogel('laser', b.x, b.y + 20, Math.cos(hoek) * 480, Math.sin(hoek) * 480, 0).setRotation(hoek);
+        Geluid.effect('laser');
+      });
+      klaar(1.2);
+    } else if (aanval === 'minis') {
+      // laat kleine ufo's los
+      this.baasRoep('Mini-ufo\'s!');
+      const aantal = this.vijanden.getChildren().filter(v => v.active && v.soort === 'ufo').length;
+      for (let i = 0; i < Math.min(2, 3 - aantal); i++) this.maakVlieger('ufo', 'ufo', b.x + (i ? 60 : -60), b.y + 30);
+      klaar(0.8);
+    } else if (aanval === 'straal') {
+      // trekstraal: hangt boven je en trekt je omhoog
+      this.baasRoep('Trekstraal!');
+      b.status = 'straal';
+      if (!this.straalG) this.straalG = this.add.triangle(0, 0, 0, 0, -80, 380, 80, 380, 0x7aff8a, 0.28).setOrigin(0.5, 0).setDepth(5);
+      this.straalG.setVisible(true);
+      Geluid.effect('laser');
+      this.time.delayedCall(2600, () => {
+        if (this.straalG) this.straalG.setVisible(false);
+        if (b.active && b.status === 'straal') { b.status = 'wacht'; b.timer = this.pauze(b); }
+      });
     } else if (aanval === 'pik') {
       // de lepelaar rent op je af en pikt met zijn lepelsnavel
       this.baasRoep('Lepelpik!');
@@ -331,6 +457,17 @@ class BaasDeel {
     this.kogels.getChildren().slice().forEach(k => {
       k.leeft -= dt;
       if (k.rolt) k.rotation += k.body.velocity.x * dt / 20;
+      // stuiterballen stuiteren op de vloer
+      if (k.stuiter && k.y > 450 && k.body.velocity.y > 0) {
+        k.body.velocity.y *= -0.8; k.stuiter--;
+        if (k.stuiter <= 0) k.golf = false; else { Geluid.effect('boing'); return; }
+      }
+      // flessen spatten in scherven uiteen
+      if (k.splits && k.y > 452) {
+        for (const r of [-1, 0, 1]) this.kogel('scherf', k.x, 440, r * 170, -260, 1200);
+        this.vonken.explode(6, k.x, 460); Geluid.effect('tink');
+        k.destroy(); return;
+      }
       const opGrond = this.baasModus && k.y > 456 && !k.golf && !k.rolt;
       const links = this.baasModus ? -60 : this.camX - 150, rechts = this.baasModus ? 1020 : this.camX + 1150;
       if (k.leeft <= 0 || k.x < links || k.x > rechts || k.y > 620 || opGrond) {
@@ -343,6 +480,13 @@ class BaasDeel {
   kogelRaakt(k) {
     if (!k.active || this.onkwetsbaar > 0 || this.dood || this.gewonnen) return;
     if (!k.golf && !k.rolt) k.destroy();
+    if (k.taart) {
+      // taart in je gezicht: even zie je bijna niks
+      if (!this.splat) this.splat = this.add.image(480, 270, 'taartsplat').setDepth(96).setScrollFactor(0);
+      this.splat.setVisible(true).setAlpha(1).setScale(0.3);
+      this.tweens.add({ targets: this.splat, scale: 1, duration: 150, ease: 'Back.easeOut' });
+      this.tweens.add({ targets: this.splat, alpha: 0, delay: 1800, duration: 700 });
+    }
     if (k.tong && this.baas) {
       // de tong trekt je naar de baas toe
       const b = this.baas, sp = this.speler;
@@ -385,12 +529,17 @@ class BaasDeel {
     const skin = SKINS.find(k => k.baas === b.baas);
     const nieuweSkin = skin && !PROFIEL.skins.includes(skin.id);
     if (nieuweSkin) PROFIEL.skins.push(skin.id);
+    statTel('flessenTotaal', flesjes);
+    statTel('baas_' + b.baas);
+    if (!this.baasGeraakt) statMax('zonderGeraakt', 1);
+    if (this.run.harten === 1) statMax('eenHart', 1);
     bewaarProfiel();
+    this.time.delayedCall(2500, () => checkPrestaties(this));
     this.toonBeloning(flesjes, nieuweSkin ? skin : null);
     this.time.delayedCall(5500, () => {
       Geluid.effect('regio');
       // je upgrade blijft, want het is nog hetzelfde potje
-      this.scene.start('Spel', { run: { level: this.n + 1, up: PROFIEL.up, harten: hartenMet(this.run.keuze), baas: false, keuze: this.run.keuze } });
+      this.scene.start('Spel', { run: { level: this.n + 1, up: this.run.up, harten: hartenMet(this.run.keuze), baas: false, keuze: this.run.keuze } });
     });
   }
 }

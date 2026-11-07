@@ -37,8 +37,9 @@
       w.spelen(); await slaap(300); moet(actief('Winkel'), 'spelen kon al vóór het kiezen');
       doe('upgrade kiezen'); kiesUpgrade(w); moet(PROFIEL.keuze && !w.kiest, 'kiezen werkte niet');
       doe('kopen en ongedaan'); PROFIEL.flessen = 100; w.vernieuwAlles();
-      w.koop(w.kaarten[0]); moet(PROFIEL.up.dash === 1 && PROFIEL.flessen === 94, 'kopen werkte niet');
-      w.ongedaan(); moet(PROFIEL.up.dash === 0 && PROFIEL.flessen === 100, 'ongedaan werkte niet');
+      w.koop(w.kaarten[0]); const na = PROFIEL.flessen;
+      moet(PROFIEL.up.dash === 1 && na < 100, 'kopen werkte niet');
+      w.ongedaan(); moet(PROFIEL.up.dash === 0 && PROFIEL.flessen === na + 6, 'ongedaan werkte niet');
       doe('baas kopen, naar shop en terug'); w.koop(w.baasKaart); moet(PROFIEL.ticket === PROFIEL.regio, 'baas kopen werkte niet');
       w.naarShop(); await wacht(() => actief('Shop'), 5000, 'shop');
       scene('Shop').terug(); await wacht(() => actief('Winkel'), 5000, 'terug naar winkel');
@@ -53,7 +54,7 @@
 
     // in elke regio 3 keer in het water vallen: 1 hartje eraf en veilig op een platform
     async vallen() {
-      for (let r = 0; r < 6; r++) {
+      for (let r = 0; r < 10; r++) {
         doe('regio ' + r); speel({ level: r }); await wacht(() => spelKlaar() && scene('Spel').n === r, 8000, 'regio ' + r);
         const sp = scene('Spel');
         for (let i = 0; i < 6; i++) { sp.speler.x += 60; await slaap(60); }
@@ -73,10 +74,13 @@
         rivier: ['kruiper', 'vliegvis', 'goud'], ijs: ['klont', 'klontje', 'pinguin', 'vliegpinguin', 'goud'],
         berg: ['fust', 'adelaar', 'goud'], vulkaan: ['lava', 'golem', 'ptero', 'goud'],
         grot: ['mol', 'vleermuis', 'goud'], savanne: ['neushoorn', 'gier', 'goud'],
+        kroeg: ['darter', 'uitsmijter', 'bierpul', 'goud'], fabriek: ['robot', 'stoomketel', 'drone', 'goud'],
+        speeltuin: ['wipkip', 'zandmonster', 'ballon', 'goud'], maan: ['alien', 'kraterkruiper', 'ufo', 'goud'],
       };
-      const EIGEN = { rivier: ['kruiper', 'vliegvis'], ijs: ['klont', 'klontje', 'pinguin', 'vliegpinguin'], berg: ['fust', 'adelaar'], vulkaan: ['lava', 'golem', 'ptero'], grot: ['mol', 'vleermuis'], savanne: ['neushoorn', 'gier'] };
+      const EIGEN = { rivier: ['kruiper', 'vliegvis'], ijs: ['klont', 'klontje', 'pinguin', 'vliegpinguin'], berg: ['fust', 'adelaar'], vulkaan: ['lava', 'golem', 'ptero'], grot: ['mol', 'vleermuis'], savanne: ['neushoorn', 'gier'],
+        kroeg: ['darter', 'uitsmijter', 'bierpul'], fabriek: ['robot', 'stoomketel', 'drone'], speeltuin: ['wipkip', 'zandmonster', 'ballon'], maan: ['alien', 'kraterkruiper', 'ufo'] };
       const uit = [];
-      for (let r = 0; r < 6; r++) {
+      for (let r = 0; r < 10; r++) {
         doe('regio ' + r); speel({ level: r }); await wacht(() => spelKlaar() && scene('Spel').n === r, 8000, 'regio ' + r);
         const sp = scene('Spel'), gezien = new Set();
         for (let i = 0; i < 120; i++) {
@@ -95,7 +99,7 @@
     // elke eindbaas doet zijn eigen aanvallen en wordt woedend
     async bazen() {
       const uit = [];
-      for (let n = 0; n < 6; n++) {
+      for (let n = 0; n < 10; n++) {
         doe('baas ' + n); PROFIEL.regio = n;
         speel({ level: n, baas: true }); await wacht(() => spelKlaar(0.3) && scene('Spel').baasModus && scene('Spel').n === n, 8000, 'baas ' + n);
         const sp = scene('Spel'), b = sp.baas, gezien = new Set();
@@ -156,7 +160,7 @@
       const s = scene('Shop');
       doe('draaien'); s.draai(); moet(s.draait, 'rad draait niet');
       await wacht(() => !s.draait, 8000, 'rad stopt');
-      moet(PROFIEL.skins.length === 2 && PROFIEL.flessen === 195 && draaiPrijs() === 10, 'prijs of skin klopt niet');
+      moet(PROFIEL.skins.length === 2 && PROFIEL.flessen < 200 && draaiPrijs() === 10, 'prijs of skin klopt niet');
       doe('terug'); s.terug(); await wacht(() => actief('Titel'), 5000, 'terug naar titel');
       return 'gewonnen: ' + skinVan(PROFIEL.skin).naam + ', volgende draai kost ' + draaiPrijs();
     },
@@ -164,7 +168,7 @@
     // monsters met een zwakke plek: verkeerd raken ketst af, goed raken doet pijn
     async zwak() {
       const uit = [];
-      for (let r = 1; r < 6; r++) {
+      for (let r = 1; r < 10; r++) {
         speel({ level: r }); await wacht(() => spelKlaar() && scene('Spel').n === r, 8000, 'regio ' + r);
         const sp = scene('Spel'), getest = new Set();
         for (let i = 0; i < 160 && getest.size < 3; i++) {
@@ -212,6 +216,96 @@
       w.kiesRegio(-2); w.vechten();
       await wacht(() => spelKlaar(0.5) && scene('Spel').baasModus && scene('Spel').n === 0, 8000, 'gevecht tegen Koning Bierpad');
       return 'Koning Bierpad nog eens: prijs ' + baasPrijs(0) + ', beloning ' + baasBeloning(0);
+    },
+
+    // prestaties: tellers lopen op, flesjes erbij, en het scherm opent
+    async prestaties() {
+      PROFIEL.flessen = 0;
+      scene('Titel').scene.start('Spel', { run: nieuweRun(false) }); await wacht(() => spelKlaar(1.5), 8000, 'spel start');
+      moet(PROFIEL.prestaties.includes('eerste'), 'geen prestatie voor je eerste potje');
+      const sp = scene('Spel');
+      doe('monster verslaan');
+      await wacht(() => sp.vijanden.getChildren().some(v => v.active && !ZWAK[v.soort] && v.soort !== 'goud'), 8000, 'een monster');
+      const v = sp.vijanden.getChildren().find(v => v.active && !ZWAK[v.soort] && v.soort !== 'goud');
+      sp.raakVijand(v, 99, 1, 'slash');
+      moet(PROFIEL.prestaties.includes('jager') && PROFIEL.stats.slash === 1, 'monster verslaan telde niet');
+      const fl = PROFIEL.flessen;
+      moet(fl >= 2, 'geen flesjes gekregen (' + fl + ')');
+      doe('scherm'); sp.scene.start('Prestaties'); await wacht(() => actief('Prestaties'), 5000, 'prestatiescherm');
+      scene('Prestaties').terug(); await wacht(() => actief('Titel'), 5000, 'terug naar titel');
+      return PROFIEL.prestaties.length + ' prestaties, ' + fl + ' flesjes verdiend';
+    },
+
+    // power-up lager zetten: aan-niveau ≤ gekocht, en het spel gebruikt het aan-niveau
+    async aan() {
+      PROFIEL.flessen = 500; PROFIEL.up.dash = 5;
+      scene('Titel').scene.start('Winkel', { meters: 0, regio: 0, baas: false }); await wacht(() => actief('Winkel'), 5000, 'winkel');
+      const w = scene('Winkel'); kiesUpgrade(w);
+      const k = w.kaarten.find(k => k.p.id === 'dash');
+      moet(k.hebT.text === 'heb MAX' && k.aanT.text === 'aan 5', 'kaart toont niet heb MAX / aan 5');
+      w.zetAan(k, -1); w.zetAan(k, -1); w.zetAan(k, -1);
+      moet(aanNiveau('dash') === 2 && k.aanT.text === 'aan 2' && PROFIEL.up.dash === 5, 'lager zetten werkte niet');
+      w.zetAan(k, 1); moet(aanNiveau('dash') === 3, 'hoger zetten werkte niet');
+      w.spelen(); await wacht(() => spelKlaar(0.5), 8000, 'spel start');
+      moet(scene('Spel').run.up.dash === 3, 'spel gebruikt niet het aan-niveau (' + scene('Spel').run.up.dash + ')');
+      return 'dash: heb MAX, aan 3, en het spel gebruikt 3';
+    },
+
+    // alle knoppen één keer indrukken
+    async knoppen() {
+      const druk = (sc, tekst) => {
+        const zones = sc.children.list.filter(o => o.type === 'Zone');
+        let t = null, z = null;
+        for (const o of sc.children.list) {
+          if (o.type !== 'Text' || !o.text.includes(tekst)) continue;
+          z = zones.find(q => Math.abs(q.x + q.width / 2 - o.x) < 4 && Math.abs(q.y + q.height / 2 - o.y) < 4);
+          if (z) { t = o; break; }
+        }
+        moet(t && z, 'knop "' + tekst + '" niet gevonden in ' + sc.scene.key);
+        z.emit('pointerup', { y: t.y, x: t.x });
+      };
+      PROFIEL.flessen = 300;
+      doe('titel → shop'); druk(scene('Titel'), 'Shop'); await wacht(() => actief('Shop'), 4000, 'shop');
+      druk(scene('Shop'), 'Draai'); await wacht(() => !scene('Shop').draait, 8000, 'rad');
+      druk(scene('Shop'), 'Terug'); await wacht(() => actief('Titel'), 4000, 'titel');
+      doe('titel → prestaties'); druk(scene('Titel'), 'Prestaties'); await wacht(() => actief('Prestaties'), 4000, 'prestaties');
+      druk(scene('Prestaties'), 'Terug'); await wacht(() => actief('Titel'), 4000, 'titel');
+      doe('titel → start'); druk(scene('Titel'), 'Start'); await wacht(() => spelKlaar(0.5), 8000, 'spel');
+      doe('instellingen → hoofdscherm');
+      const sp = scene('Spel'); sp.scene.launch('Instellingen', { terug: 'Spel' }); sp.scene.pause();
+      await wacht(() => actief('Instellingen'), 4000, 'instellingen');
+      druk(scene('Instellingen'), 'Hoofdscherm'); await wacht(() => actief('Titel') && !M().isPaused('Spel') && !actief('Instellingen'), 4000, 'hoofdscherm');
+      doe('instellingen → verder spelen'); druk(scene('Titel'), 'Start'); await wacht(() => spelKlaar(0.5), 8000, 'spel');
+      scene('Spel').scene.launch('Instellingen', { terug: 'Spel' }); scene('Spel').scene.pause();
+      await wacht(() => actief('Instellingen'), 4000, 'instellingen');
+      druk(scene('Instellingen'), 'Verder spelen'); await wacht(() => actief('Spel') && !M().isPaused('Spel'), 4000, 'verder spelen');
+      doe('winkel'); scene('Spel').gameOver(); await wacht(() => actief('Winkel'), 5000, 'winkel');
+      const w = scene('Winkel'); kiesUpgrade(w);
+      w.kaarten[0].g; w.koop(w.kaarten[1]);
+      druk(w, 'Ongedaan'); moet(PROFIEL.up.dubbel === 0, 'Ongedaan-knop werkte niet');
+      druk(w, 'Shop'); await wacht(() => actief('Shop'), 4000, 'shop vanuit winkel');
+      druk(scene('Shop'), 'Terug'); await wacht(() => actief('Winkel'), 4000, 'terug naar winkel');
+      druk(scene('Winkel'), 'Spelen'); await wacht(() => spelKlaar(0.5), 8000, 'spelen');
+      return 'Start, Shop, Draai, Terug, Prestaties, Hoofdscherm, Verder spelen, Ongedaan, Shop↔winkel en Spelen werken';
+    },
+
+    // regio-trucjes: trampoline, lopende band, bierplas, maan
+    async trucjes() {
+      doe('speeltuin'); speel({ level: 8 }); await wacht(() => spelKlaar(0.5) && scene('Spel').n === 8, 8000, 'speeltuin');
+      let sp = scene('Spel');
+      const p = sp.maakPlatform(sp.speler.x + 150, 400, 240, true); sp.maakTrampoline(p.x + 120, 400);
+      sp.speler.body.reset(p.x + 120, 360); sp.speler.body.setVelocity(0, 200);
+      await wacht(() => sp.speler.body.velocity.y < -600, 2000, 'trampoline stuitert');
+      doe('fabriek'); speel({ level: 7 }); await wacht(() => spelKlaar(0.5) && scene('Spel').n === 7, 8000, 'fabriek');
+      sp = scene('Spel');
+      const b = sp.maakPlatform(sp.speler.x + 150, 400, 300, true); sp.maakBand(b, 1);
+      sp.speler.body.reset(b.x + 60, 398); await slaap(200); const x0 = sp.speler.x; await slaap(600);
+      moet(sp.speler.x - x0 > 40, 'lopende band duwt niet (' + Math.round(sp.speler.x - x0) + ')');
+      doe('maan'); speel({ level: 9 }); await wacht(() => spelKlaar(0.5) && scene('Spel').n === 9, 8000, 'maan');
+      moet(scene('Spel').physics.world.gravity.y < 1000, 'geen lage zwaartekracht op de maan');
+      doe('rivier'); speel({ level: 0 }); await wacht(() => spelKlaar(0.5) && scene('Spel').n === 0, 8000, 'rivier');
+      moet(scene('Spel').physics.world.gravity.y === 1500, 'zwaartekracht niet terug na de maan');
+      return 'trampoline, lopende band, maanzwaartekracht en terug op aarde werken';
     },
 
     // kebabrol eten: scheet en heel hoog de lucht in

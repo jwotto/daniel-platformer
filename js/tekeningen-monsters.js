@@ -455,7 +455,252 @@ function tekenLepelaar(ctx) {
   ctx.restore();
 }
 
+function kroonkurkKlein(ctx, x, y, r) {
+  ctx.fillStyle = '#f2c14e'; ctx.strokeStyle = INKT; ctx.lineWidth = 1.4;
+  ctx.beginPath(); for (let i = 0; i < 16; i++) { const a = i * TAU / 16, rr = i % 2 ? r : r * 0.82; ctx.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); }
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#d1495b'; ctx.beginPath(); ctx.arc(x, y, r * 0.4, 0, TAU); ctx.fill();
+}
+
+// ---------- KROEG ----------
+function tekenDarter(ctx) {
+  ctx.save(); ctx.strokeStyle = INKT; ctx.lineWidth = 2.2;
+  ctx.fillStyle = '#2a2a3a'; for (const x of [16, 26]) { ctx.fillRect(x - 3, 42, 6, 14); ctx.strokeRect(x - 3, 42, 6, 14); }
+  ctx.fillStyle = '#5a2a6a'; rondRect(ctx, 8, 22, 26, 24, 6); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#f1c49b'; ctx.beginPath(); ctx.arc(21, 14, 9, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#3a2a1a'; ctx.beginPath(); ctx.arc(21, 9, 9, Math.PI, 0); ctx.fill();
+  boosOog(ctx, 17, 14, 2.4, INKT, true);
+  ctx.fillStyle = 'rgba(232,120,110,.7)'; ctx.beginPath(); ctx.arc(14, 18, 2.4, 0, TAU); ctx.fill();
+  lijnDik(ctx, [[10, 30], [2, 22]], '#f1c49b');
+  ctx.fillStyle = '#d1495b'; ctx.beginPath(); ctx.moveTo(0, 18); ctx.lineTo(4, 22); ctx.lineTo(0, 24); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.restore();
+}
+function lijnDik(ctx, p, kleur) {
+  ctx.strokeStyle = INKT; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(...p[0]); ctx.lineTo(...p[1]); ctx.stroke();
+  ctx.strokeStyle = kleur; ctx.lineWidth = 3.5; ctx.beginPath(); ctx.moveTo(...p[0]); ctx.lineTo(...p[1]); ctx.stroke();
+  ctx.strokeStyle = INKT; ctx.lineWidth = 2;
+}
+function tekenUitsmijter(ctx) {
+  ctx.save(); ctx.strokeStyle = INKT; ctx.lineWidth = 2.6;
+  ctx.fillStyle = '#1a1a22'; for (const x of [18, 36]) { ctx.fillRect(x - 5, 56, 10, 16); ctx.strokeRect(x - 5, 56, 10, 16); }
+  ctx.fillStyle = '#1a1a22'; rondRect(ctx, 4, 24, 46, 36, 10); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#f2c14e'; ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('BEVEILIGING', 27, 44);
+  ctx.fillStyle = '#c8926a'; ctx.beginPath(); ctx.arc(27, 16, 13, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#0a0a0a'; rondRect(ctx, 14, 11, 26, 6, 3); ctx.fill();
+  ctx.strokeStyle = INKT; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(20, 24); ctx.lineTo(32, 24); ctx.stroke();
+  for (const x of [4, 50]) { ctx.fillStyle = '#c8926a'; ctx.beginPath(); ctx.arc(x, 44, 6, 0, TAU); ctx.fill(); ctx.stroke(); }
+  ctx.restore();
+}
+function tekenBierpul(ctx) {
+  ctx.save(); ctx.strokeStyle = INKT; ctx.lineWidth = 2.4;
+  ctx.fillStyle = 'rgba(255,255,255,.35)';
+  for (const z of [-1, 1]) { ctx.beginPath(); ctx.ellipse(24 + z * 22, 22, 12, 6, z * 0.4, 0, TAU); ctx.fill(); ctx.stroke(); }
+  ctx.strokeStyle = INKT; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(38, 30, 8, -1.2, 1.2); ctx.stroke();
+  ctx.lineWidth = 2.4;
+  ctx.fillStyle = '#f2a33a'; rondRect(ctx, 12, 14, 26, 32, 4); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(16, 18, 4, 24);
+  ctx.fillStyle = '#fffaf0'; for (const [x, r] of [[15, 6], [24, 7], [33, 6]]) { ctx.beginPath(); ctx.arc(x, 13, r, 0, TAU); ctx.fill(); ctx.stroke(); }
+  boosOog(ctx, 20, 28, 3, INKT, true); boosOog(ctx, 30, 28, 3, INKT, false);
+  ctx.restore();
+}
+// ---------- FABRIEK ----------
+function tekenRobot(ctx) {
+  ctx.save(); ctx.strokeStyle = INKT; ctx.lineWidth = 2.2;
+  ctx.fillStyle = '#3a3e4a'; for (const x of [14, 28]) { ctx.fillRect(x - 3, 40, 6, 12); ctx.strokeRect(x - 3, 40, 6, 12); }
+  ctx.fillStyle = '#9aa4b8'; rondRect(ctx, 5, 20, 32, 22, 4); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#f2a33a'; ctx.beginPath(); ctx.arc(21, 31, 5, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#7a8090'; rondRect(ctx, 9, 4, 24, 16, 4); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#d1495b'; ctx.shadowColor = '#ff4a4a'; ctx.shadowBlur = 6; ctx.fillRect(12, 9, 18, 4); ctx.shadowBlur = 0;
+  lijnDik(ctx, [[21, 4], [21, -2]], '#9aa4b8');
+  ctx.fillStyle = '#5a5e6a'; rondRect(ctx, -2, 26, 10, 6, 2); ctx.fill(); ctx.stroke();
+  ctx.restore();
+}
+function tekenStoomketel(ctx) {
+  ctx.save(); ctx.strokeStyle = INKT; ctx.lineWidth = 2.4;
+  const g = ctx.createLinearGradient(4, 0, 44, 0); g.addColorStop(0, '#8a4a1c'); g.addColorStop(0.5, '#e8904a'); g.addColorStop(1, '#8a4a1c');
+  ctx.fillStyle = g; rondRect(ctx, 4, 12, 40, 36, 10); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#5a5e6a'; ctx.fillRect(18, 2, 12, 12); ctx.strokeRect(18, 2, 12, 12);
+  ctx.fillStyle = '#f3ead6'; ctx.beginPath(); ctx.arc(24, 30, 8, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle = '#d1495b'; ctx.beginPath(); ctx.moveTo(24, 30); ctx.lineTo(29, 25); ctx.stroke();
+  ctx.strokeStyle = INKT; boosOog(ctx, 13, 22, 2.6, INKT, true); boosOog(ctx, 35, 22, 2.6, INKT, false);
+  ctx.restore();
+}
+function tekenDrone(ctx) {
+  ctx.save(); ctx.strokeStyle = INKT; ctx.lineWidth = 2;
+  for (const x of [8, 48]) { ctx.fillStyle = 'rgba(200,210,230,.6)'; ctx.beginPath(); ctx.ellipse(x, 6, 10, 2.5, 0, 0, TAU); ctx.fill(); ctx.stroke(); lijnDik(ctx, [[x, 8], [x, 14]], '#5a5e6a'); }
+  lijnDik(ctx, [[8, 14], [48, 14]], '#5a5e6a');
+  ctx.fillStyle = '#3a3e4a'; rondRect(ctx, 16, 12, 24, 14, 5); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#d1495b'; ctx.beginPath(); ctx.arc(28, 19, 3.5, 0, TAU); ctx.fill();
+  ctx.fillStyle = '#5fae4e'; ctx.fillRect(25, 26, 6, 10); ctx.strokeRect(25, 26, 6, 10);
+  ctx.restore();
+}
+// ---------- SPEELTUIN ----------
+function tekenWipkip(ctx) {
+  ctx.save(); ctx.strokeStyle = INKT; ctx.lineWidth = 2.2;
+  ctx.strokeStyle = '#9aa4b8'; ctx.lineWidth = 3; ctx.beginPath();
+  for (let i = 0; i < 4; i++) { ctx.moveTo(14, 34 + i * 3); ctx.lineTo(30, 34 + i * 3); } ctx.stroke();
+  ctx.strokeStyle = INKT; ctx.lineWidth = 2.2;
+  ctx.fillStyle = '#f2c14e'; ctx.beginPath(); ctx.ellipse(24, 22, 16, 12, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.arc(10, 10, 8, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#d1495b'; ctx.beginPath(); ctx.moveTo(6, 2); ctx.lineTo(9, -2); ctx.lineTo(12, 2); ctx.lineTo(15, -1); ctx.lineTo(14, 4); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#f2a33a'; ctx.beginPath(); ctx.moveTo(2, 9); ctx.lineTo(-3, 11); ctx.lineTo(2, 13); ctx.closePath(); ctx.fill(); ctx.stroke();
+  boosOog(ctx, 8, 9, 2.4, INKT, true);
+  ctx.fillStyle = '#d1495b'; ctx.beginPath(); ctx.ellipse(36, 14, 6, 10, 0.6, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.restore();
+}
+function tekenZandmonster(ctx) {
+  ctx.save(); ctx.strokeStyle = INKT; ctx.lineWidth = 2.2;
+  ctx.fillStyle = '#e8c07a'; ctx.beginPath(); ctx.moveTo(2, 36); ctx.quadraticCurveTo(4, 6, 24, 6); ctx.quadraticCurveTo(44, 6, 46, 36); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = 'rgba(160,110,50,.6)'; for (const [x, y] of [[12, 26], [34, 22], [22, 30], [30, 14]]) { ctx.beginPath(); ctx.arc(x, y, 1.6, 0, TAU); ctx.fill(); }
+  boosOog(ctx, 17, 18, 3.4, INKT, true); boosOog(ctx, 31, 18, 3.4, INKT, false);
+  ctx.fillStyle = '#3cc8bb'; ctx.beginPath(); ctx.moveTo(38, 8); ctx.lineTo(44, -4); ctx.lineTo(48, 0); ctx.lineTo(42, 10); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.restore();
+}
+function tekenBallon(ctx) {
+  ctx.save(); ctx.strokeStyle = INKT; ctx.lineWidth = 1.4;
+  ctx.beginPath(); ctx.moveTo(20, 46); ctx.quadraticCurveTo(26, 54, 20, 60); ctx.stroke();
+  ctx.lineWidth = 2.2;
+  const g = ctx.createRadialGradient(14, 14, 3, 20, 22, 22); g.addColorStop(0, '#ff9aa8'); g.addColorStop(1, '#d1495b');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(20, 22, 17, 21, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#d1495b'; ctx.beginPath(); ctx.moveTo(16, 43); ctx.lineTo(24, 43); ctx.lineTo(20, 47); ctx.closePath(); ctx.fill(); ctx.stroke();
+  boosOog(ctx, 14, 20, 3, INKT, true); boosOog(ctx, 26, 20, 3, INKT, false);
+  ctx.beginPath(); ctx.arc(20, 30, 5, 0.2, Math.PI - 0.2); ctx.stroke();
+  ctx.restore();
+}
+// ---------- MAAN ----------
+function tekenAlien(ctx) {
+  ctx.save(); ctx.strokeStyle = INKT; ctx.lineWidth = 2.2;
+  ctx.fillStyle = '#5a2aa8'; for (const x of [12, 22]) { ctx.fillRect(x - 3, 40, 6, 14); ctx.strokeRect(x - 3, 40, 6, 14); }
+  ctx.fillStyle = '#7a4ac8'; rondRect(ctx, 6, 24, 22, 20, 6); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#7aff8a'; ctx.beginPath(); ctx.ellipse(17, 14, 13, 11, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  for (const x of [10, 24]) { lijnDik(ctx, [[x, 6], [x + (x < 17 ? -4 : 4), -4]], '#7aff8a'); ctx.fillStyle = '#f2c14e'; ctx.beginPath(); ctx.arc(x + (x < 17 ? -4 : 4), -4, 2.6, 0, TAU); ctx.fill(); ctx.stroke(); }
+  ctx.fillStyle = INKT; for (const x of [12, 22]) { ctx.beginPath(); ctx.ellipse(x, 14, 3.6, 4.6, 0, 0, TAU); ctx.fill(); }
+  ctx.fillStyle = '#9aa4b8'; rondRect(ctx, -4, 28, 12, 6, 2); ctx.fill(); ctx.stroke();
+  ctx.restore();
+}
+function tekenKraterkruiper(ctx) {
+  ctx.save(); ctx.strokeStyle = INKT; ctx.lineWidth = 2.4;
+  ctx.fillStyle = '#5a5a6a'; for (const x of [10, 22, 34, 44]) { ctx.beginPath(); ctx.ellipse(x, 34, 4, 3, 0, 0, TAU); ctx.fill(); ctx.stroke(); }
+  ctx.fillStyle = '#9a9aaa'; ctx.beginPath(); ctx.ellipse(28, 26, 22, 14, 0, Math.PI, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = 'rgba(40,40,60,.4)'; for (const [x, y, r] of [[20, 20, 4], [34, 18, 5], [28, 24, 2.5]]) { ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill(); }
+  ctx.fillStyle = '#7aff8a'; ctx.beginPath(); ctx.ellipse(6, 28, 8, 6, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  boosOog(ctx, 4, 26, 2.4, INKT, true);
+  ctx.restore();
+}
+function tekenUfo(ctx) {
+  ctx.save(); ctx.strokeStyle = INKT; ctx.lineWidth = 2.2;
+  ctx.fillStyle = 'rgba(160,230,255,.7)'; ctx.beginPath(); ctx.ellipse(30, 14, 12, 11, 0, Math.PI, 0); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#7aff8a'; ctx.beginPath(); ctx.arc(30, 12, 5, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = INKT; ctx.beginPath(); ctx.arc(28, 11, 1.2, 0, TAU); ctx.arc(32, 11, 1.2, 0, TAU); ctx.fill();
+  const g = ctx.createLinearGradient(0, 14, 0, 26); g.addColorStop(0, '#cfd6e6'); g.addColorStop(1, '#5a5e6a');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(30, 19, 28, 8, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#f2c14e'; for (const x of [12, 22, 38, 48]) { ctx.beginPath(); ctx.arc(x, 20, 2, 0, TAU); ctx.fill(); }
+  ctx.restore();
+}
+
+// ---------- NIEUWE EINDBAZEN ----------
+// De Kroegbaas: een dikke barman met snor en een schort
+function tekenKroegbaas(ctx) {
+  ctx.save(); lijn(ctx, 3);
+  ctx.fillStyle = '#1a1a22'; for (const x of [52, 88]) { ctx.fillRect(x - 9, 128, 18, 22); ctx.strokeRect(x - 9, 128, 18, 22); }
+  ctx.fillStyle = '#f3ead6'; ctx.beginPath(); ctx.ellipse(70, 92, 48, 44, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#3a6a3a'; ctx.beginPath(); ctx.moveTo(40, 80); ctx.lineTo(100, 80); ctx.lineTo(104, 134); ctx.lineTo(36, 134); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#d1495b'; ctx.beginPath(); ctx.moveTo(62, 52); ctx.lineTo(70, 60); ctx.lineTo(78, 52); ctx.lineTo(78, 66); ctx.lineTo(70, 60); ctx.lineTo(62, 66); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#e8b08a'; ctx.beginPath(); ctx.arc(70, 30, 26, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#3a2a1a'; ctx.beginPath(); ctx.ellipse(58, 40, 14, 6, 0.3, 0, TAU); ctx.ellipse(82, 40, 14, 6, -0.3, 0, TAU); ctx.fill();
+  oog(ctx, 60, 26, 5, INKT); oog(ctx, 80, 26, 5, INKT);
+  ctx.strokeStyle = INKT; ctx.lineWidth = 3.4; ctx.beginPath(); ctx.moveTo(52, 16); ctx.lineTo(66, 20); ctx.moveTo(88, 16); ctx.lineTo(74, 20); ctx.stroke();
+  // bierpul in zijn hand
+  ctx.lineWidth = 3; ctx.fillStyle = '#f2a33a'; rondRect(ctx, 6, 70, 24, 30, 4); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#fffaf0'; ctx.beginPath(); ctx.arc(12, 70, 6, 0, TAU); ctx.arc(24, 70, 6, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.restore();
+}
+// De Brouwmachine: een grote ketel met buizen, meters en een rood oog
+function tekenMachine(ctx) {
+  ctx.save(); lijn(ctx, 3);
+  ctx.fillStyle = '#3a3e4a'; ctx.fillRect(10, 128, 140, 24); ctx.strokeRect(10, 128, 140, 24);
+  const g = ctx.createLinearGradient(20, 0, 140, 0); g.addColorStop(0, '#8a4a1c'); g.addColorStop(0.5, '#e8904a'); g.addColorStop(1, '#8a4a1c');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(24, 130); ctx.lineTo(24, 50); ctx.quadraticCurveTo(80, 10, 136, 50); ctx.lineTo(136, 130); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#5a5e6a'; ctx.fillRect(110, 0, 18, 40); ctx.strokeRect(110, 0, 18, 40);
+  ctx.fillStyle = '#9aa4b8'; ctx.fillRect(0, 90, 30, 14); ctx.strokeRect(0, 90, 30, 14);
+  ctx.fillStyle = '#f3ead6'; for (const x of [50, 110]) { ctx.beginPath(); ctx.arc(x, 100, 11, 0, TAU); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x, 100); ctx.lineTo(x + 6, 93); ctx.stroke(); }
+  ctx.shadowColor = '#ff4a4a'; ctx.shadowBlur = 14; ctx.fillStyle = '#ff4a4a'; ctx.beginPath(); ctx.arc(80, 66, 14, 0, TAU); ctx.fill(); ctx.shadowBlur = 0; ctx.stroke();
+  ctx.fillStyle = INKT; ctx.beginPath(); ctx.arc(76, 66, 5, 0, TAU); ctx.fill();
+  ctx.fillStyle = '#f2c14e'; for (let x = 30; x < 136; x += 12) { ctx.beginPath(); ctx.arc(x, 122, 2, 0, TAU); ctx.fill(); }
+  ctx.restore();
+}
+// De Eenwielerclown
+function tekenClown(ctx) {
+  ctx.save(); lijn(ctx, 3);
+  ctx.beginPath(); ctx.arc(60, 132, 18, 0, TAU); ctx.fillStyle = '#2a2a3a'; ctx.fill(); ctx.stroke();
+  ctx.strokeStyle = '#9aa4b8'; for (let i = 0; i < 6; i++) { const a = i * TAU / 6; ctx.beginPath(); ctx.moveTo(60, 132); ctx.lineTo(60 + Math.cos(a) * 16, 132 + Math.sin(a) * 16); ctx.stroke(); }
+  lijn(ctx, 3); ctx.beginPath(); ctx.moveTo(60, 132); ctx.lineTo(60, 100); ctx.stroke();
+  ctx.fillStyle = '#7a5cff'; ctx.fillRect(48, 96, 24, 8); ctx.strokeRect(48, 96, 24, 8);
+  ctx.fillStyle = '#d1495b'; ctx.beginPath(); ctx.ellipse(60, 74, 26, 26, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#f2c14e'; for (const [x, y] of [[50, 66], [68, 78], [56, 88], [70, 62]]) { ctx.beginPath(); ctx.arc(x, y, 4, 0, TAU); ctx.fill(); }
+  ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(60, 34, 20, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#ff7a2c'; for (const z of [-1, 1]) { ctx.beginPath(); ctx.arc(60 + z * 22, 30, 10, 0, TAU); ctx.fill(); ctx.stroke(); }
+  ctx.fillStyle = '#d1495b'; ctx.beginPath(); ctx.arc(60, 38, 6, 0, TAU); ctx.fill(); ctx.stroke();
+  oog(ctx, 52, 28, 4, INKT); oog(ctx, 68, 28, 4, INKT);
+  ctx.strokeStyle = '#d1495b'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(60, 42, 9, 0.2, Math.PI - 0.2); ctx.stroke();
+  lijn(ctx, 3); ctx.fillStyle = '#3cc8bb'; ctx.beginPath(); ctx.moveTo(46, 18); ctx.lineTo(60, -6); ctx.lineTo(74, 18); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.restore();
+}
+// Het Moederschip: een grote vliegende schotel met een alien erin
+function tekenMoederschip(ctx) {
+  ctx.save(); lijn(ctx, 3);
+  ctx.fillStyle = 'rgba(160,230,255,.7)'; ctx.beginPath(); ctx.ellipse(100, 44, 42, 38, 0, Math.PI, 0); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#7aff8a'; ctx.beginPath(); ctx.ellipse(100, 36, 20, 18, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = INKT; for (const x of [92, 108]) { ctx.beginPath(); ctx.ellipse(x, 34, 5, 7, 0, 0, TAU); ctx.fill(); }
+  const g = ctx.createLinearGradient(0, 40, 0, 74); g.addColorStop(0, '#e6ecf5'); g.addColorStop(1, '#5a5e6a');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(100, 56, 96, 20, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#3a3e4a'; ctx.beginPath(); ctx.ellipse(100, 68, 40, 8, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  for (let i = 0; i < 9; i++) { ctx.fillStyle = ['#f2c14e', '#d1495b', '#3cc8bb'][i % 3]; ctx.beginPath(); ctx.arc(24 + i * 19, 58, 4, 0, TAU); ctx.fill(); }
+  ctx.restore();
+}
+
 function maakMonsterTexturen(scene) {
+  tekenTextuur(scene, 'baas_kroegbaas', 140, 152, tekenKroegbaas);
+  tekenTextuur(scene, 'baas_machine', 160, 152, tekenMachine);
+  tekenTextuur(scene, 'baas_clown', 120, 152, tekenClown);
+  tekenTextuur(scene, 'baas_moederschip', 200, 80, tekenMoederschip);
+  // licht uit: zwart met een gat in het midden (het spel zet het gat op jouw plek)
+  tekenTextuur(scene, 'donker', 960, 540, ctx => {
+    const g = ctx.createRadialGradient(480, 270, 40, 480, 270, 110);
+    g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(5,3,10,.96)');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, 960, 540);
+  });
+  // taart in je gezicht
+  tekenTextuur(scene, 'taartsplat', 760, 460, ctx => {
+    ctx.fillStyle = '#f3ead6';
+    for (let i = 0; i < 26; i++) { const a = i * TAU / 26, r = 170 + (i % 3) * 50; ctx.beginPath(); ctx.arc(380 + Math.cos(a) * r * 0.9, 230 + Math.sin(a) * r * 0.55, 60 + (i % 4) * 14, 0, TAU); ctx.fill(); }
+    ctx.beginPath(); ctx.ellipse(380, 230, 260, 160, 0, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#d1495b'; for (const [x, y] of [[300, 200], [430, 260], [380, 170], [250, 280]]) { ctx.beginPath(); ctx.arc(x, y, 16, 0, TAU); ctx.fill(); }
+  });
+  tekenTextuur(scene, 'darter', 40, 58, tekenDarter);
+  tekenTextuur(scene, 'uitsmijter', 56, 74, tekenUitsmijter);
+  tekenTextuur(scene, 'bierpul', 50, 48, tekenBierpul);
+  tekenTextuur(scene, 'robot', 44, 54, ctx => { ctx.translate(2, 0); tekenRobot(ctx); });
+  tekenTextuur(scene, 'stoomketel', 48, 50, tekenStoomketel);
+  tekenTextuur(scene, 'drone', 58, 38, tekenDrone);
+  tekenTextuur(scene, 'wipkip', 48, 46, ctx => { ctx.translate(4, 4); tekenWipkip(ctx); });
+  tekenTextuur(scene, 'zandmonster', 50, 38, tekenZandmonster);
+  tekenTextuur(scene, 'ballon', 42, 62, tekenBallon);
+  tekenTextuur(scene, 'alien', 40, 56, ctx => { ctx.translate(4, 4); tekenAlien(ctx); });
+  tekenTextuur(scene, 'kraterkruiper', 56, 40, tekenKraterkruiper);
+  tekenTextuur(scene, 'ufo', 60, 30, tekenUfo);
+  // hun kogels
+  tekenTextuur(scene, 'dart', 22, 8, ctx => { lijnDik(ctx, [[2, 4], [16, 4]], '#9aa4b8'); ctx.fillStyle = '#d1495b'; ctx.beginPath(); ctx.moveTo(14, 0); ctx.lineTo(22, 4); ctx.lineTo(14, 8); ctx.closePath(); ctx.fill(); });
+  tekenTextuur(scene, 'kurkje', 16, 16, ctx => kroonkurkKlein(ctx, 8, 8, 6));
+  tekenTextuur(scene, 'stoom', 30, 30, ctx => { ctx.fillStyle = 'rgba(230,236,245,.85)'; for (const [x, y, r] of [[15, 15, 10], [8, 18, 7], [22, 18, 7]]) { ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill(); } });
+  tekenTextuur(scene, 'schuimdruppel', 16, 18, ctx => { ctx.fillStyle = '#fffaf0'; ctx.strokeStyle = INKT; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(8, 1); ctx.quadraticCurveTo(15, 12, 8, 17); ctx.quadraticCurveTo(1, 12, 8, 1); ctx.fill(); ctx.stroke(); });
+  tekenTextuur(scene, 'flesbom', 14, 30, ctx => { ctx.fillStyle = '#5fae4e'; ctx.strokeStyle = INKT; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(3, 28); ctx.lineTo(3, 12); ctx.lineTo(5, 9); ctx.lineTo(5, 2); ctx.lineTo(9, 2); ctx.lineTo(9, 9); ctx.lineTo(11, 12); ctx.lineTo(11, 28); ctx.closePath(); ctx.fill(); ctx.stroke(); });
+  tekenTextuur(scene, 'zandbal', 18, 18, ctx => { ctx.fillStyle = '#e8c07a'; ctx.strokeStyle = INKT; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(9, 9, 7, 0, TAU); ctx.fill(); ctx.stroke(); });
+  tekenTextuur(scene, 'laser', 34, 8, ctx => { ctx.shadowColor = '#7aff8a'; ctx.shadowBlur = 6; ctx.fillStyle = '#c8ffd0'; rondRect(ctx, 2, 2, 30, 4, 2); ctx.fill(); });
+  tekenTextuur(scene, 'scherf', 12, 12, ctx => { ctx.fillStyle = 'rgba(160,230,180,.9)'; ctx.strokeStyle = INKT; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(1, 10); ctx.lineTo(6, 1); ctx.lineTo(11, 9); ctx.closePath(); ctx.fill(); ctx.stroke(); });
+  tekenTextuur(scene, 'bal', 26, 26, ctx => { ctx.fillStyle = '#f2c14e'; ctx.strokeStyle = INKT; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(13, 13, 11, 0, TAU); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#d1495b'; ctx.beginPath(); ctx.arc(13, 13, 11, -0.6, 0.6); ctx.lineTo(13, 13); ctx.fill(); ctx.fillStyle = '#3cc8bb'; ctx.beginPath(); ctx.arc(13, 13, 11, 2.5, 3.7); ctx.lineTo(13, 13); ctx.fill(); });
+  tekenTextuur(scene, 'taart', 34, 22, ctx => { ctx.fillStyle = '#f3ead6'; ctx.strokeStyle = INKT; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(17, 10, 15, 7, 0, 0, TAU); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#c8924a'; ctx.beginPath(); ctx.moveTo(3, 12); ctx.lineTo(31, 12); ctx.lineTo(28, 20); ctx.lineTo(6, 20); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#d1495b'; ctx.beginPath(); ctx.arc(17, 6, 3, 0, TAU); ctx.fill(); });
+  tekenTextuur(scene, 'persblok', 120, 70, ctx => { const g = ctx.createLinearGradient(0, 0, 0, 70); g.addColorStop(0, '#9aa4b8'); g.addColorStop(1, '#3a3e4a'); ctx.fillStyle = g; ctx.strokeStyle = INKT; ctx.lineWidth = 3; ctx.fillRect(2, 2, 116, 66); ctx.strokeRect(2, 2, 116, 66); ctx.fillStyle = '#f2c14e'; for (let x = 6; x < 116; x += 20) { ctx.beginPath(); ctx.moveTo(x, 58); ctx.lineTo(x + 10, 58); ctx.lineTo(x + 4, 66); ctx.closePath(); ctx.fill(); } });
   tekenTextuur(scene, 'mol', 50, 46, tekenMol);
   tekenTextuur(scene, 'veer', 30, 12, ctx => {
     ctx.fillStyle = '#ffc0d8'; ctx.strokeStyle = INKT; ctx.lineWidth = 1.6;

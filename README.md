@@ -37,6 +37,14 @@ Een roguelike platformer van Daniel. Het is een HTML-game, gemaakt met [Phaser 3
 - Af en toe zweeft er een **kebabrol**. Eet je hem op, dan laat je een scheet en vlieg je heel hoog de lucht in!
 - Je held draagt een **bierfles als muts**.
 
+### Power-ups lager zetten
+
+Op elke power-up-kaart in de winkel staat links het niveau dat **aan** staat (met ◀ ▶ om het lager of weer hoger te zetten) en rechts wat je **hebt** (bijv. "heb MAX"). Zo kun je Dash MAX hebben maar op niveau 2 spelen.
+
+### Prestaties
+
+Op het titelscherm zit **🏆 Prestaties**: 40 doelen van makkelijk (je eerste potje: 1 flesje) tot heel moeilijk (500 flesjes verdienen: 30 flesjes). Haal je er een, dan komt er een melding in beeld en krijg je de flesjes meteen.
+
 ### Shop en skins
 
 Op het titelscherm zit de **Shop**. Daar draai je aan een rad en win je een nieuwe **skin**: andere kleren en een ander flesje op je hoofd. De eerste keer draaien kost 5 flesjes, daarna elke keer 5 meer (10, 15, 20 …). Je wint altijd een skin die je nog niet had. Bij "Jouw skins" tik je een skin aan om hem aan te trekken.
@@ -55,6 +63,10 @@ Elke eindbaas heeft zijn eigen aanvallen, een eigen **ritme** (de pauzes tussen 
 | 🌋 Vulkaan | De Brouwdraak | 120 | vuurballen, lavaregen, duikvlucht | **Vuurspiraal**: vuurballen in een rondje, 2 golven | steeds sneller |
 | 🦇 Grot (dicht plafond!) | De Salamander | 150 | kruipt razendsnel over vloer, muren en plafond; vlucht naar de overkant als je hem raakt | **Tongslurp**: trekt je met zijn tong naar zich toe en bijt dan (HAP!) | snel-snel-snel, even wachten |
 | 🦒 Savanne | De Lepelaar | 170 | lepelpik (rent op je af), waaier van veren | **Geen zwaartekracht!** Elke 5 seconden 3 seconden zweven, en hij stuitert als een flipperbal rond | elke 5 seconden |
+| 🍺 Kroeg (gladde bierplassen) | De Kroegbaas | 190 | schuift bierpullen over de vloer, gooit flessen die in scherven springen | **Laatste ronde!** Het licht gaat uit en hij stormt op je af | tik-tak-tik-tak |
+| 🏭 Fabriek (lopende banden) | De Brouwmachine | 210 | kroonkurkenkanon, de hele vloer wordt een lopende band | **De Pers**: komt naar beneden waar jij staat | tuf, tuf, tuf-tuf |
+| 🛝 Speeltuin (trampolines) | De Eenwielerclown | 230 | eenwieler heen en weer, stuiterballen | **Taart in je gezicht!** Even zie je bijna niks | hop... hop-hop |
+| 🌙 Maan (lage zwaartekracht) | Het Moederschip | 260 | lasers, laat mini-ufo's los | **Trekstraal**: trekt je omhoog | bliep... bloep |
 
 Daarna begint het opnieuw met Rivier 2, en alles is sterker.
 
@@ -70,6 +82,10 @@ Elk monster heeft een eigen manier om hem te verslaan. Het tekentje boven zijn h
 | 🌋 Vulkaan | Lavalager ➶ (ontploft), Brouwketel-golem ⤓ (schokgolven) | pterodactyl ⤓ (scheert heen en weer) |
 | 🦇 Grot | Mijnwerkersmol (graaft onder de grond, alleen te raken als hij boven is) | hopvleermuis ⚔ (hangt onder platforms, komt op je af als je dichtbij komt) |
 | 🦒 Savanne | Neushoorn ➶ (stormt op je af) | gieren (in groepjes, vliegen als een raket op je af, 2,5× zo snel) |
+| 🍺 Kroeg | Darter ⚔ (gooit dartpijlen), Uitsmijter ⤓ | vliegende bierpul ➶ (druppelt schuim) |
+| 🏭 Fabriek | Robot ⚔ (schiet kroonkurken), Stoomketel ⤓ (stoomwolken) | drone ➶ (laat flessen vallen) |
+| 🛝 Speeltuin | Wipkip ⤓ (hopt naar je toe), Zandbakmonster ⚔ (gooit zand) | ballon ➶ |
+| 🌙 Maan | Alien ⚔ (laser), Kraterkruiper ⤓ | ufo ➶ (trekstraal) |
 | Overal, zeldzaam | Gouden flesje met pootjes: vang hem voor een heel flesje! | |
 
 Op sommige platforms liggen **spikes**: niet aanraken, ook niet als je erop springt! In de Grot hangen **stalactieten** aan het plafond: ze vallen als je eronder loopt en doen ook pijn als ze nog hangen.
@@ -134,6 +150,7 @@ Grot gebruikt de Bergmars, Savanne de Bierpolka. Een nieuw liedje maken? Voeg in
 | `js/krachten.js` | effecten van Reservevat, Boerbom en Flesmaatje |
 | `js/schermen.js` | titelscherm, instellingen en winkel |
 | `js/shop.js` | de shop met het draairad en je skins |
+| `js/prestaties.js` | de 40 prestaties, de tellers en het prestatiescherm |
 | `js/iconen.js` | de icoontjes van de power-ups en de upgrade-keuzes |
 | `js/main.js` | zet alles aan |
 | `manifest.webmanifest`, `icoon-*.png` | zodat de game als app op je beginscherm kan |

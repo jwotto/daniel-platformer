@@ -77,14 +77,14 @@ class Shop extends Phaser.Scene {
     }).setOrigin(0.5, 0);
     this.vakjes = SKINS.map((k, i) => {
       // 6 per rij, 2 rijen
-      const x = 492 + (i % 6) * 75, y = 92 + Math.floor(i / 6) * 152, w = 70, h = 144;
+      const x = 492 + (i % 6) * 75, y = 88 + Math.floor(i / 6) * 100, w = 70, h = 94;
       const v = {
         k, x, y, w, h,
         g: this.add.graphics(),
-        img: this.add.image(x + w / 2, y + 108, 'skin_' + k.id).setOrigin(0.5, 1).setScale(0.3),
-        naam: this.add.text(x + w / 2, y + h - 6, k.naam, { fontFamily: FONT, fontSize: '12px', fontStyle: 'bold', color: '#f3ead6', align: 'center', wordWrap: { width: w - 4 }, lineSpacing: -3 }).setOrigin(0.5, 1),
+        img: this.add.image(x + w / 2, y + 68, 'skin_' + k.id).setOrigin(0.5, 1).setScale(0.2),
+        naam: this.add.text(x + w / 2, y + h - 4, k.naam, { fontFamily: FONT, fontSize: '11px', fontStyle: 'bold', color: '#f3ead6', align: 'center', wordWrap: { width: w - 4 }, lineSpacing: -3 }).setOrigin(0.5, 1),
         kroon: k.baas ? this.add.text(x + w - 4, y + 4, '♛', { fontFamily: FONT, fontSize: '16px', color: '#f2c14e' }).setOrigin(1, 0) : null,
-        slot: this.add.text(x + w / 2, y + 58, '?', { fontFamily: FONT_TITEL, fontSize: '40px', color: '#5a6a9a' }).setOrigin(0.5),
+        slot: this.add.text(x + w / 2, y + 38, '?', { fontFamily: FONT_TITEL, fontSize: '30px', color: '#5a6a9a' }).setOrigin(0.5),
       };
       this.add.zone(x, y, w, h).setOrigin(0).setInteractive({ useHandCursor: true }).on('pointerup', () => this.trekAan(v));
       return v;
@@ -128,6 +128,7 @@ class Shop extends Phaser.Scene {
     if (kans.length === 0 || PROFIEL.flessen < kost) { this.schud(); return; }
     PROFIEL.flessen -= kost;
     PROFIEL.draaien++;
+    statTel('draai');
     const prijs = Phaser.Utils.Array.GetRandom(kans);
     // direct bewaren, zodat je je prijs niet kwijtraakt als je de pagina sluit
     PROFIEL.skins.push(prijs.id);
@@ -158,6 +159,7 @@ class Shop extends Phaser.Scene {
     bewaarProfiel();
     maakSpelerTexturen(this);
     Geluid.effect('prijs');
+    checkPrestaties(this);
     this.vernieuw();
     const flits = this.add.rectangle(0, 0, 960, 540, 0xf2c14e, 0.45).setOrigin(0).setDepth(50);
     this.tweens.add({ targets: flits, alpha: 0, duration: 500, onComplete: () => flits.destroy() });

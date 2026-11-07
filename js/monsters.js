@@ -10,6 +10,10 @@ const ZWAK = {
   fust: 'stamp', vleermuis: 'slash', adelaar: 'slash',
   lava: 'pijl', golem: 'stamp', vuurmot: 'slash', ptero: 'stamp',
   neushoorn: 'pijl',
+  darter: 'slash', uitsmijter: 'stamp', bierpul: 'pijl',
+  robot: 'slash', stoomketel: 'stamp', drone: 'pijl',
+  wipkip: 'stamp', zandmonster: 'slash', ballon: 'pijl',
+  alien: 'slash', kraterkruiper: 'stamp', ufo: 'pijl',
 };
 const ZWAK_TEKST = { slash: 'Alleen slaan! ⚔', pijl: 'Alleen schieten! ➶', stamp: 'Spring erop! ⤓', boven: 'Wacht tot hij boven is!' };
 
@@ -54,6 +58,10 @@ class MonsterDeel {
       this.maakMol(x + w / 2, y, x, x + w);
     } else if (id === 'savanne') {
       this.maakNeushoorn(x + w / 2, y, x, x + w);
+    } else if (NIEUW_GROND[id]) {
+      // kroeg, fabriek, speeltuin, maan: kies een van de twee grondmonsters
+      const [a, b] = NIEUW_GROND[id];
+      this.maakNieuwLoper(r < 0.5 ? a : b, x + w / 2, y, x, x + w);
     } else {
       this.maakKruiper(x + w / 2, y, x, x + w);
     }
@@ -66,6 +74,7 @@ class MonsterDeel {
     else if (id === 'berg') this.maakVlieger('adelaar', 'adelaar', x + w / 2, Phaser.Math.Between(80, 140));
     else if (id === 'vulkaan') this.maakVlieger('ptero', 'ptero', x + w / 2, hoog);
     else if (id === 'grot') { if (y <= 420) this.maakVleermuis(x + w / 2, y + 48); }
+    else if (NIEUW_LUCHT[id]) this.maakVlieger(NIEUW_LUCHT[id], NIEUW_LUCHT[id], x + w / 2, hoog);
     else if (id === 'savanne') {
       // gieren komen in groepjes, maar minder vaak (een groep telt als 4 gewone vliegers)
       if (Math.random() < 0.25) {
@@ -77,6 +86,18 @@ class MonsterDeel {
       }
     }
     else this.maakVlieger('vliegvis', 'vliegvis', x + w / 2, hoog);
+  }
+
+  // Monsters van de kroeg, fabriek, speeltuin en maan (lopen over een platform)
+  maakNieuwLoper(soort, x, y, minX, maxX) {
+    const L = this.moeilijkheid(x), inf = NIEUW_INFO[soort];
+    const v = this.maakLoper(soort, soort, x, y, minX, maxX, inf.bw, inf.bh);
+    v.hp = inf.hp + Math.floor(L * inf.erbij);
+    v.snelheid = inf.snel + Math.min(40, L * 6);
+    v.shots = inf.shots;
+    v.actieT = 1 + Math.random() * 1.5;
+    if (soort === 'zandmonster') { v.verstopt = true; v.setAlpha(0.5).setScale(1, 0.5); }
+    return v;
   }
 
   // Grot: een mol met een mijnlamp. Graaft onder de grond en komt dan boven.
@@ -199,7 +220,9 @@ class MonsterDeel {
     this.vonken.explode(24, v.x, v.y - 25);
     v.destroy();
     PROFIEL.flessen++;
+    statTel('goud'); statTel('flessenTotaal');
     bewaarProfiel();
+    checkPrestaties(this);
     this.popTekst('Gouden flesje! +1 flesje');
     Geluid.effect('flesVol');
     this.tweens.add({ targets: [this.flesGlas, this.flesBier, this.flesRand], scale: 1.25, yoyo: true, duration: 150 });
@@ -331,6 +354,8 @@ class MonsterDeel {
             v.storm = 1.5; Geluid.effect('dash');
             this.vonken.explode(5, v.x, v.y);
           } else patrouille(v, 1);
+        } else if (NIEUW_INFO[v.soort]) {
+          this.nieuwLoperUpdate(v, dt, dx, dy, inBeeld, patrouille);
         } else if (v.soort === 'goud') {
           // rent weg als je dichtbij komt
           if (Math.abs(dx) < 260) { v.richting = -Math.sign(dx) || 1; patrouille(v, 4.5); }
@@ -338,6 +363,8 @@ class MonsterDeel {
         } else {
           patrouille(v, 1); // kruiper, ijsklontjes
         }
+      } else if (v.soort === 'bierpul' || v.soort === 'drone' || v.soort === 'ufo' || v.soort === 'ballon') {
+        this.nieuwVliegerUpdate(v, dt, dx, dy, inBeeld);
       } else if (v.soort === 'gier') {
         // vliegt als een raket op je af (draait langzaam bij)
         if (!inBeeld && !v.vx) return;
@@ -449,4 +476,134 @@ class MonsterDeel {
     });
   }
 }
+
+// ---------- KROEG, FABRIEK, SPEELTUIN, MAAN ----------
+const NIEUW_GROND = { kroeg: ['darter', 'uitsmijter'], fabriek: ['robot', 'stoomketel'], speeltuin: ['wipkip', 'zandmonster'], maan: ['alien', 'kraterkruiper'] };
+const NIEUW_LUCHT = { kroeg: 'bierpul', fabriek: 'drone', speeltuin: 'ballon', maan: 'ufo' };
+// bw/bh = grootte van zijn lijf, hp + erbij×moeilijkheid, snel = loopsnelheid
+const NIEUW_INFO = {
+  darter: { bw: 26, bh: 44, hp: 2, erbij: 0.6, snel: 50, shots: 3 },
+  uitsmijter: { bw: 40, bh: 60, hp: 4, erbij: 0.8, snel: 35, shots: 5 },
+  robot: { bw: 30, bh: 42, hp: 2, erbij: 0.6, snel: 55, shots: 3 },
+  stoomketel: { bw: 40, bh: 40, hp: 3, erbij: 0.6, snel: 0, shots: 4 },
+  wipkip: { bw: 32, bh: 36, hp: 2, erbij: 0.6, snel: 0, shots: 3 },
+  zandmonster: { bw: 36, bh: 30, hp: 2, erbij: 0.6, snel: 30, shots: 3 },
+  alien: { bw: 26, bh: 44, hp: 2, erbij: 0.7, snel: 50, shots: 4 },
+  kraterkruiper: { bw: 44, bh: 30, hp: 3, erbij: 0.7, snel: 35, shots: 4 },
+};
+
+MonsterDeel.prototype.nieuwLoperUpdate = function (v, dt, dx, dy, inBeeld, patrouille) {
+  v.actieT -= dt;
+  const dichtbij = inBeeld && Math.abs(dx) < 420;
+  if (v.soort === 'darter') {
+    // gooit een dartpijltje met een boogje naar je
+    if (v.actieT <= 0 && dichtbij) {
+      v.actieT = 2.4; v.setFlipX(dx > 0);
+      this.kogel('dart', v.x, v.y - 34, Phaser.Math.Clamp(dx * 1.2, -360, 360), -260, 900).setRotation(dx > 0 ? 0 : Math.PI);
+      Geluid.effect('schiet');
+    } else patrouille(v, 1);
+  } else if (v.soort === 'uitsmijter') {
+    // loopt op je af als je in de buurt bent: "Jij komt er niet in!"
+    if (dichtbij && Math.abs(dy) < 80) { v.richting = Math.sign(dx) || 1; patrouille(v, 2.2); }
+    else patrouille(v, 1);
+  } else if (v.soort === 'robot') {
+    // schiet kroonkurken recht vooruit
+    if (v.actieT <= 0 && dichtbij && Math.abs(dy) < 60) {
+      v.actieT = 2; v.setFlipX(dx > 0); v.body.velocity.x = 0;
+      this.kogel('kurkje', v.x + Math.sign(dx) * 18, v.y - 26, Math.sign(dx) * 340, 0, 0);
+      Geluid.effect('tink');
+    } else patrouille(v, 1);
+  } else if (v.soort === 'stoomketel') {
+    // staat stil en blaast af en toe een stoomwolk omhoog (niet boven hem staan!)
+    v.body.velocity.x = 0;
+    if (v.actieT <= 0 && inBeeld) {
+      v.actieT = 2.6;
+      for (let i = 0; i < 3; i++) this.time.delayedCall(i * 120, () => {
+        if (!v.active) return;
+        const k = this.kogel('stoom', v.x, v.y - 42, 0, -260, 0); k.leeft = 0.9; k.golf = true;
+        this.tweens.add({ targets: k, scale: 1.8, alpha: 0.4, duration: 900 });
+      });
+      Geluid.effect('dash');
+      this.tweens.add({ targets: v, scaleY: 0.85, yoyo: true, duration: 120 });
+    }
+  } else if (v.soort === 'wipkip') {
+    // hopt in boogjes naar je toe
+    const opGrond = v.body.blocked.down || v.body.touching.down;
+    if (opGrond) {
+      v.body.velocity.x = 0;
+      if (v.actieT <= 0 && dichtbij) {
+        v.actieT = 1.1; v.setFlipX(dx > 0);
+        v.body.setVelocity(Phaser.Math.Clamp(dx, -170, 170), -430);
+        Geluid.effect('boing');
+      }
+    }
+  } else if (v.soort === 'zandmonster') {
+    // verstopt in de zandbak; komt tevoorschijn en gooit een zandbal
+    if (v.verstopt) {
+      patrouille(v, 1);
+      if (v.actieT <= 0 && dichtbij) {
+        v.verstopt = false; v.actieT = 1.6; v.body.velocity.x = 0;
+        v.setAlpha(1); this.tweens.add({ targets: v, scaleY: 1, duration: 150, ease: 'Back.easeOut' });
+        this.time.delayedCall(350, () => { if (v.active) this.kogel('zandbal', v.x, v.y - 30, Phaser.Math.Clamp(dx * 1.1, -340, 340), -320, 900); });
+      }
+    } else {
+      v.body.velocity.x = 0; v.setFlipX(dx > 0);
+      if (v.actieT <= 0) { v.verstopt = true; v.actieT = 2; v.setAlpha(0.5); this.tweens.add({ targets: v, scaleY: 0.5, duration: 150 }); }
+    }
+  } else if (v.soort === 'alien') {
+    // schiet een laserstraal
+    if (v.actieT <= 0 && dichtbij && Math.abs(dy) < 70) {
+      v.actieT = 2.3; v.setFlipX(dx > 0); v.body.velocity.x = 0;
+      const k = this.kogel('laser', v.x + Math.sign(dx) * 16, v.y - 30, Math.sign(dx) * 460, 0, 0);
+      k.setFlipX(dx < 0);
+      Geluid.effect('laser');
+    } else patrouille(v, 1);
+  } else if (v.soort === 'kraterkruiper') {
+    // trekt zich in zijn schild als je dichtbij komt
+    const ver = Math.abs(dx) > 140;
+    v.setScale(1, ver ? 1 : 0.8);
+    patrouille(v, ver ? 1 : 0);
+  }
+};
+
+MonsterDeel.prototype.nieuwVliegerUpdate = function (v, dt, dx, dy, inBeeld) {
+  const sp = this.speler;
+  v.fase += dt;
+  v.schietT -= dt;
+  if (v.soort === 'ballon') {
+    // dobbert langzaam op je af en op en neer
+    if (Math.abs(dx) < 500) v.x += Math.sign(dx) * v.jaagSnelheid * 0.5 * dt;
+    v.y = v.basisY + Math.sin(v.fase * 1.4) * 22;
+    v.rotation = Math.sin(v.fase * 2) * 0.12;
+    return;
+  }
+  // bierpul, drone en ufo zweven boven je
+  const doelX = sp.x, doelY = Math.max(90, sp.y - 190);
+  if (Math.abs(dx) < 500) {
+    v.x += Phaser.Math.Clamp(doelX - v.x, -1, 1) * Math.min(Math.abs(doelX - v.x), v.jaagSnelheid * 1.2 * dt) * (Math.abs(doelX - v.x) > 1 ? 1 : 0);
+    v.basisY += Phaser.Math.Clamp(doelY - v.basisY, -40 * dt, 40 * dt);
+  }
+  v.y = v.basisY + Math.sin(v.fase * 3) * 8;
+  v.setFlipX(dx > 0);
+  if (v.soort === 'ufo') {
+    // trekstraal: sta je eronder, dan word je omhoog getrokken
+    if (!v.straal) {
+      v.straal = this.add.triangle(0, 0, 0, 0, -50, 230, 50, 230, 0x7aff8a, 0.25).setOrigin(0.5, 0).setDepth(5).setVisible(false);
+      v.once('destroy', () => v.straal.destroy());
+    }
+    const aan = (v.fase % 4) > 2.4 && inBeeld;
+    v.straal.setVisible(aan).setPosition(v.x, v.y + 10);
+    if (aan && Math.abs(dx) < 45 && sp.y > v.y && sp.y < v.y + 260) sp.body.setVelocityY(Math.max(sp.body.velocity.y - 60, -260));
+    v.rotation = Math.sin(v.fase * 4) * 0.08;
+    return;
+  }
+  if (v.schietT <= 0 && inBeeld && Math.abs(dx) < 60) {
+    v.schietT = 2.2;
+    if (v.soort === 'bierpul') this.kogel('schuimdruppel', v.x, v.y + 20, 0, 120, 900);
+    else this.kogel('flesbom', v.x, v.y + 16, 0, 80, 1200);
+    Geluid.effect('plop');
+  }
+  if (v.soort === 'bierpul') v.rotation = Math.sin(v.fase * 5) * 0.2;
+};
+
 voegToeAanSpel(MonsterDeel);
