@@ -102,20 +102,45 @@ const Geluid = (() => {
   };
 
   // ---------- MUZIEK: polka in 2/4 met gabber-drums ----------
-  // 8 maten van elk 8 zestiende noten. 0 = rust.
+  // 16 maten van elk 8 zestiende noten: eerst een couplet, dan een refrein. 0 = rust.
+  // De melodie gebruikt vooral de noten van het akkoord eronder, zo klinkt het mooi samen.
   const MELODIE = [
-    72, 76, 79, 76, 72, 76, 79, 84,
-    83, 79, 76, 79, 84, 0, 79, 0,
-    71, 74, 77, 74, 71, 74, 77, 79,
-    83, 79, 77, 74, 79, 0, 74, 0,
-    76, 77, 79, 81, 79, 77, 76, 74,
-    72, 76, 79, 84, 79, 76, 72, 76,
-    74, 77, 79, 83, 81, 79, 77, 74,
-    72, 0, 79, 0, 72, 0, 0, 0,
+    // couplet
+    72, 76, 79, 76, 72, 76, 79, 84, //  C
+    81, 76, 72, 76, 81, 0, 76, 0, //    Am
+    74, 77, 81, 77, 74, 77, 81, 86, //  Dm
+    83, 79, 77, 74, 79, 0, 71, 0, //    G7
+    76, 77, 79, 81, 79, 77, 76, 74, //  C
+    76, 80, 83, 80, 76, 0, 80, 0, //    E7
+    81, 80, 81, 83, 84, 83, 81, 76, //  Am
+    79, 77, 74, 71, 74, 0, 79, 0, //    G7
+    // refrein
+    77, 81, 84, 81, 77, 81, 84, 81, //  F
+    79, 76, 72, 76, 79, 0, 84, 0, //    C
+    83, 79, 74, 79, 83, 86, 83, 79, //  G
+    81, 76, 72, 76, 81, 0, 76, 0, //    Am
+    77, 76, 77, 81, 84, 81, 77, 76, //  F
+    76, 74, 76, 79, 84, 79, 76, 72, //  C
+    74, 77, 79, 83, 86, 83, 79, 77, //  G7
+    76, 0, 79, 0, 72, 0, 0, 0, //       C
   ];
-  const C = { bas: [48, 43], stoot: [60, 64, 67] };
-  const G = { bas: [43, 50], stoot: [59, 62, 65] };
-  const AKKOORDEN = [C, C, G, G, C, C, G, C];
+  // Elk akkoord: twee basnoten (hoempa!) en drie noten voor de stootjes ertussen
+  const AK = {
+    C: { bas: [48, 43], stoot: [60, 64, 67] },
+    Am: { bas: [45, 40], stoot: [60, 64, 69] },
+    Dm: { bas: [50, 45], stoot: [62, 65, 69] },
+    E7: { bas: [40, 47], stoot: [59, 62, 68] },
+    F: { bas: [41, 48], stoot: [60, 65, 69] },
+    G: { bas: [43, 50], stoot: [59, 62, 67] },
+    G7: { bas: [43, 50], stoot: [59, 65, 67] },
+  };
+  // het akkoordenschema, één akkoord per maat
+  const SCHEMA = [
+    'C', 'Am', 'Dm', 'G7', 'C', 'E7', 'Am', 'G7', // couplet
+    'F', 'C', 'G', 'Am', 'F', 'C', 'G7', 'C', //    refrein
+  ];
+  const AKKOORDEN = SCHEMA.map(n => AK[n]);
+  const STAPPEN = MELODIE.length;
 
   let speelt = false, volgende = 0, stap = 0, timer = null, tempo = 192, transpositie = 0, loop = 0;
 
@@ -143,7 +168,8 @@ const Geluid = (() => {
     if (pos === 0 || pos === 4) kick(t);
     if (pos === 4) snare(t);
     if (pos % 2 === 1) hihat(t);
-    if (maat === 7 && pos >= 4) snare(t, 0.35);
+    // roffel aan het eind van het couplet en het refrein
+    if ((maat === 7 || maat === 15) && pos >= 4) snare(t, 0.35);
   }
 
   function plan() {
@@ -152,7 +178,7 @@ const Geluid = (() => {
     while (volgende < ctx.currentTime + 0.12) {
       speelStap(stap, volgende, d);
       volgende += d;
-      stap = (stap + 1) % 64;
+      stap = (stap + 1) % STAPPEN;
       if (stap === 0) { loop++; transpositie = loop % 4 === 2 ? 2 : loop % 4 === 3 ? 5 : 0; }
     }
   }
