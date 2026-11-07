@@ -36,12 +36,15 @@
       moet(w.kiest, 'geen keuzescherm na doodgaan');
       w.spelen(); await slaap(300); moet(actief('Winkel'), 'spelen kon al vóór het kiezen');
       doe('upgrade kiezen'); kiesUpgrade(w); moet(PROFIEL.keuze && !w.kiest, 'kiezen werkte niet');
-      doe('kopen en ongedaan'); PROFIEL.flessen = 100; w.vernieuwAlles();
-      w.koop(w.kaarten[0]); const na = PROFIEL.flessen;
+      doe('power-ups: kopen en ongedaan'); PROFIEL.flessen = 100;
+      w.naar('PowerUps'); await wacht(() => actief('PowerUps'), 5000, 'power-upscherm');
+      const pu = scene('PowerUps');
+      pu.koop(pu.kaarten[0]); const na = PROFIEL.flessen;
       moet(PROFIEL.up.dash === 1 && na < 100, 'kopen werkte niet');
-      w.ongedaan(); moet(PROFIEL.up.dash === 0 && PROFIEL.flessen === na + 6, 'ongedaan werkte niet');
-      doe('baas kopen, naar shop en terug'); w.koop(w.baasKaart); moet(PROFIEL.ticket === PROFIEL.regio, 'baas kopen werkte niet');
-      w.naarShop(); await wacht(() => actief('Shop'), 5000, 'shop');
+      pu.ongedaan(); moet(PROFIEL.up.dash === 0 && PROFIEL.flessen === na + 6, 'ongedaan werkte niet');
+      pu.terug(); await wacht(() => actief('Winkel') && !scene('Winkel').kiest, 5000, 'terug naar het menu');
+      doe('baas kopen, naar shop en terug'); moet(scene('Winkel').koopBaas() && PROFIEL.ticket === PROFIEL.regio, 'baas kopen werkte niet');
+      scene('Winkel').naar('Shop'); await wacht(() => actief('Shop'), 5000, 'shop');
       scene('Shop').terug(); await wacht(() => actief('Winkel'), 5000, 'terug naar winkel');
       moet(!scene('Winkel').kiest && PROFIEL.ticket !== false, 'na de shop moest je opnieuw kiezen of was je ticket weg');
       doe('vechten'); scene('Winkel').vechten(); moet(PROFIEL.ticket === false, 'ticket niet opgebruikt');
@@ -209,10 +212,12 @@
       PROFIEL.regio = 2; PROFIEL.startRegio = 0; PROFIEL.flessen = 100;
       scene('Titel').scene.start('Winkel', { meters: 0, regio: 0, baas: false }); await wacht(() => actief('Winkel'), 5000, 'winkel');
       const w = scene('Winkel'); kiesUpgrade(w);
-      moet(w.baasKaart.naam.text === REGIOS[0].baasNaam && w.baasKaart.vinkje.visible, 'baaskaart toont niet Koning Bierpad met vinkje');
+      moet(w.baasN() === 0 && w.tegels.Eindbaas.hint.text.includes('✔'), 'baastegel toont niet Koning Bierpad met vinkje');
       moet(baasBeloning(0) > baasPrijs(0) && baasBeloning(5) > baasPrijs(5), 'beloning niet hoger dan de prijs');
-      w.koop(w.baasKaart); moet(PROFIEL.ticket === 0 && PROFIEL.flessen === 100 - baasPrijs(0), 'opnieuw kopen werkte niet');
-      w.kiesRegio(2); moet(!w.baasKaart.vinkje.visible && w.baasKaart.naam.text === REGIOS[2].baasNaam, 'nieuwe baas heeft een vinkje');
+      w.toonBaas(); moet(w.baasLaag, 'baasvenster gaat niet open');
+      w.koopBaas(); moet(PROFIEL.ticket === 0 && PROFIEL.flessen === 100 - baasPrijs(0), 'opnieuw kopen werkte niet');
+      w.baasLaag.forEach(o => o.destroy()); w.baasLaag = null;
+      w.kiesRegio(2); moet(w.baasN() === 2 && !w.tegels.Eindbaas.hint.text.includes('✔'), 'nieuwe baas heeft een vinkje');
       w.kiesRegio(-2); w.vechten();
       await wacht(() => spelKlaar(0.5) && scene('Spel').baasModus && scene('Spel').n === 0, 8000, 'gevecht tegen Koning Bierpad');
       return 'Koning Bierpad nog eens: prijs ' + baasPrijs(0) + ', beloning ' + baasBeloning(0);
@@ -240,7 +245,8 @@
     async aan() {
       PROFIEL.flessen = 500; PROFIEL.up.dash = 5;
       scene('Titel').scene.start('Winkel', { meters: 0, regio: 0, baas: false }); await wacht(() => actief('Winkel'), 5000, 'winkel');
-      const w = scene('Winkel'); kiesUpgrade(w);
+      kiesUpgrade(scene('Winkel')); scene('Winkel').naar('PowerUps'); await wacht(() => actief('PowerUps'), 5000, 'power-ups');
+      const w = scene('PowerUps');
       const k = w.kaarten.find(k => k.p.id === 'dash');
       moet(k.hebT.text === 'heb MAX' && k.aanT.text === 'aan 5', 'kaart toont niet heb MAX / aan 5');
       w.zetAan(k, -1); w.zetAan(k, -1); w.zetAan(k, -1);
@@ -254,6 +260,7 @@
     // alle knoppen één keer indrukken
     async knoppen() {
       const druk = (sc, tekst) => {
+        if (sc.tegels && sc.tegels[tekst]) { sc.tegels[tekst].z.emit('pointerup'); return; } // tegels in het Game over-menu
         const zones = sc.children.list.filter(o => o.type === 'Zone');
         let t = null, z = null;
         for (const o of sc.children.list) {
@@ -281,20 +288,26 @@
       druk(scene('Instellingen'), 'Verder spelen'); await wacht(() => actief('Spel') && !M().isPaused('Spel'), 4000, 'verder spelen');
       doe('winkel'); scene('Spel').gameOver(); await wacht(() => actief('Winkel'), 5000, 'winkel');
       const w = scene('Winkel'); kiesUpgrade(w);
-      w.kaarten[0].g; w.koop(w.kaarten[1]);
-      druk(w, '↶'); moet(PROFIEL.up.dubbel === 0, 'Ongedaan-knop werkte niet');
-      druk(w, 'Gok'); await wacht(() => actief('Gokkast'), 4000, 'gokkast vanuit winkel');
+      druk(w, 'Power-ups'); await wacht(() => actief('PowerUps'), 4000, 'power-ups vanuit het menu');
+      const pu = scene('PowerUps'); pu.koop(pu.kaarten[1]);
+      druk(pu, 'Ongedaan'); moet(PROFIEL.up.dubbel === 0, 'Ongedaan-knop werkte niet');
+      druk(pu, 'Terug'); await wacht(() => actief('Winkel'), 4000, 'terug naar het menu');
+      druk(scene('Winkel'), 'Eindbaas'); moet(scene('Winkel').baasLaag, 'eindbaasvenster ging niet open');
+      druk(scene('Winkel'), 'Sluiten'); moet(!scene('Winkel').baasLaag, 'eindbaasvenster ging niet dicht');
+      druk(scene('Winkel'), 'Level'); await wacht(() => actief('LevelKeuze'), 4000, 'levelscherm');
+      druk(scene('LevelKeuze'), 'Sluiten'); await wacht(() => actief('Winkel') && !actief('LevelKeuze'), 4000, 'terug van levelscherm');
+      druk(scene('Winkel'), 'Gokkast'); await wacht(() => actief('Gokkast'), 4000, 'gokkast vanuit winkel');
       druk(scene('Gokkast'), 'Terug'); await wacht(() => actief('Winkel'), 4000, 'terug naar winkel');
       druk(scene('Winkel'), 'Dieren'); await wacht(() => actief('Dieren'), 4000, 'dieren vanuit winkel');
       druk(scene('Dieren'), 'Terug'); await wacht(() => actief('Winkel'), 4000, 'terug naar winkel');
       druk(scene('Winkel'), 'Prestaties'); await wacht(() => actief('Prestaties'), 4000, 'prestaties vanuit winkel');
       druk(scene('Prestaties'), 'Terug'); await wacht(() => actief('Winkel') && !scene('Winkel').kiest, 4000, 'terug naar winkel');
-      druk(scene('Winkel'), 'Shop'); await wacht(() => actief('Shop'), 4000, 'shop vanuit winkel');
+      druk(scene('Winkel'), 'Skins'); await wacht(() => actief('Shop'), 4000, 'shop vanuit winkel');
       druk(scene('Shop'), 'Terug'); await wacht(() => actief('Winkel'), 4000, 'terug naar winkel');
       druk(scene('Winkel'), 'Spelen'); await wacht(() => spelKlaar(0.5), 8000, 'spelen');
       scene('Spel').gameOver(); await wacht(() => actief('Winkel'), 5000, 'winkel');
       druk(scene('Winkel'), 'Menu'); await wacht(() => actief('Titel'), 4000, 'menu vanuit winkel');
-      return 'Start, Shop, Draai, Terug, Prestaties, Hoofdscherm, Verder spelen, Ongedaan, Gok↔winkel, Dieren↔winkel, Prestaties↔winkel, Shop↔winkel, Spelen en Menu werken';
+      return 'Start, Shop, Draai, Terug, Prestaties, Hoofdscherm, Verder spelen, en in het Game over-menu: Power-ups (kopen/ongedaan), Eindbaas, Level, Gokkast, Dieren, Prestaties, Skins, Spelen en Menu werken';
     },
 
     // regio-trucjes: trampoline, lopende band, bierplas, maan
@@ -328,12 +341,12 @@
       PROFIEL.regio = 3; PROFIEL.startRegio = 0;
       scene('Titel').scene.start('Winkel', { meters: 0, regio: 0, baas: false }); await wacht(() => actief('Winkel'), 5000, 'winkel');
       const w = scene('Winkel'); kiesUpgrade(w);
-      doe('levelknop'); w.levelKnop.z.emit('pointerup'); await wacht(() => actief('LevelKeuze'), 4000, 'levelscherm');
+      doe('leveltegel'); w.tegels.Level.z.emit('pointerup'); await wacht(() => actief('LevelKeuze'), 4000, 'levelscherm');
       const l = scene('LevelKeuze');
       moet(l.kaarten.length === REGIOS.length, 'niet alle levels te zien');
       doe('dicht level'); l.kies(5, l.kaarten[5].c); moet(PROFIEL.startRegio === 0 && actief('LevelKeuze'), 'dicht level kon gekozen worden');
       doe('open level'); l.kies(2, l.kaarten[2].c); await wacht(() => actief('Winkel') && !actief('LevelKeuze'), 10000, 'terug naar winkel');
-      moet(PROFIEL.startRegio === 2 && scene('Winkel').regioTekst.text.includes('Bergen'), 'level niet gekozen');
+      moet(PROFIEL.startRegio === 2 && scene('Winkel').levelHint.text.includes('Bergen'), 'level niet gekozen');
       scene('Winkel').spelen(); await wacht(() => spelKlaar(0.5) && scene('Spel').n === 2, 8000, 'spelen in de Bergen');
       return 'Bergen gekozen met het plaatje, dicht level geweigerd, spel start in de Bergen';
     },

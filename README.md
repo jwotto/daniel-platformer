@@ -31,7 +31,7 @@ Een roguelike platformer van Daniel. Het is een HTML-game, gemaakt met [Phaser 3
 - Elke regio loopt **eindeloos** door en wordt steeds moeilijker: sneller scherm, meer en sterkere vijanden, klimmuren en grote gaten.
 - Vijanden laten **shotjes** vallen. 10 shotjes = **1 vol flesje**. In latere regio's zijn shotjes meer waard.
 - Ga je dood, dan kies je eerst **1 van 3 upgrades** voor je volgende potje. Elke upgrade heeft een plus én een min, bijvoorbeeld *Springveer*: 1.2× zo hoog springen, maar 0.8× zo snel lopen. Of *Gulzig*: 1.5× zoveel shotjes, maar maar 1 hartje. De upgrade geldt alleen voor dat ene potje (ook als je daarin een eindbaas verslaat).
-- Daarna kom je in de **winkel**. Daar koop je power-ups met je flesjes. Alles wat je koopt blijft van jou.
+- Daarna kom je in het **Game over-menu**: grote tegels naar Power-ups, Skins, Dieren, Gokkast, Level, Eindbaas, Prestaties en Menu, en onderaan **▶ Spelen**. Elke tegel heeft een hintje (bijv. "3 te koop!"), en vanuit elk scherm kom je met ← Terug weer in dit menu. Daar koop je power-ups met je flesjes. Alles wat je koopt blijft van jou.
 - In de winkel koop je ook een gevecht met de **eindbaas**. Dat is duur! Versla je hem, dan ga je door naar de volgende regio. Je ticket is op zodra je gaat vechten: verlies je, dan moet je opnieuw betalen.
 - Regio's die je hebt vrijgespeeld kun je in de winkel kiezen als startplek.
 - Af en toe zweeft er een **kebabrol**. Eet je hem op, dan laat je een scheet en vlieg je heel hoog de lucht in!

@@ -293,71 +293,120 @@ const WINKEL_BOVEN = 74, WINKEL_ONDER = 458;
 
 class Winkel extends Phaser.Scene {
   constructor() { super('Winkel'); }
+
+  // Het menu na het doodgaan: grote tegels naar alle schermen, en onderaan Spelen.
   create(data) {
-    // elke keer opnieuw op nul, anders blijft "verder" de tweede keer hangen
     this.weg = false;
     this.data0 = data;
-    // wat je bij dit winkelbezoek gekocht hebt (om ongedaan te kunnen maken)
     this.gekocht = data.gekocht || [];
     const regio = data.regio || 0;
     this.add.image(0, 0, 'lucht_' + regioVan(regio).id).setOrigin(0);
-    this.add.rectangle(0, 0, 960, 540, 0x0a1028, 0.62).setOrigin(0);
-
-    this.add.text(480, 8, 'Game over', {
+    this.add.rectangle(0, 0, 960, 540, 0x0a1028, 0.6).setOrigin(0);
+    this.add.text(480, 6, 'Game over', {
       fontFamily: FONT_TITEL, fontSize: '36px', color: '#d1495b', stroke: '#0a1028', strokeThickness: 7,
     }).setOrigin(0.5, 0);
     const sub = data.baas
       ? `${regioVan(regio).baasNaam} was te sterk! Word sterker en probeer opnieuw.`
       : `Je kwam ${data.meters} m ver in ${levelNaam(regio)}  ·  beste: ${PROFIEL.beste} m`;
     this.subTekst = sub;
-    this.sub = this.add.text(480, 52, sub, { fontFamily: FONT, fontSize: '16px', fontStyle: 'bold', color: '#f3ead6' }).setOrigin(0.5, 0);
+    this.sub = this.add.text(480, 50, sub, { fontFamily: FONT, fontSize: '16px', fontStyle: 'bold', color: '#f3ead6' }).setOrigin(0.5, 0);
     this.add.image(918, 12, 'fles_mini').setOrigin(0, 0);
     this.flesTekst = this.add.text(910, 16, '', {
       fontFamily: FONT, fontSize: '26px', fontStyle: 'bold', color: '#f3ead6', stroke: '#0a1028', strokeThickness: 5,
     }).setOrigin(1, 0);
-    this.shotTekst = this.add.text(940, 54, '', { fontFamily: FONT, fontSize: '14px', color: '#f2c14e' }).setOrigin(1, 0);
     maakInstellingenKnop(this, 30, 28);
-    // kleine knoppen linksboven: aankoop ongedaan maken en naar de shop met skins
-    // de balk bovenaan: alles is altijd te zien
-    this.ongedaanKnop = knop(this, 56, 9, 50, 38, '↶', 0xa9c4ee, () => this.ongedaan(), 22);
-    knop(this, 112, 9, 88, 38, '🎡 Shop', 0x3cc8bb, () => this.naar('Shop'), 16);
-    knop(this, 206, 9, 78, 38, '🎰 Gok', 0xd1495b, () => this.naar('Gokkast'), 16);
-    knop(this, 290, 9, 96, 38, '🐾 Dieren', 0x5fd38a, () => this.naar('Dieren'), 16);
-    knop(this, 590, 9, 128, 38, '🏆 Prestaties', 0xf2c14e, () => this.naar('Prestaties'), 16);
-    knop(this, 724, 9, 90, 38, '⌂ Menu', 0xa9c4ee, () => this.naarMenu(), 16);
 
-    // alle kaarten zitten in een lijst die je kunt scrollen (muiswiel, pijltjes of slepen met je vinger)
-    this.lijst = this.add.container(0, 0);
-    const vak = this.make.graphics({ add: false }).fillRect(0, WINKEL_BOVEN, 960, WINKEL_ONDER - WINKEL_BOVEN);
-    this.lijst.setMask(vak.createGeometryMask());
-    // de eindbaas staat altijd rechtsboven, de power-ups vullen de rest
-    const plek = i => [15 + (i % 5) * 188, 80 + Math.floor(i / 5) * 186];
-    const vrij = [];
-    for (let i = 0; i < POWERUPS.length + 1; i++) if (i !== 4) vrij.push(i);
-    this.kaarten = POWERUPS.map((p, i) => this.maakKaart(p, ...plek(vrij[i])));
-    this.baasKaart = this.maakKaart(null, ...plek(4));
-    this.maakScroll(Math.ceil((POWERUPS.length + 1) / 5) * 186 + 80 - 10);
+    // de tegels: 4 naast elkaar, 2 rijen
+    const T = [
+      { naam: 'Power-ups', kleur: 0x3cc8bb, actie: () => this.naar('PowerUps') },
+      { naam: 'Skins', kleur: 0xff8ac8, actie: () => this.naar('Shop') },
+      { naam: 'Dieren', kleur: 0x5fd38a, actie: () => this.naar('Dieren') },
+      { naam: 'Gokkast', kleur: 0xd1495b, actie: () => this.naar('Gokkast') },
+      { naam: 'Level', kleur: 0x7a5cff, actie: () => this.openLevels() },
+      { naam: 'Eindbaas', kleur: 0xc8501c, actie: () => this.toonBaas() },
+      { naam: 'Prestaties', kleur: 0xf2c14e, actie: () => this.naar('Prestaties') },
+      { naam: 'Menu', kleur: 0xa9c4ee, actie: () => this.naarMenu() },
+    ];
+    this.tegels = {};
+    T.forEach((t, i) => { this.tegels[t.naam] = this.maakTegel(t, 36 + (i % 4) * 226, 84 + Math.floor(i / 4) * 180); });
 
-    // onderaan: startregio kiezen, spelen, en vechten tegen de eindbaas
-    // de levelknop: een plaatje van het level waar je start; tik erop om een ander level te kiezen
-    this.levelKnop = knop(this, 16, 466, 312, 62, '', 0x22336a, () => this.openLevels());
-    this.levelPlaatje = this.add.image(62, 497, 'mini_rivier').setScale(0.42);
-    this.levelRand = this.add.graphics();
-    this.regioTekst = this.add.text(110, 497, '', { fontFamily: FONT, fontSize: '19px', fontStyle: 'bold', color: '#f3ead6', lineSpacing: -4 }).setOrigin(0, 0.5);
-    this.add.text(310, 497, '▼', { fontFamily: FONT, fontSize: '18px', color: '#f2c14e' }).setOrigin(1, 0.5);
-    this.levelKnop.t.setColor('#f3ead6');
-    knop(this, 340, 470, 280, 54, 'Spelen →', 0x3cc8bb, () => this.spelen());
-    this.vechtKnop = knop(this, 650, 470, 290, 54, '⚔ Vecht tegen de baas!', 0xd1495b, () => this.vechten());
+    this.speelKnop = knop(this, 270, 456, 420, 62, '', 0xf2c14e, () => this.spelen(), 26);
     this.input.keyboard.on('keydown-ENTER', () => this.spelen());
     this.input.keyboard.on('keydown-SPACE', () => this.spelen());
     this.vernieuwAlles();
-    // terug uit de shop? dan heb je al gekozen
+    // terug uit een ander scherm? dan heb je al gekozen
     if (data.keuzeGedaan) {
       this.kiest = false;
       const k = keuzeVan(PROFIEL.keuze);
       if (k.id) this.sub.setText(this.subTekst + '   ·   Volgende potje: ✦ ' + k.naam);
     } else this.toonKeuzes();
     meldOpenPrestaties(this);
+  }
+
+  // een grote tegel met een plaatje, een naam en een hintje eronder
+  maakTegel(t, x, y) {
+    const w = 210, h = 164;
+    const c = this.add.container(x + w / 2, y + h / 2);
+    const g = this.add.graphics();
+    const teken = (licht) => {
+      g.clear();
+      g.fillStyle(0x0a1028, 0.4).fillRoundedRect(-w / 2 + 3, -h / 2 + 6, w, h, 18);
+      g.fillStyle(licht ? 0x2c4387 : 0x16244f, 1).fillRoundedRect(-w / 2, -h / 2, w, h, 18);
+      g.fillStyle(t.kleur, 1).fillRoundedRect(-w / 2, -h / 2, w, 10, { tl: 18, tr: 18, bl: 0, br: 0 });
+      g.lineStyle(licht ? 4 : 3, licht ? 0xf2c14e : t.kleur, 1).strokeRoundedRect(-w / 2, -h / 2, w, h, 18);
+    };
+    teken(false);
+    const naam = this.add.text(0, 22, t.naam, { fontFamily: FONT_TITEL, fontSize: '24px', color: '#f3ead6' }).setOrigin(0.5);
+    const hint = this.add.text(0, 52, '', { fontFamily: FONT, fontSize: '15px', fontStyle: 'bold', color: '#a9b6d8', align: 'center' }).setOrigin(0.5);
+    c.add([g, naam, hint]);
+    const tegel = { t, c, g, naam, hint, plaatje: null, x, y, w, h };
+    const z = this.add.zone(x, y, w, h).setOrigin(0).setInteractive({ useHandCursor: true })
+      .on('pointerover', () => { teken(true); this.tweens.add({ targets: c, scale: 1.04, duration: 90 }); })
+      .on('pointerout', () => { teken(false); this.tweens.add({ targets: c, scale: 1, duration: 120 }); })
+      .on('pointerdown', () => { this.tweens.add({ targets: c, scale: 0.92, duration: 60 }); Geluid.effect('klik'); })
+      .on('pointerup', () => { this.tweens.add({ targets: c, scale: 1, duration: 220, ease: 'Back.easeOut' }); if (!this.kiest) t.actie(); });
+    tegel.z = z;
+    return tegel;
+  }
+
+  // plaatje op een tegel zetten (een textuur, of een emoji)
+  zetPlaatje(tegel, key, schaal, emoji) {
+    if (tegel.plaatje) tegel.plaatje.destroy();
+    tegel.plaatje = emoji
+      ? this.add.text(0, -30, emoji, { fontFamily: FONT, fontSize: '50px' }).setOrigin(0.5)
+      : this.add.image(0, -30, key).setScale(schaal);
+    if (!emoji && tegel.plaatje.displayHeight > 84) tegel.plaatje.setScale(tegel.plaatje.scale * 84 / tegel.plaatje.displayHeight);
+    if (!emoji && tegel.plaatje.displayWidth > 180) tegel.plaatje.setScale(tegel.plaatje.scale * 180 / tegel.plaatje.displayWidth);
+    tegel.c.add(tegel.plaatje);
+  }
+
+  // de hintjes onder de tegels bijwerken
+  vernieuwAlles() {
+    this.flesTekst.setText('× ' + PROFIEL.flessen);
+    PROFIEL.startRegio = Math.min(PROFIEL.startRegio, PROFIEL.regio);
+    const T = this.tegels, n = this.baasN();
+    const teKoop = POWERUPS.filter(p => PROFIEL.up[p.id] < p.max && PROFIEL.flessen >= prijs(p, PROFIEL.up[p.id])).length;
+    this.zetPlaatje(T['Power-ups'], 'icoon_dash', 1.1);
+    T['Power-ups'].hint.setText(teKoop ? `${teKoop} te koop!` : 'nog even sparen').setColor(teKoop ? '#5fd38a' : '#a9b6d8');
+    this.zetPlaatje(T.Skins, 'skin_' + PROFIEL.skin, 0.32);
+    const radOver = RAD_SKINS.some(k => !PROFIEL.skins.includes(k.id));
+    T.Skins.hint.setText(radOver ? `draaien: ${draaiPrijs()} 🍺` : 'alles verzameld!');
+    const dier = DIEREN.find(d => d.id === PROFIEL.dier && PROFIEL.dieren[d.id]);
+    this.zetPlaatje(T.Dieren, 'dier_groot_' + (dier ? dier.id : 'kuiken'), 0.55);
+    T.Dieren.plaatje.setAlpha(dier ? 1 : 0.4);
+    T.Dieren.hint.setText(`${Object.keys(PROFIEL.dieren).length} van ${DIEREN.length}` + (dier ? ` · ${dier.naam} mee` : ''));
+    this.zetPlaatje(T.Gokkast, null, 1, '🎰');
+    T.Gokkast.hint.setText('×2, ×3 of ×5... of niks!');
+    this.zetPlaatje(T.Level, 'mini_' + regioVan(PROFIEL.startRegio).id, 1);
+    T.Level.hint.setText(levelNaam(PROFIEL.startRegio) + (PROFIEL.startRegio < PROFIEL.regio ? ' ✔' : '') + '  ·  wisselen');
+    this.levelHint = T.Level.hint;
+    this.zetPlaatje(T.Eindbaas, 'baas_' + regioVan(n).baas, 0.5);
+    T.Eindbaas.hint.setText(PROFIEL.ticket === n ? 'Gekocht! ⚔ Vechten' : `${baasPrijs(n)} → ${baasBeloning(n)} 🍺` + (n < PROFIEL.regio ? '  ✔' : ''));
+    this.zetPlaatje(T.Prestaties, null, 1, '🏆');
+    T.Prestaties.hint.setText(`${PROFIEL.prestaties.length} van ${PRESTATIES.length}`);
+    this.zetPlaatje(T.Menu, null, 1, '⌂');
+    T.Menu.hint.setText('naar het hoofdmenu');
+    this.speelKnop.t.setText('▶  Spelen in ' + levelNaam(PROFIEL.startRegio));
   }
 
   // Eerst kiezen: 1 van 3 upgrades voor je volgende potje
@@ -406,6 +455,129 @@ class Winkel extends Phaser.Scene {
       laag.forEach(o => o.destroy());
       this.sub.setText(this.subTekst + '   ·   Volgende potje: ✦ ' + k.naam);
     };
+  }
+
+  // de baas van het level waar je start (kies een eerder level om een verslagen baas nog eens te doen)
+  baasN() { return Math.min(PROFIEL.startRegio, PROFIEL.regio); }
+
+  // het venster van de eindbaas: kopen en vechten
+  toonBaas() {
+    if (this.kiest || this.weg || this.baasLaag) return;
+    const n = this.baasN(), r = regioVan(n), kost = baasPrijs(n), gekocht = PROFIEL.ticket === n;
+    const laag = this.baasLaag = [];
+    const vast = o => { laag.push(o); return o.setDepth(300); };
+    const sluit = () => { laag.forEach(o => o.destroy()); this.baasLaag = null; };
+    vast(this.add.rectangle(0, 0, 960, 540, 0x0a1028, 0.85).setOrigin(0).setInteractive());
+    const g = vast(this.add.graphics());
+    g.fillStyle(0x3a1228, 1).fillRoundedRect(200, 60, 560, 420, 22).lineStyle(4, 0xc8501c, 1).strokeRoundedRect(200, 60, 560, 420, 22);
+    vast(this.add.text(480, 80, r.baasNaam, { fontFamily: FONT_TITEL, fontSize: '36px', color: '#ff8a8a' }).setOrigin(0.5, 0));
+    const img = vast(this.add.image(480, 250, 'baas_' + r.baas));
+    if (img.displayHeight > 150) img.setScale(150 / img.displayHeight);
+    if (img.displayWidth > 300) img.setScale(img.scale * 300 / img.displayWidth);
+    this.tweens.add({ targets: img, y: 244, yoyo: true, repeat: -1, duration: 700, ease: 'Sine.easeInOut' });
+    vast(this.add.text(480, 342, (n < PROFIEL.regio ? '✔ Al verslagen! ' : '') + `Gevecht kost ${kost} 🍺  ·  beloning ${baasBeloning(n)} 🍺` + (n >= PROFIEL.regio ? `\nWin je, dan ga je door naar ${levelNaam(n + 1)}!` : ''), {
+      fontFamily: FONT, fontSize: '18px', fontStyle: 'bold', color: '#f3ead6', align: 'center',
+    }).setOrigin(0.5, 0));
+    const kan = gekocht || PROFIEL.flessen >= kost;
+    const a = knop(this, 250, 408, 240, 56, gekocht ? '⚔ Vecht!' : `⚔ Koop & vecht (${kost})`, kan ? 0xd1495b : 0x5a6a9a, () => {
+      if (!this.koopBaas()) { Geluid.effect('nee'); return; }
+      this.vechten();
+    }, 20);
+    const b = knop(this, 510, 408, 200, 56, 'Sluiten', 0xa9c4ee, sluit, 22);
+    for (const k of [a, b]) for (const o of Object.values(k)) laag.push(o.setDepth(301));
+  }
+
+  // een gevecht kopen voor de baas van het gekozen level (true als het lukt of al gekocht was)
+  koopBaas() {
+    const n = this.baasN(), kost = baasPrijs(n);
+    if (PROFIEL.ticket === n) return true;
+    if (PROFIEL.flessen < kost) return false;
+    PROFIEL.flessen -= kost; PROFIEL.ticket = n;
+    this.gekocht.push({ baas: true, kost });
+    bewaarProfiel();
+    this.vernieuwAlles();
+    return true;
+  }
+
+  // naar een ander scherm, en daarna weer terug naar dit menu
+  naar(scene) {
+    if (this.kiest || this.weg || this.scene.isPaused()) return;
+    this.weg = true;
+    const terug = Object.assign({}, this.data0, { keuzeGedaan: true, gekocht: this.gekocht });
+    if (scene === 'Shop') this.scene.start('Shop', { terugNaar: 'Winkel', winkelData: terug });
+    else this.scene.start(scene, { terugNaar: 'Winkel', terugData: terug });
+  }
+
+  naarMenu() {
+    if (this.weg || this.scene.isPaused()) return;
+    this.weg = true;
+    this.scene.start('Titel');
+  }
+
+  // het levelkeuzescherm openen (dit menu wacht even)
+  openLevels() {
+    if (this.kiest || this.weg || this.scene.isPaused()) return;
+    this.scene.launch('LevelKeuze', { terug: 'Winkel' });
+    this.scene.pause();
+  }
+
+  kiesRegio(r) {
+    if (this.kiest) return;
+    PROFIEL.startRegio = Phaser.Math.Clamp(PROFIEL.startRegio + r, 0, PROFIEL.regio);
+    bewaarProfiel();
+    this.vernieuwAlles();
+  }
+
+  spelen() {
+    if (this.weg || this.kiest || this.baasLaag || this.scene.isPaused()) return;
+    this.weg = true;
+    this.scene.start('Spel', { run: nieuweRun(false) });
+  }
+
+  vechten() {
+    if (this.weg || this.kiest || PROFIEL.ticket === false || this.scene.isPaused()) return;
+    this.weg = true;
+    const n = PROFIEL.ticket;
+    // je ticket is nu op: verlies je, dan moet je opnieuw betalen
+    PROFIEL.ticket = false;
+    bewaarProfiel();
+    this.scene.start('Spel', { run: nieuweRun(true, n) });
+  }
+}
+
+class PowerUps extends Phaser.Scene {
+  constructor() { super('PowerUps'); }
+  create(data) {
+    this.weg = false; this.kiest = false;
+    this.terugData = data.terugData || {};
+    // wat je bij dit bezoek gekocht hebt (om ongedaan te kunnen maken)
+    this.gekocht = this.terugData.gekocht || [];
+    this.add.image(0, 0, 'lucht_' + regioVan(this.terugData.regio || 0).id).setOrigin(0);
+    this.add.rectangle(0, 0, 960, 540, 0x0a1028, 0.62).setOrigin(0);
+    this.add.text(480, 8, '⚡ Power-ups', {
+      fontFamily: FONT_TITEL, fontSize: '36px', color: '#f2c14e', stroke: '#0a1028', strokeThickness: 7,
+    }).setOrigin(0.5, 0);
+    this.add.text(480, 52, 'Tik op een kaart om te kopen  ·  ◀ ▶ zet een power-up lager of hoger', { fontFamily: FONT, fontSize: '15px', fontStyle: 'bold', color: '#f3ead6' }).setOrigin(0.5, 0);
+    this.add.image(918, 12, 'fles_mini').setOrigin(0, 0);
+    this.flesTekst = this.add.text(910, 16, '', {
+      fontFamily: FONT, fontSize: '26px', fontStyle: 'bold', color: '#f3ead6', stroke: '#0a1028', strokeThickness: 5,
+    }).setOrigin(1, 0);
+    this.shotTekst = this.add.text(940, 54, '', { fontFamily: FONT, fontSize: '14px', color: '#f2c14e' }).setOrigin(1, 0);
+    maakInstellingenKnop(this, 30, 28);
+
+    // alle kaarten zitten in een lijst die je kunt scrollen (muiswiel, pijltjes of slepen met je vinger)
+    this.lijst = this.add.container(0, 0);
+    const vak = this.make.graphics({ add: false }).fillRect(0, WINKEL_BOVEN, 960, WINKEL_ONDER - WINKEL_BOVEN);
+    this.lijst.setMask(vak.createGeometryMask());
+    this.kaarten = POWERUPS.map((p, i) => this.maakKaart(p, 15 + (i % 5) * 188, 80 + Math.floor(i / 5) * 186));
+    this.maakScroll(Math.ceil(POWERUPS.length / 5) * 186 + 80 - 10);
+
+    // onderaan: aankoop ongedaan maken, terug naar het menu, of meteen spelen
+    this.ongedaanKnop = knop(this, 90, 470, 220, 54, '↶ Ongedaan', 0xa9c4ee, () => this.ongedaan(), 22);
+    knop(this, 370, 470, 220, 54, '← Terug', 0x3cc8bb, () => this.terug());
+    knop(this, 650, 470, 220, 54, '▶ Spelen', 0xf2c14e, () => this.spelen());
+    this.input.keyboard.on('keydown-ESC', () => this.terug());
+    this.vernieuwAlles();
   }
 
   maakKaart(p, x, y) {
@@ -484,13 +656,7 @@ class Winkel extends Phaser.Scene {
     this.flesTekst.setText('× ' + PROFIEL.flessen);
     this.shotTekst.setText(PROFIEL.shotjes + '/10 shotjes in je flesje');
     this.kaarten.forEach(k => this.vernieuw(k));
-    this.vernieuwBaas();
-    PROFIEL.startRegio = Math.min(PROFIEL.startRegio, PROFIEL.regio);
-    this.regioTekst.setText('Level: ' + levelNaam(PROFIEL.startRegio) + '\ntik om te kiezen');
-    this.levelPlaatje.setTexture('mini_' + regioVan(PROFIEL.startRegio).id);
-    this.levelRand.clear().lineStyle(2, 0xf2c14e, 1).strokeRect(62 - 34, 497 - 19, 68, 38);
-    for (const o of Object.values(this.vechtKnop)) o.setVisible(PROFIEL.ticket !== false && PROFIEL.ticket === this.baasN());
-    if (this.ongedaanKnop) for (const o of [this.ongedaanKnop.g, this.ongedaanKnop.t]) o.setAlpha(this.gekocht.length ? 1 : 0.4);
+    for (const o of [this.ongedaanKnop.g, this.ongedaanKnop.t]) o.setAlpha(this.gekocht.some(g => !g.baas) ? 1 : 0.4);
   }
 
   vernieuw(k) {
@@ -523,33 +689,6 @@ class Winkel extends Phaser.Scene {
     this.vernieuw(k);
   }
 
-  // de baas van de regio waar je start (kies een eerdere regio om een verslagen baas nog eens te doen)
-  baasN() { return Math.min(PROFIEL.startRegio, PROFIEL.regio); }
-
-  vernieuwBaas() {
-    const k = this.baasKaart, n = this.baasN(), kost = baasPrijs(n);
-    const gekocht = PROFIEL.ticket === n, verslagen = n < PROFIEL.regio;
-    const kan = !gekocht && PROFIEL.flessen >= kost;
-    k.g.clear();
-    k.g.fillStyle(0x3a1228, 0.95).fillRoundedRect(k.x, k.y, k.w, k.h, 14);
-    k.g.lineStyle(gekocht || kan ? 3 : 2, gekocht ? 0x3cc8bb : kan ? 0xf2c14e : 0x7a3048, 1).strokeRoundedRect(k.x, k.y, k.w, k.h, 14);
-    k.naam.setText(regioVan(n).baasNaam).setWordWrapWidth(verslagen ? k.w - 48 : k.w - 20);
-    // vinkje rechtsboven: deze baas heb je al verslagen
-    if (!k.vinkje) {
-      k.vinkje = this.add.text(k.x + k.w - 10, k.y + 8, '✔', { fontFamily: FONT, fontSize: '26px', fontStyle: 'bold', color: '#5fd38a', stroke: '#0a1028', strokeThickness: 4 }).setOrigin(1, 0);
-      this.lijst.add(k.vinkje);
-    }
-    k.vinkje.setVisible(verslagen);
-    k.uitleg.setText(gekocht
-      ? 'Gekocht! Druk op "Vecht tegen de baas" om te vechten.'
-      : verslagen
-        ? `Al verslagen! Nog eens vechten? Beloning: ${baasBeloning(n)} flesjes.`
-        : `Koop een gevecht. Win je, dan ga je door naar ${levelNaam(n + 1)}! Beloning: ${baasBeloning(n)}.`);
-    k.prijsT.setText(gekocht ? '✔' : String(kost)).setColor(gekocht ? '#3cc8bb' : kan ? '#f2c14e' : '#5a6a9a');
-    k.prijsT.setX(gekocht ? k.x + k.w - 12 : k.x + k.w - 28);
-    k.icoon.setVisible(!gekocht).setAlpha(kan ? 1 : 0.4);
-  }
-
   schud(k) {
     Geluid.effect('nee');
     this.tweens.add({ targets: [k.naam, k.uitleg], x: '+=6', yoyo: true, repeat: 2, duration: 50 });
@@ -563,90 +702,45 @@ class Winkel extends Phaser.Scene {
   }
 
   koop(k) {
-    if (this.kiest) return;
-    if (!k.p) {
-      const n = this.baasN(), kost = baasPrijs(n);
-      if (PROFIEL.ticket === n) { this.vechten(); return; }
-      if (PROFIEL.flessen < kost) { this.schud(k); return; }
-      PROFIEL.flessen -= kost; PROFIEL.ticket = n;
-      this.gekocht.push({ baas: true, kost });
-    } else {
-      const lvl = PROFIEL.up[k.p.id], kost = prijs(k.p, lvl);
-      if (lvl >= k.p.max || PROFIEL.flessen < kost) { this.schud(k); return; }
-      PROFIEL.flessen -= kost; PROFIEL.up[k.p.id]++;
-      delete PROFIEL.aan[k.p.id]; // wat je net koopt staat meteen aan
-      statTel('koop');
-      checkPrestaties(this);
-      this.gekocht.push({ id: k.p.id, kost });
-    }
+    const lvl = PROFIEL.up[k.p.id], kost = prijs(k.p, lvl);
+    if (lvl >= k.p.max || PROFIEL.flessen < kost) { this.schud(k); return; }
+    PROFIEL.flessen -= kost; PROFIEL.up[k.p.id]++;
+    delete PROFIEL.aan[k.p.id]; // wat je net koopt staat meteen aan
+    statTel('koop');
+    this.gekocht.push({ id: k.p.id, kost });
     bewaarProfiel();
     this.vernieuwAlles();
     this.flits(k);
+    checkPrestaties(this);
   }
 
-  // de laatste aankoop van dit bezoek terugdraaien: je krijgt je flesjes terug
+  // de laatste power-up van dit bezoek terugdraaien: je krijgt je flesjes terug
   ongedaan() {
-    if (this.kiest || this.weg || this.scene.isPaused()) return;
-    const laatste = this.gekocht.pop();
-    if (!laatste) { Geluid.effect('nee'); return; }
-    if (laatste.baas) PROFIEL.ticket = false;
-    else PROFIEL.up[laatste.id] = Math.max(0, PROFIEL.up[laatste.id] - 1);
+    if (this.weg || this.scene.isPaused()) return;
+    const i = this.gekocht.map(g => !g.baas).lastIndexOf(true);
+    if (i < 0) { Geluid.effect('nee'); return; }
+    const laatste = this.gekocht.splice(i, 1)[0];
+    PROFIEL.up[laatste.id] = Math.max(0, PROFIEL.up[laatste.id] - 1);
     PROFIEL.flessen += laatste.kost;
     bewaarProfiel();
     this.vernieuwAlles();
     Geluid.effect('draai');
-    const k = laatste.baas ? this.baasKaart : this.kaarten.find(x => x.p.id === laatste.id);
+    const k = this.kaarten.find(x => x.p.id === laatste.id);
     const f = this.add.rectangle(k.x, k.y, k.w, k.h, 0xa9c4ee, 0.5).setOrigin(0);
     this.lijst.add(f);
     this.tweens.add({ targets: f, alpha: 0, duration: 300, onComplete: () => f.destroy() });
   }
 
-  // naar een ander scherm, en daarna weer terug naar deze winkel
-  naar(scene) {
-    if (this.kiest || this.weg || this.scene.isPaused()) return;
-    this.weg = true;
-    const terug = Object.assign({}, this.data0, { keuzeGedaan: true, gekocht: this.gekocht });
-    if (scene === 'Shop') this.scene.start('Shop', { terugNaar: 'Winkel', winkelData: terug });
-    else this.scene.start(scene, { terugNaar: 'Winkel', terugData: terug });
-  }
-  naarPrestaties() { this.naar('Prestaties'); }
-
-  naarMenu() {
+  terug() {
     if (this.weg || this.scene.isPaused()) return;
     this.weg = true;
-    this.scene.start('Titel');
-  }
-
-  naarShop() { this.naar('Shop'); }
-
-  // het levelkeuzescherm openen (de winkel wacht even)
-  openLevels() {
-    if (this.kiest || this.weg || this.scene.isPaused()) return;
-    this.scene.launch('LevelKeuze', { terug: 'Winkel' });
-    this.scene.pause();
-  }
-
-  kiesRegio(r) {
-    if (this.kiest) return;
-    PROFIEL.startRegio = Phaser.Math.Clamp(PROFIEL.startRegio + r, 0, PROFIEL.regio);
-    bewaarProfiel();
-    this.vernieuwAlles();
+    this.scene.start('Winkel', Object.assign({}, this.terugData, { keuzeGedaan: true, gekocht: this.gekocht }));
   }
 
   spelen() {
-    if (this.weg || this.kiest || this.scene.isPaused()) return;
+    if (this.weg || this.scene.isPaused()) return;
     this.weg = true;
     this.scene.start('Spel', { run: nieuweRun(false) });
-  }
-
-  vechten() {
-    if (this.weg || this.kiest || PROFIEL.ticket === false || this.scene.isPaused()) return;
-    this.weg = true;
-    const n = PROFIEL.ticket;
-    // je ticket is nu op: verlies je, dan moet je opnieuw betalen
-    PROFIEL.ticket = false;
-    bewaarProfiel();
-    this.scene.start('Spel', { run: nieuweRun(true, n) });
   }
 }
 

@@ -8,7 +8,7 @@ const config = {
   physics: { default: 'arcade', arcade: { gravity: { y: 1500 }, debug: false } },
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
   input: { activePointers: 4 },
-  scene: [Boot, Titel, Spel, Winkel, Shop, Prestaties, LevelKeuze, Gokkast, Dieren, Instellingen],
+  scene: [Boot, Titel, Spel, Winkel, PowerUps, Shop, Prestaties, LevelKeuze, Gokkast, Dieren, Instellingen],
 };
 
 // Eerst de lettertypes laden (maximaal 2,5 seconde wachten), dan beginnen
