@@ -53,7 +53,7 @@ class Spel extends Phaser.Scene {
     this.onkwetsbaar = 0; this.knipper = 0; this.loopT = 0;
 
     this.speler = this.physics.add.sprite(150, 418, 'sp_stil').setOrigin(0.5, 1).setDepth(10);
-    this.speler.body.setSize(20, 40).setOffset(18, 31);
+    this.speler.body.setSize(20, 40).setOffset(18, 47);
     this.speler.body.setMaxVelocity(900, 1000);
 
     if (this.baasModus) this.maakArena();

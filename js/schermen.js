@@ -128,8 +128,8 @@ class Titel extends Phaser.Scene {
     this.add.text(480, 132, 'Een game gemaakt door Daniel en Jantje Willie', {
       fontFamily: FONT, fontSize: '24px', fontStyle: 'bold', color: '#3cc8bb', stroke: '#0a1028', strokeThickness: 5,
     }).setOrigin(0.5);
-    const held = this.add.image(480, 400, 'sp_stil').setOrigin(0.5, 1).setScale(3);
-    this.tweens.add({ targets: held, y: 392, yoyo: true, repeat: -1, duration: 700, ease: 'Sine.easeInOut' });
+    const held = this.add.image(480, 404, 'sp_groot').setOrigin(0.5, 1).setScale(0.7);
+    this.tweens.add({ targets: held, y: 396, yoyo: true, repeat: -1, duration: 700, ease: 'Sine.easeInOut' });
 
     const touch = this.sys.game.device.input.touch;
     let hulp = touch

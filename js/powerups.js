@@ -62,7 +62,7 @@ const OPSLAG = 'flesje_profiel_v2';
 const TESTMODUS = ['#test', '#winkel', '#baas', '#ijs', '#berg', '#vulkaan', '#spel'].some(h => location.hash.startsWith(h));
 
 function laadProfiel() {
-  const p = { up: {}, flessen: 0, shotjes: 0, beste: 0, regio: 0, startRegio: 0, ticket: false };
+  const p = { up: {}, flessen: 0, shotjes: 0, beste: 0, regio: 0, startRegio: 0, ticket: false, skin: 'standaard', skins: ['standaard'], draaien: 0 };
   POWERUPS.forEach(x => { p.up[x.id] = 0; });
   if (TESTMODUS) return p;
   try {
@@ -71,6 +71,11 @@ function laadProfiel() {
       Object.keys(p.up).forEach(k => { p.up[k] = Number(d.up && d.up[k]) || 0; });
       for (const k of ['flessen', 'shotjes', 'beste', 'regio', 'startRegio']) p[k] = Number(d[k]) || 0;
       p.ticket = !!d.ticket;
+      if (typeof d.skin === 'string') p.skin = d.skin;
+      if (Array.isArray(d.skins)) p.skins = d.skins.filter(x => typeof x === 'string');
+      if (!p.skins.includes('standaard')) p.skins.unshift('standaard');
+      if (!p.skins.includes(p.skin)) p.skin = 'standaard';
+      p.draaien = Number(d.draaien) || 0;
     }
   } catch (e) { /* niks bewaard */ }
   return p;

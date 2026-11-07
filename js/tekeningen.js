@@ -42,10 +42,13 @@ const THEMA_KLEUR = {
   },
 };
 
-function tekenTextuur(scene, key, w, h, tekenFn) {
+// schaal > 1 = scherper plaatje (bijvoorbeeld voor groot op het titelscherm)
+function tekenTextuur(scene, key, w, h, tekenFn, schaal) {
   if (scene.textures.exists(key)) return key;
-  const t = scene.textures.createCanvas(key, w, h);
+  const s = schaal || 1;
+  const t = scene.textures.createCanvas(key, Math.round(w * s), Math.round(h * s));
   const ctx = t.getContext();
+  ctx.scale(s, s);
   ctx.lineJoin = 'round';
   ctx.lineCap = 'round';
   tekenFn(ctx, w, h);
@@ -81,7 +84,21 @@ function rug(x, breedte, golven) {
 }
 
 // ---------- DE HELD ----------
-// Een mannetje met een biermuts en op zijn rug een bierblik als pijlenkoker.
+// Een mannetje met een bierfles als muts en op zijn rug een bierblik als pijlenkoker.
+// Het plaatje is 56 breed en 88 hoog: bovenin is ruimte voor de bierfles.
+
+// Skins: andere kleren en een ander flesje. Win je in de shop aan het draairad.
+const SKINS = [
+  { id: 'standaard', naam: 'Gewoon', tuniek: ['#1f8a80', '#3cc8bb'], mouw: '#2aa597', broek: '#1b2f6b', fles: ['#c9771f', '#6b3a0e'], etiket: '#f3ead6', band: '#d1495b' },
+  { id: 'groen', naam: 'Groene Fles', tuniek: ['#2f6b2a', '#5fae4e'], mouw: '#4f9a40', broek: '#3a2a1a', fles: ['#5cc455', '#1f5a1c'], etiket: '#f3ead6', band: '#d1495b' },
+  { id: 'goud', naam: 'Goudkoning', tuniek: ['#b8862a', '#f2c14e'], mouw: '#d9a53a', broek: '#5a1a2a', fles: ['#ffe08a', '#c8921c'], etiket: '#d1495b', band: '#0a1028' },
+  { id: 'nacht', naam: 'Nachtridder', tuniek: ['#141a3a', '#2c4387'], mouw: '#24366e', broek: '#0d0f1e', fles: ['#4a4a5e', '#101018'], etiket: '#f2c14e', band: '#7a5cff' },
+  { id: 'duivel', naam: 'Rode Duivel', tuniek: ['#8a1a2a', '#d1495b'], mouw: '#b8343f', broek: '#2a0a10', fles: ['#ff6a4a', '#8a1a10'], etiket: '#0a1028', band: '#f2c14e' },
+  { id: 'ijs', naam: 'IJskoud', tuniek: ['#6aa8d8', '#cfeaff'], mouw: '#9ccbec', broek: '#2c4387', fles: ['#e8f6ff', '#7ab8e0'], etiket: '#2c4387', band: '#3cc8bb' },
+  { id: 'roze', naam: 'Roze Rosé', tuniek: ['#c04a8a', '#ff8ac8'], mouw: '#e070aa', broek: '#4a1a3a', fles: ['#ffb0d8', '#c0508a'], etiket: '#fff6fb', band: '#7a2a5a' },
+  { id: 'zombie', naam: 'Zombie', tuniek: ['#4a5a3a', '#7a8a5a'], mouw: '#6a7a4a', broek: '#3a2a2a', fles: ['#a0581c', '#4a2a0a'], etiket: '#c8c8a0', band: '#5a8a3a', huid: '#9cc48a' },
+];
+function skinVan(id) { return SKINS.find(k => k.id === id) || SKINS[0]; }
 const POSES = {
   sp_stil: {},
   sp_loop0: { been1: 0.65, been2: -0.6, arm: -0.5 },
@@ -98,10 +115,12 @@ const POSES = {
   sp_smash: { been1: 0.1, been2: -0.1, arm: 3.0, zwaard: true },
 };
 
-function tekenSpeler(ctx, pose) {
+function tekenSpeler(ctx, pose, skin) {
   const P = Object.assign({ been1: 0.15, been2: -0.15, arm: 0.3, bob: 0 }, pose);
+  const K = skin || SKINS[0];
+  const huid = K.huid || '#f1c49b';
   ctx.save();
-  ctx.translate(0, P.bob);
+  ctx.translate(0, 16 + P.bob);
 
   // pijlenkoker: een bierblik op de rug
   ctx.save();
@@ -126,7 +145,7 @@ function tekenSpeler(ctx, pose) {
     const fx = x + Math.sin(a) * 15, fy = y + Math.cos(a) * 15;
     ctx.strokeStyle = INKT; ctx.lineWidth = 8;
     ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(fx, fy); ctx.stroke();
-    ctx.strokeStyle = '#1b2f6b'; ctx.lineWidth = 5;
+    ctx.strokeStyle = K.broek; ctx.lineWidth = 5;
     ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(fx, fy); ctx.stroke();
     ctx.fillStyle = '#4a2a12'; ctx.strokeStyle = INKT; ctx.lineWidth = 1.6;
     ctx.beginPath(); ctx.ellipse(fx + 2, fy + 1, 5, 3, 0, 0, TAU); ctx.fill(); ctx.stroke();
@@ -136,14 +155,14 @@ function tekenSpeler(ctx, pose) {
 
   // lijf (tuniek)
   const tg = ctx.createLinearGradient(19, 0, 37, 0);
-  tg.addColorStop(0, '#1f8a80'); tg.addColorStop(0.5, '#3cc8bb'); tg.addColorStop(1, '#1f8a80');
+  tg.addColorStop(0, K.tuniek[0]); tg.addColorStop(0.5, K.tuniek[1]); tg.addColorStop(1, K.tuniek[0]);
   ctx.fillStyle = tg; ctx.strokeStyle = INKT; ctx.lineWidth = 2;
   rondRect(ctx, 19, 32, 18, 22, 6); ctx.fill(); ctx.stroke();
   ctx.fillStyle = '#f2c14e'; ctx.fillRect(19.8, 45, 16.4, 3);
   ctx.fillStyle = '#b8862a'; ctx.fillRect(27, 44.5, 3, 4);
 
   // hoofd
-  ctx.fillStyle = '#f1c49b'; ctx.strokeStyle = INKT; ctx.lineWidth = 2;
+  ctx.fillStyle = huid; ctx.strokeStyle = INKT; ctx.lineWidth = 2;
   ctx.beginPath(); ctx.arc(29, 23, 9.5, 0, TAU); ctx.fill(); ctx.stroke();
   ctx.fillStyle = 'rgba(232,120,110,.5)';
   ctx.beginPath(); ctx.arc(33.5, 27, 2, 0, TAU); ctx.fill();
@@ -154,19 +173,35 @@ function tekenSpeler(ctx, pose) {
   ctx.strokeStyle = INKT; ctx.lineWidth = 1.2;
   ctx.beginPath(); ctx.arc(31.5, 27, 2.4, 0.3, 1.6); ctx.stroke();
 
-  // biermuts: amberkleurig met schuim erop
-  const mg = ctx.createLinearGradient(0, 8, 0, 22);
-  mg.addColorStop(0, '#f6b544'); mg.addColorStop(1, '#b8651a');
-  ctx.fillStyle = mg; ctx.strokeStyle = INKT; ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.moveTo(18.5, 21); ctx.bezierCurveTo(18, 7, 40, 7, 39.5, 21); ctx.closePath(); ctx.fill(); ctx.stroke();
-  ctx.fillStyle = 'rgba(255,255,255,.55)';
-  for (const [bx, by] of [[24, 16], [31, 14], [35, 18], [27, 19]]) { ctx.beginPath(); ctx.arc(bx, by, 0.9, 0, TAU); ctx.fill(); }
-  ctx.fillStyle = '#8a4a12';
+  // muts: een echte bierfles die op zijn hoofd staat
+  const fg = ctx.createLinearGradient(19, 0, 39, 0);
+  fg.addColorStop(0, K.fles[1]); fg.addColorStop(0.45, K.fles[0]); fg.addColorStop(1, K.fles[1]);
+  ctx.fillStyle = fg; ctx.strokeStyle = INKT; ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(19.5, 20); ctx.lineTo(19.5, 6);
+  ctx.quadraticCurveTo(19.5, -0.5, 25.8, -3); ctx.lineTo(25.8, -11);
+  ctx.lineTo(32.2, -11); ctx.lineTo(32.2, -3);
+  ctx.quadraticCurveTo(38.5, -0.5, 38.5, 6); ctx.lineTo(38.5, 20);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  // glans op het glas
+  ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 1.6;
+  ctx.beginPath(); ctx.moveTo(22.3, 16); ctx.lineTo(22.3, 5); ctx.quadraticCurveTo(22.6, 1.5, 26.5, -0.5); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(27.6, -9); ctx.lineTo(27.6, -4); ctx.stroke();
+  // etiket met een streep en een sterretje
+  ctx.fillStyle = K.etiket; ctx.strokeStyle = INKT; ctx.lineWidth = 1.3;
+  rondRect(ctx, 21, 6.5, 16, 8.5, 1.8); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = K.band; ctx.fillRect(21.6, 9.6, 14.8, 2.4);
+  ctx.fillStyle = '#f2c14e'; ctx.beginPath(); ctx.arc(29, 10.8, 1.7, 0, TAU); ctx.fill();
+  // folie om de hals
+  ctx.fillStyle = K.etiket; ctx.fillRect(26.4, -7.5, 5.2, 2.6);
+  // kroonkurk bovenop
+  ctx.fillStyle = '#f2c14e'; ctx.strokeStyle = INKT; ctx.lineWidth = 1.3;
+  ctx.beginPath();
+  for (let i = 0; i <= 8; i++) { const xx = 25 + i; ctx.lineTo(xx, i % 2 ? -12.2 : -14.6); }
+  ctx.lineTo(33, -11); ctx.lineTo(25, -11); ctx.closePath(); ctx.fill(); ctx.stroke();
+  // rand van de muts over het voorhoofd
+  ctx.fillStyle = K.fles[1]; ctx.lineWidth = 2;
   rondRect(ctx, 17.5, 18.5, 23, 4.5, 2.2); ctx.fill(); ctx.stroke();
-  ctx.fillStyle = '#fffaf0'; ctx.lineWidth = 1.2;
-  for (const [sx, sy, r] of [[22, 10, 3.4], [27, 7.5, 4], [32.5, 8, 3.8], [37, 11, 2.8]]) {
-    ctx.beginPath(); ctx.arc(sx, sy, r, 0, TAU); ctx.fill(); ctx.stroke();
-  }
   ctx.fillStyle = '#f2c14e';
   ctx.beginPath(); ctx.arc(34, 20.7, 1.8, 0, TAU); ctx.fill();
 
@@ -175,9 +210,9 @@ function tekenSpeler(ctx, pose) {
   const arm = (hx, hy) => {
     ctx.strokeStyle = INKT; ctx.lineWidth = 7;
     ctx.beginPath(); ctx.moveTo(schouder.x, schouder.y); ctx.lineTo(hx, hy); ctx.stroke();
-    ctx.strokeStyle = '#2aa597'; ctx.lineWidth = 4;
+    ctx.strokeStyle = K.mouw; ctx.lineWidth = 4;
     ctx.beginPath(); ctx.moveTo(schouder.x, schouder.y); ctx.lineTo(hx, hy); ctx.stroke();
-    ctx.fillStyle = '#f1c49b'; ctx.strokeStyle = INKT; ctx.lineWidth = 1.4;
+    ctx.fillStyle = huid; ctx.strokeStyle = INKT; ctx.lineWidth = 1.4;
     ctx.beginPath(); ctx.arc(hx, hy, 2.8, 0, TAU); ctx.fill(); ctx.stroke();
   };
   if (P.armenWijd) {
@@ -721,6 +756,18 @@ function tekenProjectielen(scene) {
 }
 
 // Maakt alle vaste plaatjes één keer aan het begin
+// Tekent de speler in de skin die je nu aan hebt. Opnieuw aanroepen als je een andere skin kiest.
+function maakSpelerTexturen(scene) {
+  const skin = skinVan(PROFIEL.skin);
+  for (const [key, pose] of Object.entries(POSES)) {
+    if (scene.textures.exists(key)) scene.textures.remove(key);
+    tekenTextuur(scene, key, 56, 88, ctx => tekenSpeler(ctx, pose, skin));
+  }
+  // groot en scherp, voor het titelscherm
+  if (scene.textures.exists('sp_groot')) scene.textures.remove('sp_groot');
+  tekenTextuur(scene, 'sp_groot', 56, 88, ctx => tekenSpeler(ctx, {}, skin), 4);
+}
+
 function maakTexturen(scene) {
   tekenTextuur(scene, 'baas_pad', 180, 132, tekenPad);
   tekenTextuur(scene, 'baas_beer', 170, 152, tekenBeer);
@@ -735,7 +782,9 @@ function maakTexturen(scene) {
     ctx.closePath(); ctx.fill();
     ctx.fillStyle = '#1b2f6b'; ctx.beginPath(); ctx.arc(20, 20, 4.5, 0, TAU); ctx.fill();
   });
-  for (const [key, pose] of Object.entries(POSES)) tekenTextuur(scene, key, 56, 72, ctx => tekenSpeler(ctx, pose));
+  maakSpelerTexturen(scene);
+  // scherpe plaatjes van elke skin, voor de shop
+  for (const k of SKINS) tekenTextuur(scene, 'skin_' + k.id, 56, 88, ctx => tekenSpeler(ctx, {}, k), 3);
   for (const id of Object.keys(THEMA_KLEUR)) {
     tekenTextuur(scene, 'kruiper_' + id, 70, 50, ctx => tekenKruiper(ctx, THMA(id).kruiper));
     tekenTextuur(scene, 'licht_' + id, 60, 84, ctx => tekenDwaallicht(ctx, THMA(id).licht));
