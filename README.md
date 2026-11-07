@@ -76,6 +76,12 @@ Zet dit achter het adres van de game (je opgeslagen spel wordt dan niet aangeraa
 - `#ijs`, `#berg`, `#vulkaan`: meteen naar die regio
 - `#winkel`: meteen naar de winkel, met 60 flesjes
 
+## Online zetten
+
+Typ `./zet-online.sh`. Dat geeft de game een nieuw versienummer, maakt een commit en zet hem op GitHub. Na 1 à 2 minuten staat hij online.
+
+Waarom een versienummer? Je browser bewaart de bestanden van de game een tijdje (de *cache*), zodat hij sneller laadt. Zonder nieuw nummer speel je dan nog de oude versie. Met een nieuw nummer haalt de browser alles opnieuw op. De game kijkt bij het opstarten ook zelf of er een nieuwere versie is, en laadt dan meteen opnieuw.
+
 ## Problemen en oplossingen
 
 - **Na twee keer doodgaan bleef de game hangen.** Oorzaak: een scherm onthield "ik ben al weg" van de vorige keer, en reageerde de volgende keer niet meer op de knop. Oplossing: dat vlaggetje wordt nu elke keer opnieuw op nul gezet als het scherm opent. Getest met drie keer doodgaan en echt klikken.
