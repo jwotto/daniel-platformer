@@ -96,6 +96,7 @@ const Geluid = (() => {
     lont: () => rijtje([1400, 1500, 1400, 1500, 1400, 1500, 1400, 1500], 0.09, 'square', 0.12),
     duik: () => toon(1200, 300, 0.25, 'sawtooth', 0.15),
     tink: () => toon(2200, 1800, 0.05, 'triangle', 0.18),
+    klik: () => toon(900, 600, 0.04, 'square', 0.14),
     boing: () => toon(180, 760, 0.25, 'sine', 0.35),
     laser: () => toon(1800, 300, 0.15, 'sawtooth', 0.14),
     plop: () => toon(600, 1200, 0.08, 'square', 0.2),
@@ -262,6 +263,14 @@ const Geluid = (() => {
       tempo = lied.tempo + (sneller || 0);
     },
     liedjes: Object.keys(LIEDJES),
+    // elk level een eigen kort melodietje als je hem kiest
+    levelMelodie(n) {
+      if (!ctx || !effectenAan) return;
+      const stukjes = [[0, 4, 7, 12], [0, 7, 12, 16], [0, 5, 9, 12], [0, 3, 7, 10], [0, 3, 6, 9],
+        [0, 4, 9, 7], [0, 2, 4, 7], [7, 4, 0, 12], [0, 4, 7, 4], [0, 7, 14, 19]];
+      const basis = 60 + (n % 5) * 2;
+      stukjes[n % stukjes.length].forEach((s, i) => toon(hz(basis + s), null, 0.12, n >= 5 ? 'triangle' : 'square', 0.2, sfx, ctx.currentTime + i * 0.08));
+    },
     muziekIsAan() { return muziekAan; },
     effectenIsAan() { return effectenAan; },
     wisselMuziek() {

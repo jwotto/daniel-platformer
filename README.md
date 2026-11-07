@@ -41,9 +41,17 @@ Een roguelike platformer van Daniel. Het is een HTML-game, gemaakt met [Phaser 3
 
 Op elke power-up-kaart in de winkel staat links het niveau dat **aan** staat (met ◀ ▶ om het lager of weer hoger te zetten) en rechts wat je **hebt** (bijv. "heb MAX"). Zo kun je Dash MAX hebben maar op niveau 2 spelen.
 
+### Level kiezen
+
+In de winkel zit linksonder de **levelknop** met een plaatje van het level waar je start. Tik erop en je krijgt alle levels als kaarten: met een plaatje, de eindbaas, een ✔ als je hem verslagen hebt en een 🔒 als het level nog dicht zit. Elk level heeft een eigen melodietje als je hem kiest. Alle knoppen in de game veren in als je ze indrukt, met een klikje.
+
+### Gokkast
+
+In de shop zit de **🎰 Gokkast**. Kies hoeveel flesjes je inzet (1, 5, 10, 25 of alles) en draai: ×2, ×3 of ×5 (jackpot)... maar 12 van de 16 vakjes zijn "niks". Je verliest dus veel vaker dan je wint; gemiddeld krijg je maar 75% terug.
+
 ### Prestaties
 
-Op het titelscherm zit **🏆 Prestaties**: 40 doelen van makkelijk (je eerste potje: 1 flesje) tot heel moeilijk (500 flesjes verdienen: 30 flesjes). Haal je er een, dan komt er een melding in beeld en krijg je de flesjes meteen.
+Op het titelscherm en in de winkel (na doodgaan) zit **🏆 Prestaties**: 40 doelen van makkelijk (je eerste potje: 1 flesje) tot heel moeilijk (500 flesjes verdienen: 30 flesjes). Haal je er een, dan komt er een melding in beeld en krijg je de flesjes meteen.
 
 ### Shop en skins
 
@@ -150,6 +158,7 @@ Grot gebruikt de Bergmars, Savanne de Bierpolka. Een nieuw liedje maken? Voeg in
 | `js/krachten.js` | effecten van Reservevat, Boerbom en Flesmaatje |
 | `js/schermen.js` | titelscherm, instellingen en winkel |
 | `js/shop.js` | de shop met het draairad en je skins |
+| `js/gokkast.js` | de gokkast |
 | `js/prestaties.js` | de 40 prestaties, de tellers en het prestatiescherm |
 | `js/iconen.js` | de icoontjes van de power-ups en de upgrade-keuzes |
 | `js/main.js` | zet alles aan |

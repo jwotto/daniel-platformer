@@ -9,6 +9,7 @@ const PRESTATIES = [
   { id: 'flesje', naam: 'Eerste flesje', uitleg: 'Vul je eerste flesje met shotjes', stat: 'flesVol', doel: 1, beloning: 1 },
   { id: 'kebab1', naam: 'PRRRT!', uitleg: 'Eet een kebabrol', stat: 'kebab', doel: 1, beloning: 2 },
   { id: 'shoppen', naam: 'Shoppen', uitleg: 'Koop je eerste power-up', stat: 'koop', doel: 1, beloning: 2 },
+  { id: 'gok', naam: 'Gokje wagen', uitleg: 'Draai aan de gokkast', stat: 'gokken', doel: 1, beloning: 1 },
   { id: 'rad', naam: 'Draaien maar', uitleg: 'Draai aan het rad in de shop', stat: 'draai', doel: 1, beloning: 2 },
   { id: 'm100', naam: '100 meter', uitleg: 'Kom 100 meter ver in één potje', stat: 'meters', doel: 100, beloning: 2 },
   { id: 'tien', naam: 'Tien op een rij', uitleg: 'Versla 10 monsters', stat: 'monsters', doel: 10, beloning: 2 },
@@ -20,7 +21,6 @@ const PRESTATIES = [
   { id: 'pad', naam: 'Koning gevloerd', uitleg: 'Versla Koning Bierpad', stat: 'baas_pad', doel: 1, beloning: 4 },
   { id: 'vijftig', naam: 'Monsterplaag', uitleg: 'Versla 50 monsters', stat: 'monsters', doel: 50, beloning: 4 },
   { id: 'skins3', naam: 'Verzamelaar', uitleg: 'Heb 3 skins', stat: 'skins', doel: 3, beloning: 4 },
-  { id: 'potjes10', naam: 'Doorzetter', uitleg: 'Speel 10 potjes', stat: 'potjes', doel: 10, beloning: 4 },
   { id: 'kebab10', naam: 'Scheetkampioen', uitleg: 'Eet 10 kebabrollen', stat: 'kebab', doel: 10, beloning: 5 },
   { id: 'beer', naam: 'IJsbreker', uitleg: 'Versla De IJsbierbeer', stat: 'baas_beer', doel: 1, beloning: 5 },
   { id: 'spaar25', naam: 'Spaarpot', uitleg: 'Verdien in totaal 25 flesjes', stat: 'flessenTotaal', doel: 25, beloning: 5 },
@@ -98,7 +98,10 @@ function toonPrestatie(scene, p) {
 class Prestaties extends Phaser.Scene {
   constructor() { super('Prestaties'); }
 
-  create() {
+  create(data) {
+    // waar ga je heen met "Terug"? Normaal het titelscherm, vanuit de winkel terug naar de winkel
+    this.terugNaar = (data && data.terugNaar) || 'Titel';
+    this.terugData = data && data.terugData;
     this.weg = false;
     this.add.image(0, 0, 'lucht_rivier').setOrigin(0);
     this.add.rectangle(0, 0, 960, 540, 0x0a1028, 0.6).setOrigin(0);
@@ -153,6 +156,6 @@ class Prestaties extends Phaser.Scene {
   terug() {
     if (this.weg) return;
     this.weg = true;
-    this.scene.start('Titel');
+    this.scene.start(this.terugNaar, this.terugData);
   }
 }

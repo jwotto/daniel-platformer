@@ -809,6 +809,19 @@ function maakTexturen(scene) {
     tekenAchtergronden(scene, id);
   }
   tekenTextuur(scene, 'plafond_grot', 512, 90, tekenPlafond);
+  // klein plaatje van elke regio (voor het levelkeuzescherm): lucht, verre bergen, dichtbij en de bodem
+  for (const id of Object.keys(THEMA_KLEUR)) {
+    tekenTextuur(scene, 'mini_' + id, 160, 90, ctx => {
+      const bron = k => scene.textures.get(k + '_' + id).getSourceImage();
+      const s = 160 / 960;
+      ctx.drawImage(bron('lucht'), 0, 0, 160, 90);
+      ctx.drawImage(bron('ver'), 0, 0, 960, 512, 0, 28 * s, 160, 512 * s);
+      ctx.drawImage(bron('mid'), 0, 0, 960, 256, 0, 284 * s, 160, 256 * s);
+      ctx.drawImage(bron('nabij'), 0, 0, 960, 256, 0, 284 * s, 160, 256 * s);
+      ctx.drawImage(bron('bodem'), 0, 0, 512, 64, 0, 476 * s, 85, 64 * s);
+      ctx.drawImage(bron('bodem'), 0, 0, 512, 64, 85, 476 * s, 85, 64 * s);
+    });
+  }
   // kroeg: een plas gemorst bier (glad!)
   tekenTextuur(scene, 'plas', 80, 10, ctx => {
     ctx.fillStyle = 'rgba(242,163,58,.85)'; ctx.strokeStyle = 'rgba(10,16,40,.6)'; ctx.lineWidth = 1.5;

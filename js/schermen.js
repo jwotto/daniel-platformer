@@ -36,14 +36,35 @@ function maakInstellingenKnop(scene, x, y) {
     .on('pointerup', open);
 }
 
+// Een knop die je voelt: hij licht op als je erboven bent, veert in als je drukt (met een klikje)
+// en springt terug als je loslaat.
 function knop(scene, x, y, w, h, tekst, kleur, actie, grootte) {
-  const g = scene.add.graphics();
-  g.fillStyle(kleur, 1).fillRoundedRect(x, y, w, h, h / 2);
-  g.lineStyle(3, 0x0a1028, 1).strokeRoundedRect(x, y, w, h, h / 2);
-  const t = scene.add.text(x + w / 2, y + h / 2, tekst, {
+  const cx = x + w / 2, cy = y + h / 2;
+  const g = scene.add.graphics({ x: cx, y: cy });
+  const teken = (licht) => {
+    g.clear();
+    g.fillStyle(0x0a1028, 0.35).fillRoundedRect(-w / 2 + 2, -h / 2 + 5, w, h, h / 2); // schaduw
+    const c = Phaser.Display.Color.IntegerToColor(kleur);
+    if (licht) c.lighten(12);
+    g.fillStyle(c.color, 1).fillRoundedRect(-w / 2, -h / 2, w, h, h / 2);
+    g.fillStyle(0xffffff, 0.22).fillRoundedRect(-w / 2 + 8, -h / 2 + 4, w - 16, h * 0.32, h * 0.16); // glans
+    g.lineStyle(3, 0x0a1028, 1).strokeRoundedRect(-w / 2, -h / 2, w, h, h / 2);
+  };
+  teken(false);
+  const t = scene.add.text(cx, cy, tekst, {
     fontFamily: FONT, fontSize: (grootte || 24) + 'px', fontStyle: 'bold', color: '#0a1028',
   }).setOrigin(0.5);
-  const z = scene.add.zone(x, y, w, h).setOrigin(0).setInteractive({ useHandCursor: true }).on('pointerup', actie);
+  const veer = (s, duur, ease) => scene.tweens.add({ targets: [g, t], scaleX: s, scaleY: s, duration: duur, ease: ease || 'Quad.easeOut' });
+  let ingedrukt = false;
+  const z = scene.add.zone(x, y, w, h).setOrigin(0).setInteractive({ useHandCursor: true })
+    .on('pointerover', () => { teken(true); if (!ingedrukt) veer(1.04, 90); })
+    .on('pointerout', () => { teken(false); ingedrukt = false; veer(1, 120); })
+    .on('pointerdown', () => { ingedrukt = true; veer(0.9, 60); Geluid.effect('klik'); })
+    .on('pointerup', (...a) => {
+      ingedrukt = false;
+      veer(1, 260, 'Back.easeOut');
+      actie(...a);
+    });
   return { g, t, z };
 }
 
@@ -65,6 +86,13 @@ class Boot extends Phaser.Scene {
       this.scene.start('Spel', { run: { level: PROFIEL.regio, up: PROFIEL.up, harten: 99, baas: true } });
     } else if (regios[h] !== undefined) {
       this.scene.start('Spel', { run: { level: regios[h], up: PROFIEL.up, harten: maxHarten(), baas: false } });
+    } else if (h === '#gokkast') {
+      PROFIEL.flessen = 100;
+      this.scene.start('Gokkast');
+    } else if (h === '#levels') {
+      PROFIEL.regio = 6; PROFIEL.flessen = 60;
+      this.scene.start('Winkel', { meters: 0, regio: 0, baas: false });
+      this.time.delayedCall(300, () => { const w = this.scene.get('Winkel'); if (w.kiest !== undefined) { w.children.list.filter(o => o.depth === 300).forEach(o => o.destroy()); w.kiest = false; w.openLevels(); } });
     } else if (h === '#prestaties') {
       this.scene.start('Prestaties');
     } else if (h === '#shop') {
@@ -252,6 +280,9 @@ class Winkel extends Phaser.Scene {
     // kleine knoppen linksboven: aankoop ongedaan maken en naar de shop met skins
     this.ongedaanKnop = knop(this, 60, 9, 140, 38, '↶ Ongedaan', 0xa9c4ee, () => this.ongedaan(), 18);
     knop(this, 210, 9, 120, 38, '🎡 Shop', 0x3cc8bb, () => this.naarShop(), 18);
+    // rechts van de titel: je prestaties bekijken, of terug naar het hoofdmenu
+    knop(this, 596, 9, 140, 38, '🏆 Prestaties', 0xf2c14e, () => this.naarPrestaties(), 17);
+    knop(this, 744, 9, 96, 38, '⌂ Menu', 0xa9c4ee, () => this.naarMenu(), 17);
 
     // alle kaarten zitten in een lijst die je kunt scrollen (muiswiel, pijltjes of slepen met je vinger)
     this.lijst = this.add.container(0, 0);
@@ -266,11 +297,13 @@ class Winkel extends Phaser.Scene {
     this.maakScroll(Math.ceil((POWERUPS.length + 1) / 5) * 186 + 80 - 10);
 
     // onderaan: startregio kiezen, spelen, en vechten tegen de eindbaas
-    this.regioTekst = this.add.text(160, 497, '', { fontFamily: FONT, fontSize: '20px', fontStyle: 'bold', color: '#f3ead6', align: 'center' }).setOrigin(0.5);
-    this.pijlL = this.add.text(30, 497, '◀', { fontFamily: FONT, fontSize: '30px', color: '#f2c14e' }).setOrigin(0.5)
-      .setInteractive({ useHandCursor: true }).on('pointerup', () => this.kiesRegio(-1));
-    this.pijlR = this.add.text(290, 497, '▶', { fontFamily: FONT, fontSize: '30px', color: '#f2c14e' }).setOrigin(0.5)
-      .setInteractive({ useHandCursor: true }).on('pointerup', () => this.kiesRegio(1));
+    // de levelknop: een plaatje van het level waar je start; tik erop om een ander level te kiezen
+    this.levelKnop = knop(this, 16, 466, 312, 62, '', 0x22336a, () => this.openLevels());
+    this.levelPlaatje = this.add.image(62, 497, 'mini_rivier').setScale(0.42);
+    this.levelRand = this.add.graphics();
+    this.regioTekst = this.add.text(110, 497, '', { fontFamily: FONT, fontSize: '19px', fontStyle: 'bold', color: '#f3ead6', lineSpacing: -4 }).setOrigin(0, 0.5);
+    this.add.text(310, 497, '▼', { fontFamily: FONT, fontSize: '18px', color: '#f2c14e' }).setOrigin(1, 0.5);
+    this.levelKnop.t.setColor('#f3ead6');
     knop(this, 340, 470, 280, 54, 'Spelen →', 0x3cc8bb, () => this.spelen());
     this.vechtKnop = knop(this, 650, 470, 290, 54, '⚔ Vecht tegen de baas!', 0xd1495b, () => this.vechten());
     this.input.keyboard.on('keydown-ENTER', () => this.spelen());
@@ -411,9 +444,9 @@ class Winkel extends Phaser.Scene {
     this.kaarten.forEach(k => this.vernieuw(k));
     this.vernieuwBaas();
     PROFIEL.startRegio = Math.min(PROFIEL.startRegio, PROFIEL.regio);
-    this.regioTekst.setText('Start in\n' + levelNaam(PROFIEL.startRegio));
-    this.pijlL.setVisible(PROFIEL.startRegio > 0);
-    this.pijlR.setVisible(PROFIEL.startRegio < PROFIEL.regio);
+    this.regioTekst.setText('Level: ' + levelNaam(PROFIEL.startRegio) + '\ntik om te kiezen');
+    this.levelPlaatje.setTexture('mini_' + regioVan(PROFIEL.startRegio).id);
+    this.levelRand.clear().lineStyle(2, 0xf2c14e, 1).strokeRect(62 - 34, 497 - 19, 68, 38);
     for (const o of Object.values(this.vechtKnop)) o.setVisible(PROFIEL.ticket !== false && PROFIEL.ticket === this.baasN());
     if (this.ongedaanKnop) for (const o of [this.ongedaanKnop.g, this.ongedaanKnop.t]) o.setAlpha(this.gekocht.length ? 1 : 0.4);
   }
@@ -526,11 +559,31 @@ class Winkel extends Phaser.Scene {
     this.tweens.add({ targets: f, alpha: 0, duration: 300, onComplete: () => f.destroy() });
   }
 
+  naarPrestaties() {
+    if (this.kiest || this.weg || this.scene.isPaused()) return;
+    this.weg = true;
+    const terug = Object.assign({}, this.data0, { keuzeGedaan: true, gekocht: this.gekocht });
+    this.scene.start('Prestaties', { terugNaar: 'Winkel', terugData: terug });
+  }
+
+  naarMenu() {
+    if (this.weg || this.scene.isPaused()) return;
+    this.weg = true;
+    this.scene.start('Titel');
+  }
+
   naarShop() {
     if (this.kiest || this.weg || this.scene.isPaused()) return;
     this.weg = true;
     const terug = Object.assign({}, this.data0, { keuzeGedaan: true, gekocht: this.gekocht });
     this.scene.start('Shop', { terugNaar: 'Winkel', winkelData: terug });
+  }
+
+  // het levelkeuzescherm openen (de winkel wacht even)
+  openLevels() {
+    if (this.kiest || this.weg || this.scene.isPaused()) return;
+    this.scene.launch('LevelKeuze', { terug: 'Winkel' });
+    this.scene.pause();
   }
 
   kiesRegio(r) {
@@ -554,5 +607,79 @@ class Winkel extends Phaser.Scene {
     PROFIEL.ticket = false;
     bewaarProfiel();
     this.scene.start('Spel', { run: nieuweRun(true, n) });
+  }
+}
+
+// ---------- LEVEL KIEZEN ----------
+// Alle regio's als kaarten met een plaatje. ✔ = baas verslagen, 🔒 = nog dicht.
+class LevelKeuze extends Phaser.Scene {
+  constructor() { super('LevelKeuze'); }
+
+  create(data) {
+    this.terug = data.terug || 'Winkel';
+    this.weg = false;
+    this.add.rectangle(0, 0, 960, 540, 0x0a1028, 0.9).setOrigin(0).setInteractive();
+    this.add.text(480, 18, 'Kies je level', {
+      fontFamily: FONT_TITEL, fontSize: '38px', color: '#f2c14e', stroke: '#0a1028', strokeThickness: 7,
+    }).setOrigin(0.5, 0);
+    this.kaarten = REGIOS.map((r, n) => this.maakKaart(r, n, 22 + (n % 5) * 186, 82 + Math.floor(n / 5) * 186));
+    knop(this, 380, 470, 200, 52, '✕ Sluiten', 0x3cc8bb, () => this.sluit(), 22);
+    this.input.keyboard.on('keydown-ESC', () => this.sluit());
+  }
+
+  maakKaart(r, n, x, y) {
+    const w = 172, h = 172, open = n <= PROFIEL.regio, verslagen = n < PROFIEL.regio, gekozen = n === Math.min(PROFIEL.startRegio, PROFIEL.regio);
+    const c = this.add.container(x + w / 2, y + h / 2);
+    const g = this.add.graphics();
+    const teken = (licht) => {
+      g.clear();
+      g.fillStyle(0x0a1028, 0.4).fillRoundedRect(-w / 2 + 3, -h / 2 + 6, w, h, 14);
+      g.fillStyle(licht ? 0x2c4387 : 0x16244f, 1).fillRoundedRect(-w / 2, -h / 2, w, h, 14);
+      g.lineStyle(gekozen ? 5 : 2, gekozen ? 0xf2c14e : licht ? 0x3cc8bb : 0x2c4387, 1).strokeRoundedRect(-w / 2, -h / 2, w, h, 14);
+    };
+    teken(false);
+    const plaatje = this.add.image(0, -32, 'mini_' + r.id).setScale(0.98).setAlpha(open ? 1 : 0.35);
+    const rand = this.add.graphics().lineStyle(2, 0x0a1028, 1).strokeRect(-79, -76, 158, 89);
+    const baas = this.add.image(54, -8, 'baas_' + r.baas).setScale(0.3).setAlpha(open ? 1 : 0.35);
+    if (baas.displayHeight > 48) baas.setScale(baas.scale * 48 / baas.displayHeight);
+    const naam = this.add.text(0, 30, levelNaam(n), { fontFamily: FONT_TITEL, fontSize: '20px', color: open ? '#f3ead6' : '#5a6a9a' }).setOrigin(0.5);
+    const sub = this.add.text(0, 54, open ? r.baasNaam : 'Versla eerst ' + REGIOS[Math.max(0, n - 1)].baasNaam, {
+      fontFamily: FONT, fontSize: '12px', color: open ? '#a9b6d8' : '#5a6a9a', align: 'center', wordWrap: { width: w - 16 },
+    }).setOrigin(0.5, 0);
+    c.add([g, plaatje, rand, baas, naam, sub]);
+    if (verslagen) c.add(this.add.text(w / 2 - 6, -h / 2 + 2, '✔', { fontFamily: FONT, fontSize: '26px', fontStyle: 'bold', color: '#5fd38a', stroke: '#0a1028', strokeThickness: 5 }).setOrigin(1, 0));
+    if (!open) c.add(this.add.text(0, -32, '🔒', { fontFamily: FONT, fontSize: '36px' }).setOrigin(0.5));
+    if (gekozen) this.tweens.add({ targets: c, scale: 1.04, yoyo: true, repeat: -1, duration: 600, ease: 'Sine.easeInOut' });
+    const z = this.add.zone(x, y, w, h).setOrigin(0).setInteractive({ useHandCursor: true })
+      .on('pointerover', () => { teken(true); this.tweens.add({ targets: c, y: y + h / 2 - 5, duration: 100 }); })
+      .on('pointerout', () => { teken(false); this.tweens.add({ targets: c, y: y + h / 2, scaleX: 1, scaleY: 1, duration: 120 }); })
+      .on('pointerdown', () => { this.tweens.add({ targets: c, scaleX: 0.92, scaleY: 0.92, duration: 60 }); Geluid.effect('klik'); })
+      .on('pointerup', () => this.kies(n, c));
+    return { n, c, z, naam };
+  }
+
+  kies(n, c) {
+    if (this.weg) return;
+    if (n > PROFIEL.regio) {
+      // nog dicht: schudden
+      Geluid.effect('nee');
+      this.tweens.add({ targets: c, x: c.x + 8, yoyo: true, repeat: 3, duration: 45, onComplete: () => c.setScale(1) });
+      return;
+    }
+    this.weg = true;
+    PROFIEL.startRegio = n;
+    bewaarProfiel();
+    Geluid.levelMelodie(n);
+    this.tweens.add({ targets: c, scaleX: 1.15, scaleY: 1.15, duration: 160, yoyo: true, ease: 'Back.easeOut' });
+    const f = this.add.rectangle(c.x, c.y, 172, 172, 0xf2c14e, 0.6);
+    this.tweens.add({ targets: f, alpha: 0, scale: 1.3, duration: 400 });
+    this.time.delayedCall(450, () => this.sluit());
+  }
+
+  sluit() {
+    const s = this.scene.get(this.terug);
+    this.scene.resume(this.terug);
+    if (s && s.vernieuwAlles) s.vernieuwAlles();
+    this.scene.stop();
   }
 }

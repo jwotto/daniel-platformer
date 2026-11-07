@@ -283,10 +283,14 @@
       const w = scene('Winkel'); kiesUpgrade(w);
       w.kaarten[0].g; w.koop(w.kaarten[1]);
       druk(w, 'Ongedaan'); moet(PROFIEL.up.dubbel === 0, 'Ongedaan-knop werkte niet');
-      druk(w, 'Shop'); await wacht(() => actief('Shop'), 4000, 'shop vanuit winkel');
+      druk(w, 'Prestaties'); await wacht(() => actief('Prestaties'), 4000, 'prestaties vanuit winkel');
+      druk(scene('Prestaties'), 'Terug'); await wacht(() => actief('Winkel') && !scene('Winkel').kiest, 4000, 'terug naar winkel');
+      druk(scene('Winkel'), 'Shop'); await wacht(() => actief('Shop'), 4000, 'shop vanuit winkel');
       druk(scene('Shop'), 'Terug'); await wacht(() => actief('Winkel'), 4000, 'terug naar winkel');
       druk(scene('Winkel'), 'Spelen'); await wacht(() => spelKlaar(0.5), 8000, 'spelen');
-      return 'Start, Shop, Draai, Terug, Prestaties, Hoofdscherm, Verder spelen, Ongedaan, Shop↔winkel en Spelen werken';
+      scene('Spel').gameOver(); await wacht(() => actief('Winkel'), 5000, 'winkel');
+      druk(scene('Winkel'), 'Menu'); await wacht(() => actief('Titel'), 4000, 'menu vanuit winkel');
+      return 'Start, Shop, Draai, Terug, Prestaties, Hoofdscherm, Verder spelen, Ongedaan, Prestaties↔winkel, Shop↔winkel, Spelen en Menu werken';
     },
 
     // regio-trucjes: trampoline, lopende band, bierplas, maan
@@ -313,6 +317,39 @@
       doe('rivier'); speel({ level: 0 }); await wacht(() => spelKlaar(0.5) && scene('Spel').n === 0, 8000, 'rivier');
       moet(scene('Spel').physics.world.gravity.y === 1500, 'zwaartekracht niet terug na de maan');
       return 'trampoline, lopende band, maanzwaartekracht en terug op aarde werken';
+    },
+
+    // levelkeuze: open regio kiezen werkt, dichte regio niet
+    async levels() {
+      PROFIEL.regio = 3; PROFIEL.startRegio = 0;
+      scene('Titel').scene.start('Winkel', { meters: 0, regio: 0, baas: false }); await wacht(() => actief('Winkel'), 5000, 'winkel');
+      const w = scene('Winkel'); kiesUpgrade(w);
+      doe('levelknop'); w.levelKnop.z.emit('pointerup'); await wacht(() => actief('LevelKeuze'), 4000, 'levelscherm');
+      const l = scene('LevelKeuze');
+      moet(l.kaarten.length === REGIOS.length, 'niet alle levels te zien');
+      doe('dicht level'); l.kies(5, l.kaarten[5].c); moet(PROFIEL.startRegio === 0 && actief('LevelKeuze'), 'dicht level kon gekozen worden');
+      doe('open level'); l.kies(2, l.kaarten[2].c); await wacht(() => actief('Winkel') && !actief('LevelKeuze'), 10000, 'terug naar winkel');
+      moet(PROFIEL.startRegio === 2 && scene('Winkel').regioTekst.text.includes('Bergen'), 'level niet gekozen');
+      scene('Winkel').spelen(); await wacht(() => spelKlaar(0.5) && scene('Spel').n === 2, 8000, 'spelen in de Bergen');
+      return 'Bergen gekozen met het plaatje, dicht level geweigerd, spel start in de Bergen';
+    },
+
+    // gokkast: inzet eraf, winst erbij volgens het vakje
+    async gokken() {
+      PROFIEL.flessen = 100;
+      PROFIEL.prestaties = PRESTATIES.map(p => p.id); // prestaties geven extra flesjes: hier even niet
+      scene('Titel').scene.start('Gokkast'); await wacht(() => actief('Gokkast'), 5000, 'gokkast');
+      const g = scene('Gokkast');
+      const ev = GOK_VAKJES.reduce((a, b) => a + b, 0) / GOK_VAKJES.length;
+      moet(ev < 1 && GOK_VAKJES.filter(v => !v).length > GOK_VAKJES.length / 2, 'verliezen is niet veel waarschijnlijker');
+      doe('verlies'); g.draai(0); moet(PROFIEL.flessen === 95, 'inzet niet afgehaald'); await wacht(() => !g.draait, 8000, 'rad stopt');
+      moet(PROFIEL.flessen === 95, 'verlies klopt niet');
+      doe('jackpot'); g.draai(GOK_VAKJES.indexOf(5)); await wacht(() => !g.draait, 8000, 'rad stopt');
+      moet(PROFIEL.flessen === 95 - 5 + 25, 'jackpot klopt niet (' + PROFIEL.flessen + ')');
+      doe('alles'); g.allesInzetten(); g.draai(0); await wacht(() => !g.draait, 8000, 'rad stopt');
+      moet(PROFIEL.flessen === 0, 'alles inzetten klopt niet');
+      g.terug(); await wacht(() => actief('Shop'), 5000, 'terug naar shop');
+      return 'verlies -5, jackpot ×5 = +25, alles kwijt bij niks; gemiddeld ' + Math.round(ev * 100) + '% terug';
     },
 
     // kebabrol eten: scheet en heel hoog de lucht in
