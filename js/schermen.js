@@ -125,17 +125,13 @@ class Titel extends Phaser.Scene {
     this.add.text(480, 70, 'BVO', {
       fontFamily: FONT_TITEL, fontSize: '64px', color: '#f2c14e', stroke: '#0a1028', strokeThickness: 10,
     }).setOrigin(0.5);
-    this.add.text(480, 132, 'Yo niffow! Zullen we een game gaan spelen?', {
+    this.add.text(480, 132, 'Een game gemaakt door Daniel en Jantje Willie', {
       fontFamily: FONT, fontSize: '24px', fontStyle: 'bold', color: '#3cc8bb', stroke: '#0a1028', strokeThickness: 5,
     }).setOrigin(0.5);
     const held = this.add.image(480, 400, 'sp_stil').setOrigin(0.5, 1).setScale(3);
     this.tweens.add({ targets: held, y: 392, yoyo: true, repeat: -1, duration: 700, ease: 'Sine.easeInOut' });
 
     const touch = this.sys.game.device.input.touch;
-    const start = this.add.text(480, 440, touch ? 'Tik om te beginnen' : 'Druk op spatie om te beginnen', {
-      fontFamily: FONT, fontSize: '28px', fontStyle: 'bold', color: '#f3ead6', stroke: '#0a1028', strokeThickness: 6,
-    }).setOrigin(0.5).setDepth(20);
-    this.tweens.add({ targets: start, alpha: 0.4, yoyo: true, repeat: -1, duration: 650 });
     let hulp = touch
       ? 'Links: duim = lopen en richten  ·  Rechts: SPRING, SLASH, PIJL  ·  Omlaag in de lucht = smash'
       : '← → lopen  ·  spatie springen  ·  X slash  ·  C pijl  ·  shift dash  ·  ↓ in de lucht smash  ·  Esc instellingen';
@@ -151,15 +147,17 @@ class Titel extends Phaser.Scene {
     const tandwiel = maakInstellingenKnop(this, 932, 28);
     maakVolledigSchermKnop(this, 884, 28);
 
-    const begin = (p) => {
+    const begin = () => {
       if (this.gestart || this.scene.isPaused()) return;
-      // tik op een knopje bovenin? dan niet beginnen
-      if (p && p.y !== undefined && p.y < 60 && p.x > 850) return;
       this.gestart = true;
       naarVolledigScherm(this);
       this.scene.start('Spel', { run: nieuweRun() });
     };
-    this.input.on('pointerup', begin);
+    // de Start-knop: klik erop (of druk op spatie/Enter) om te beginnen
+    const startKnop = knop(this, 380, 414, 200, 56, '▶  Start', 0xf2c14e, begin);
+    for (const o of Object.values(startKnop)) o.setDepth(20);
+    // de knop zachtjes laten kloppen, zodat je ziet dat je erop moet drukken
+    this.tweens.add({ targets: [startKnop.g, startKnop.t], alpha: 0.75, yoyo: true, repeat: -1, duration: 650 });
     this.input.keyboard.on('keydown-SPACE', () => begin());
     this.input.keyboard.on('keydown-ENTER', () => begin());
     void tandwiel;
