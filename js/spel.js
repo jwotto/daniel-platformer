@@ -1114,7 +1114,9 @@ class Spel extends Phaser.Scene {
     // het veilige platformpje gloeit even, zodat je ziet waar je bent
     p.setTint(0xfff2a0);
     this.time.delayedCall(2500, () => { if (p.active) p.clearTint(); });
-    sp.setPosition(x, y - 2);
+    // reset (niet alleen verplaatsen): anders denkt het spel dat je van onderen tegen het platform
+    // aan springt, en duwt het je er onderdoor
+    b.reset(x, y - 2);
     b.setVelocity(0, 0);
     b.setAllowGravity(true);
     this.dashTijd = 0; this.smashing = false;
