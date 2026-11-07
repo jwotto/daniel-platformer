@@ -95,6 +95,12 @@ const Geluid = (() => {
     draai: () => toon(900, 700, 0.03, 'square', 0.12),
     lont: () => rijtje([1400, 1500, 1400, 1500, 1400, 1500, 1400, 1500], 0.09, 'square', 0.12),
     duik: () => toon(1200, 300, 0.25, 'sawtooth', 0.15),
+    boer: () => {
+      if (!ctx) return;
+      const t = ctx.currentTime;
+      for (let i = 0; i < 10; i++) toon(95 - i * 3 + Math.random() * 15, 55, 0.06, 'sawtooth', 0.45, sfx, t + i * 0.05);
+      ruisje(0.5, 'lowpass', 500, 120, 0.4, sfx, t);
+    },
     prijs: () => rijtje([523, 659, 784, 1047, 1319, 1568], 0.07, 'square', 0.24),
     nee: () => toon(110, 90, 0.18, 'square', 0.25),
     baasRaak: () => toon(160, 70, 0.1, 'sawtooth', 0.28),

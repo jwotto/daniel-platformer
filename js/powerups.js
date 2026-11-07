@@ -35,6 +35,38 @@ const POWERUPS = [
   { id: 'smash', naam: 'Smash', basis: 2, max: 4, uitleg: [
     'In de lucht omlaag: knal naar beneden!',
     'Grotere en hardere klap.'] },
+  // ---- de dure, gekke power-ups ----
+  { id: 'schild', naam: 'Schuimschild', basis: 5, max: 2, uitleg: [
+    'Een bel van bierschuim om je heen. Vangt 1 klap per potje op.',
+    'Twee schuimbellen: 2 klappen per potje.'] },
+  { id: 'maatje', naam: 'Flesmaatje', basis: 6, max: 3, uitleg: [
+    'Een klein flesje vliegt met je mee en schiet zelf op monsters.',
+    'Je maatje schiet sneller.',
+    'Je maatje schiet als een gek!'] },
+  { id: 'stomp', naam: 'Bierbuik-stamp', basis: 4, max: 2, uitleg: [
+    'Spring bovenop een monster: AU! en je stuitert omhoog.',
+    'Harder stampen: dubbele schade.'] },
+  { id: 'reserve', naam: 'Reservevat', basis: 10, max: 1, uitleg: [
+    'Ga je dood? Dan krijg je 1 keer per potje een tweede kans.'] },
+  { id: 'boer', naam: 'Boerbom', basis: 4, max: 3, uitleg: [
+    'Word je geraakt? Dan laat je een enorme boer die monsters wegblaast.',
+    'Grotere boer.',
+    'MEGA-BOER!'] },
+  { id: 'magneet', naam: 'Magneetkurk', basis: 3, max: 2, uitleg: [
+    'Shotjes vliegen van ver naar je toe.',
+    'Shotjes van het hele scherm vliegen naar je toe.'] },
+  { id: 'statiegeld', naam: 'Statiegeld', basis: 4, max: 3, uitleg: [
+    'Elk verslagen monster laat 1 shotje extra vallen.',
+    '2 shotjes extra per monster.',
+    '3 shotjes extra per monster.'] },
+  { id: 'doorboor', naam: 'Doorboorpijlen', basis: 6, max: 1, uitleg: [
+    'Je pijlen gaan dwars door alle monsters heen.'] },
+  { id: 'slok', naam: 'Herstelslok', basis: 5, max: 2, uitleg: [
+    'Na elke 20 verslagen monsters krijg je een hartje terug.',
+    'Al na elke 12 monsters een hartje terug.'] },
+  { id: 'kebabradar', naam: 'Kebabradar', basis: 3, max: 2, uitleg: [
+    'Veel vaker kebabrollen (PRRRT!).',
+    'Kebab overal!'] },
 ];
 
 // De regio's. Elke regio loopt eindeloos door. Versla de eindbaas om verder te mogen.

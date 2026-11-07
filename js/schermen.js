@@ -208,6 +208,9 @@ class Titel extends Phaser.Scene {
   }
 }
 
+// het stuk van de winkel waar de kaarten staan (daartussen kun je scrollen)
+const WINKEL_BOVEN = 74, WINKEL_ONDER = 458;
+
 class Winkel extends Phaser.Scene {
   constructor() { super('Winkel'); }
   create(data) {
@@ -238,8 +241,17 @@ class Winkel extends Phaser.Scene {
     this.ongedaanKnop = knop(this, 60, 9, 140, 38, '↶ Ongedaan', 0xa9c4ee, () => this.ongedaan(), 18);
     knop(this, 210, 9, 120, 38, '🎡 Shop', 0x3cc8bb, () => this.naarShop(), 18);
 
-    this.kaarten = POWERUPS.map((p, i) => this.maakKaart(p, 15 + (i % 5) * 188, 80 + Math.floor(i / 5) * 186));
-    this.baasKaart = this.maakKaart(null, 15 + 4 * 188, 80 + 186);
+    // alle kaarten zitten in een lijst die je kunt scrollen (muiswiel, pijltjes of slepen met je vinger)
+    this.lijst = this.add.container(0, 0);
+    const vak = this.make.graphics({ add: false }).fillRect(0, WINKEL_BOVEN, 960, WINKEL_ONDER - WINKEL_BOVEN);
+    this.lijst.setMask(vak.createGeometryMask());
+    // de eindbaas staat altijd rechtsboven, de power-ups vullen de rest
+    const plek = i => [15 + (i % 5) * 188, 80 + Math.floor(i / 5) * 186];
+    const vrij = [];
+    for (let i = 0; i < POWERUPS.length + 1; i++) if (i !== 4) vrij.push(i);
+    this.kaarten = POWERUPS.map((p, i) => this.maakKaart(p, ...plek(vrij[i])));
+    this.baasKaart = this.maakKaart(null, ...plek(4));
+    this.maakScroll(Math.ceil((POWERUPS.length + 1) / 5) * 186 + 80 - 10);
 
     // onderaan: startregio kiezen, spelen, en vechten tegen de eindbaas
     this.regioTekst = this.add.text(160, 497, '', { fontFamily: FONT, fontSize: '20px', fontStyle: 'bold', color: '#f3ead6', align: 'center' }).setOrigin(0.5);
@@ -313,14 +325,54 @@ class Winkel extends Phaser.Scene {
     const kaart = {
       p, x, y, w, h,
       g: this.add.graphics(),
-      naam: this.add.text(x + 12, y + 10, p ? p.naam : 'Eindbaas', { fontFamily: FONT_TITEL, fontSize: '18px', color: p ? '#f3ead6' : '#ff8a8a', wordWrap: { width: p ? w - 58 : w - 20 }, lineSpacing: -4 }),
+      naam: this.add.text(x + 12, y + 10, p ? p.naam : 'Eindbaas', { fontFamily: FONT_TITEL, fontSize: p && p.naam.length > 13 && !p.naam.includes(' ') ? '15px' : '18px', color: p ? '#f3ead6' : '#ff8a8a', wordWrap: { width: p ? w - 58 : w - 20 }, lineSpacing: -4 }),
       plaatje: p ? this.add.image(x + w - 24, y + 24, 'icoon_' + p.id).setScale(0.38) : null,
       uitleg: this.add.text(x + 12, y + 60, '', { fontFamily: FONT, fontSize: '14px', color: '#a9b6d8', wordWrap: { width: w - 22 } }),
       prijsT: this.add.text(x + w - 28, y + h - 8, '', { fontFamily: FONT, fontSize: '22px', fontStyle: 'bold', color: '#f2c14e' }).setOrigin(1, 1),
       icoon: this.add.image(x + w - 8, y + h - 8, 'fles_mini').setOrigin(1, 1).setScale(0.7),
     };
-    this.add.zone(x, y, w, h).setOrigin(0).setInteractive({ useHandCursor: true }).on('pointerup', () => this.koop(kaart));
+    const zone = this.add.zone(x, y, w, h).setOrigin(0).setInteractive({ useHandCursor: true }).on('pointerup', (ptr) => {
+      // niet kopen als je aan het scrollen was, of als de kaart buiten beeld zit
+      if (this.gesleept || ptr.y < WINKEL_BOVEN || ptr.y > WINKEL_ONDER) return;
+      this.koop(kaart);
+    });
+    this.lijst.add([kaart.g, kaart.naam, kaart.uitleg, kaart.prijsT, kaart.icoon, zone]);
+    if (kaart.plaatje) this.lijst.add(kaart.plaatje);
     return kaart;
+  }
+
+  // Scrollen door de kaarten
+  maakScroll(onderkant) {
+    this.scroll = 0;
+    this.maxScroll = Math.max(0, onderkant - WINKEL_ONDER + 4);
+    if (!this.maxScroll) return;
+    const balk = this.add.graphics();
+    this.pijlOmlaag = this.add.text(480, WINKEL_ONDER - 2, '▼ scroll voor meer ▼', {
+      fontFamily: FONT, fontSize: '15px', fontStyle: 'bold', color: '#f2c14e', stroke: '#0a1028', strokeThickness: 4,
+    }).setOrigin(0.5, 1).setDepth(5);
+    this.tweens.add({ targets: this.pijlOmlaag, y: WINKEL_ONDER + 2, yoyo: true, repeat: -1, duration: 500 });
+    const zet = (y) => {
+      this.scroll = Phaser.Math.Clamp(y, 0, this.maxScroll);
+      this.lijst.y = -this.scroll;
+      const hoog = WINKEL_ONDER - WINKEL_BOVEN, lengte = hoog * hoog / (hoog + this.maxScroll);
+      balk.clear();
+      balk.fillStyle(0x0a1028, 0.6).fillRoundedRect(951, WINKEL_BOVEN, 6, hoog, 3);
+      balk.fillStyle(0xf2c14e, 1).fillRoundedRect(951, WINKEL_BOVEN + (hoog - lengte) * this.scroll / this.maxScroll, 6, lengte, 3);
+      this.pijlOmlaag.setVisible(this.scroll < this.maxScroll - 5);
+    };
+    zet(0);
+    this.input.on('wheel', (p, o, dx, dy) => { if (!this.kiest) zet(this.scroll + dy * 0.6); });
+    this.input.keyboard.on('keydown-DOWN', () => zet(this.scroll + 90));
+    this.input.keyboard.on('keydown-UP', () => zet(this.scroll - 90));
+    // slepen met je vinger (of de muis)
+    let start = null;
+    this.input.on('pointerdown', p => { this.gesleept = false; start = (p.y >= WINKEL_BOVEN && p.y <= WINKEL_ONDER) ? { y: p.y, s: this.scroll } : null; });
+    this.input.on('pointermove', p => {
+      if (!start || !p.isDown || this.kiest) return;
+      if (Math.abs(p.y - start.y) > 8) this.gesleept = true;
+      if (this.gesleept) zet(start.s - (p.y - start.y));
+    });
+    this.input.on('pointerup', () => { start = null; });
   }
 
   vernieuwAlles() {
@@ -374,6 +426,7 @@ class Winkel extends Phaser.Scene {
   flits(k) {
     Geluid.effect('koop');
     const f = this.add.rectangle(k.x, k.y, k.w, k.h, 0xf2c14e, 0.5).setOrigin(0);
+    this.lijst.add(f);
     this.tweens.add({ targets: f, alpha: 0, duration: 300, onComplete: () => f.destroy() });
   }
 
@@ -409,6 +462,7 @@ class Winkel extends Phaser.Scene {
     Geluid.effect('draai');
     const k = laatste.baas ? this.baasKaart : this.kaarten.find(x => x.p.id === laatste.id);
     const f = this.add.rectangle(k.x, k.y, k.w, k.h, 0xa9c4ee, 0.5).setOrigin(0);
+    this.lijst.add(f);
     this.tweens.add({ targets: f, alpha: 0, duration: 300, onComplete: () => f.destroy() });
   }
 

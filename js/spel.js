@@ -28,6 +28,12 @@ class Spel extends Phaser.Scene {
     this.mod = keuzeVan(this.run.keuze);
     this.maxH = hartenMet(this.run.keuze);
     this.shotRest = 0;
+    // power-ups die per potje opladen
+    const up0 = this.run.up;
+    this.schilden = up0.schild || 0;
+    this.reserve = up0.reserve || 0;
+    this.verslagen = 0;
+    this.maatjeCd = 1;
     // Phaser gebruikt dit level-object steeds opnieuw. Dingen van het vorige potje zijn al weg,
     // dus eerst leegmaken. Anders loopt het baasgevecht vast na een normaal potje (en andersom).
     this.baas = null; this.baasBalk = null; this.baasTekst = null;
@@ -60,6 +66,10 @@ class Spel extends Phaser.Scene {
     this.speler = this.physics.add.sprite(150, 418, 'sp_stil').setOrigin(0.5, 1).setDepth(10);
     this.speler.body.setSize(20, 40).setOffset(18, 47);
     this.speler.body.setMaxVelocity(900, 1000);
+    // schuimschild: een bel om de speler
+    this.schildBel = this.add.circle(0, 0, 38, 0xfffaf0, 0.18).setStrokeStyle(3, 0xfffaf0, 0.8).setDepth(11).setVisible(false);
+    // flesmaatje: vliegt achter je aan
+    this.maatje = this.run.up.maatje ? this.add.image(100, 380, 'fles_mini').setDepth(11).setScale(1.1) : null;
     // zwaartekracht anders? (de wereld trekt al met 1500)
     if (this.mod.zwaarte !== 1) this.speler.body.setGravityY(1500 * (this.mod.zwaarte - 1));
 
@@ -263,7 +273,7 @@ class Spel extends Phaser.Scene {
   }
 
   // het lavalager ontploft
-  ontplof(v) {
+  lavaBoem(v) {
     if (!v.active) return;
     const x = v.x, y = v.y - 22;
     v.destroy();
@@ -319,7 +329,7 @@ class Spel extends Phaser.Scene {
     // heel soms: een gouden flesje met pootjes
     if (w >= 150 && this.genX > 1200 && Math.random() < 0.035) this.maakGoud(x + w * 0.3, y, x, x + w);
     // af en toe een kebabrol
-    if (this.genX > 1200 && Math.random() < 0.07) this.maakKebab(x + w * 0.75, y - 40);
+    if (this.genX > 1200 && Math.random() < 0.07 * (1 + (this.run.up.kebabradar || 0) * 1.5)) this.maakKebab(x + w * 0.75, y - 40);
     if (Math.random() < 0.3) this.rijShotjes(x + w / 2, y - 34, Phaser.Math.Between(2, 4));
     else if (Math.random() < 0.25 && y > 330) {
       // hoog bonusplatform: alleen te halen met dubbele sprong
@@ -610,6 +620,9 @@ class Spel extends Phaser.Scene {
       this.opruimen();
     }
     this.pijlenUpdate(dt);
+    this.maatjeUpdate(dt);
+    this.schildBel.setVisible(this.schilden > 0).setPosition(this.speler.x, this.speler.y - 30);
+    this.schildBel.setScale(1 + Math.sin(this.tijd * 4) * 0.04);
     this.spelerUpdate(dt, inp);
     this.vijandenUpdate(dt);
     if (this.baasModus) this.baasUpdate(dt);
@@ -804,6 +817,15 @@ class Spel extends Phaser.Scene {
 
   pijlRaakt(p, v) {
     if (!p.active || !v.active) return;
+    if (this.run.up.doorboor) {
+      // doorboorpijl: elk monster maar 1 keer raken en dan doorvliegen
+      p.geraakt = p.geraakt || new Set();
+      if (p.geraakt.has(v)) return;
+      p.geraakt.add(v);
+      this.raakVijand(v, 1, Math.sign(p.body.velocity.x) || 1);
+      if (p.boem) this.ontplof(p.x, p.y);
+      return;
+    }
     this.raakVijand(v, 1, Math.sign(p.body.velocity.x) || 1);
     if (p.boem) this.ontplof(p.x, p.y);
     p.destroy();
@@ -863,7 +885,15 @@ class Spel extends Phaser.Scene {
     if (v.hp <= 0) {
       const my = v.y - (v.loopt ? v.displayHeight / 2 : 0);
       this.vonken.explode(16, v.x, my);
-      this.dropShotjes(v.x, my, v.shots);
+      this.dropShotjes(v.x, my, v.shots + (this.run.up.statiegeld || 0));
+      // herstelslok: na genoeg verslagen monsters een hartje terug
+      this.verslagen++;
+      const nodig = [0, 20, 12][this.run.up.slok || 0];
+      if (nodig && this.verslagen % nodig === 0 && this.run.harten < this.maxH) {
+        this.run.harten++;
+        this.popTekst('Herstelslok! +1 hartje');
+        Geluid.effect('koop');
+      }
       // een groot ijsklontje breekt in 3 kleintjes
       if (v.soort === 'klont') {
         for (const r of [-1, 0, 1]) {
@@ -935,7 +965,7 @@ class Spel extends Phaser.Scene {
             v.body.velocity.x = 0;
             if (Math.floor(v.lont * 12) % 2) v.setTintFill(0xffffff); else v.clearTint();
             v.setScale(1 + (0.8 - v.lont) * 0.3);
-            if (v.lont <= 0) this.ontplof(v);
+            if (v.lont <= 0) this.lavaBoem(v);
             return;
           }
           if (Math.hypot(dx, dy) < 95) { v.lont = 0.8; Geluid.effect('lont'); return; }
@@ -1033,7 +1063,7 @@ class Spel extends Phaser.Scene {
     this.shotjes.getChildren().forEach(s => {
       if (!s.active) return;
       const dx = sp.x - s.x, dy = (sp.y - 30) - s.y, d = Math.hypot(dx, dy);
-      if (s.magneet || d < 70) {
+      if (s.magneet || d < [70, 190, 420][this.run.up.magneet || 0]) {
         s.magneet = true; s.zweeft = false;
         s.body.setAllowGravity(false);
         if (d > 1) s.body.setVelocity(dx / d * 400, dy / d * 400);
@@ -1066,6 +1096,16 @@ class Spel extends Phaser.Scene {
   spelerRaakt(v) {
     if (!v.active || this.dood || this.gewonnen) return;
     if (v.soort === 'goud') { this.vangGoud(v); return; }
+    // bierbuik-stamp: van bovenop een monster springen
+    const sp = this.speler;
+    if (this.run.up.stomp && !this.smashing && sp.body.velocity.y > 60 && sp.y < v.getCenter().y) {
+      this.raakVijand(v, this.run.up.stomp * 2, this.kijk);
+      sp.body.setVelocityY(-520);
+      this.onkwetsbaar = Math.max(this.onkwetsbaar, 0.15);
+      this.vonken.explode(10, sp.x, sp.y);
+      Geluid.effect('dubbel');
+      return;
+    }
     if (this.smashing) {
       this.raakVijand(v, 1 + this.run.up.smash, this.kijk);
       this.smashing = false;
@@ -1078,7 +1118,18 @@ class Spel extends Phaser.Scene {
 
   schade(richting) {
     const b = this.speler.body;
+    if (this.schilden > 0) {
+      // de schuimbel vangt de klap op
+      this.schilden--;
+      this.onkwetsbaar = 1;
+      this.vonken.explode(20, this.speler.x, this.speler.y - 30);
+      Geluid.effect('raak');
+      this.popTekst('Schuimschild!');
+      b.setVelocity(richting * 200, -260);
+      return;
+    }
     this.run.harten -= 1;
+    if (this.run.up.boer) this.boer();
     this.onkwetsbaar = 1.2; this.knipper = 1.2;
     this.cameras.main.shake(120, 0.008);
     this.cameras.main.flash(120, 209, 73, 91);
@@ -1086,7 +1137,7 @@ class Spel extends Phaser.Scene {
     this.dashTijd = 0; b.setAllowGravity(true); this.smashing = false;
     b.setVelocity(richting * 260, -320);
     this.muurLock = 0.25; this.springGeknipt = true;
-    if (this.run.harten <= 0) this.gameOver();
+    if (this.run.harten <= 0) this.bijnaDood();
   }
 
   valSchade() {
@@ -1095,7 +1146,7 @@ class Spel extends Phaser.Scene {
     this.cameras.main.shake(150, 0.01);
     this.cameras.main.flash(120, 209, 73, 91);
     Geluid.effect('au');
-    if (this.run.harten <= 0) { this.gameOver(); return; }
+    if (this.run.harten <= 0 && this.bijnaDood()) return;
     this.respawn();
   }
 
@@ -1123,6 +1174,66 @@ class Spel extends Phaser.Scene {
     this.onkwetsbaar = 2.5; this.knipper = 2.5;
     // het scherm wacht even, zodat je rustig verder kunt
     this.startVertraging = 2.5;
+  }
+
+  // Hartjes op: met een Reservevat krijg je nog 1 kans. Geeft true als je echt dood bent.
+  bijnaDood() {
+    if (this.reserve > 0) {
+      this.reserve--;
+      this.run.harten = 1;
+      this.onkwetsbaar = 2.5; this.knipper = 2.5;
+      this.popTekst('Reservevat! Nog één kans!');
+      Geluid.effect('flesVol');
+      this.cameras.main.flash(300, 242, 193, 78);
+      return false;
+    }
+    this.gameOver();
+    return true;
+  }
+
+  // Boerbom: een grote boer die monsters om je heen raakt
+  boer() {
+    const lvl = this.run.up.boer, sp = this.speler;
+    const r = [0, 130, 180, 240][lvl], x = sp.x, y = sp.y - 30;
+    Geluid.effect('boer');
+    const ring = this.add.circle(x, y, r, 0x9ad86e, 0.35).setDepth(12).setScale(0.2);
+    this.tweens.add({ targets: ring, scale: 1, alpha: 0, duration: 400, onComplete: () => ring.destroy() });
+    this.vijanden.getChildren().slice().forEach(v => {
+      if (v.active && v.soort !== 'goud' && Phaser.Math.Distance.Between(x, y, v.x, v.getCenter().y) < r + (v.soort === 'baas' ? 50 : 0)) {
+        this.raakVijand(v, 1 + lvl, Math.sign(v.x - x) || 1);
+      }
+    });
+    this.kogels.getChildren().slice().forEach(k => {
+      if (Phaser.Math.Distance.Between(x, y, k.x, k.y) < r) k.destroy();
+    });
+  }
+
+  // Flesmaatje: vliegt mee en schiet op het dichtstbijzijnde monster
+  maatjeUpdate(dt) {
+    const m = this.maatje, sp = this.speler;
+    if (!m) return;
+    const doelX = sp.x - this.kijk * 40, doelY = sp.y - 80 + Math.sin(this.tijd * 3) * 6;
+    m.x += (doelX - m.x) * Math.min(1, dt * 6);
+    m.y += (doelY - m.y) * Math.min(1, dt * 6);
+    m.rotation = Math.sin(this.tijd * 4) * 0.15;
+    this.maatjeCd -= dt;
+    if (this.maatjeCd > 0 || this.dood) return;
+    let doel = null, best = 460;
+    this.vijanden.getChildren().forEach(v => {
+      if (!v.active || v.soort === 'goud') return;
+      const d = Phaser.Math.Distance.Between(m.x, m.y, v.x, v.getCenter().y);
+      if (d < best) { best = d; doel = v; }
+    });
+    if (!doel) return;
+    this.maatjeCd = [0, 1.8, 1.2, 0.7][this.run.up.maatje];
+    const hoek = Phaser.Math.Angle.Between(m.x, m.y, doel.x, doel.getCenter().y);
+    const p = this.pijlen.create(m.x, m.y, 'pijl').setDepth(11).setScale(0.8);
+    p.body.setAllowGravity(false);
+    p.body.setSize(14, 8);
+    p.setVelocity(Math.cos(hoek) * 650, Math.sin(hoek) * 650);
+    p.setRotation(hoek);
+    p.leeft = 1; p.boem = false;
+    Geluid.effect('schiet');
   }
 
   meters() { return this.baasModus ? 0 : Math.max(0, Math.floor(this.speler.x / 20)); }

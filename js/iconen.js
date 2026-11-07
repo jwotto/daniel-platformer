@@ -8,6 +8,9 @@ const ICOON_KLEUR = {
   // keuzes
   springveer: '#5fd38a', gulzig: '#f2c14e', renner: '#3cc8bb', tank: '#5a6a9a', kanon: '#d1495b',
   maan: '#2c4387', kracht: '#c8682a', spaarvarken: '#ff8ac8', raket: '#ff6a2c', zwaar: '#4a4a5e',
+  // dure power-ups
+  schild: '#a9c4ee', maatje: '#3cc8bb', stomp: '#c8682a', reserve: '#8a4a1c', boer: '#5fae4e',
+  magneet: '#d1495b', statiegeld: '#5a6a9a', doorboor: '#7a5cff', slok: '#d1495b', kebabradar: '#f2a33a',
 };
 
 function lijnPad(ctx, punten, dikte, kleur) {
@@ -116,6 +119,61 @@ const ICOON_TEKEN = {
     ctx.fillStyle = CREME; ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('10T', 32, 43);
   },
 };
+
+Object.assign(ICOON_TEKEN, {
+  schild: ctx => {
+    ctx.fillStyle = 'rgba(255,250,240,.35)'; ctx.strokeStyle = CREME; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(32, 32, 19, 0, TAU); ctx.fill(); ctx.stroke();
+    for (const [x, y, r] of [[24, 18, 6], [33, 15, 7], [42, 19, 6]]) rondje(ctx, x, y, r, CREME);
+    ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.beginPath(); ctx.arc(25, 30, 4, 0, TAU); ctx.fill();
+  },
+  maatje: ctx => {
+    vorm(ctx, [[24, 50], [24, 30], [29, 24], [29, 14], [35, 14], [35, 24], [40, 30], [40, 50]], '#c9771f');
+    rondRect(ctx, 25, 34, 14, 8, 2); ctx.fillStyle = CREME; ctx.fill(); ctx.stroke();
+    ctx.fillStyle = INKT; ctx.beginPath(); ctx.arc(29, 28, 1.6, 0, TAU); ctx.arc(35, 28, 1.6, 0, TAU); ctx.fill();
+    lijnPad(ctx, [[42, 22], [54, 16]], 2.5, '#e6ecf5'); vorm(ctx, [[54, 12], [58, 15], [53, 19]], '#e6ecf5');
+  },
+  stomp: ctx => {
+    vorm(ctx, [[22, 12], [42, 12], [42, 26], [48, 34], [16, 34], [22, 26]], '#4a2a12');
+    vorm(ctx, [[12, 50], [52, 50], [46, 40], [18, 40]], '#5a49b8');
+    lijnPad(ctx, [[10, 38], [6, 34]], 2.5, '#f2c14e'); lijnPad(ctx, [[54, 38], [58, 34]], 2.5, '#f2c14e');
+  },
+  reserve: ctx => {
+    ctx.fillStyle = '#a0581c'; ctx.strokeStyle = INKT; ctx.lineWidth = 2.4;
+    ctx.beginPath(); ctx.ellipse(32, 34, 16, 18, 0, 0, TAU); ctx.fill(); ctx.stroke();
+    lijnPad(ctx, [[17, 26], [47, 26]], 2.5, '#9aa4b8'); lijnPad(ctx, [[17, 42], [47, 42]], 2.5, '#9aa4b8');
+    hartVorm(ctx, 32, 34, 0.55, '#ff8a8a');
+  },
+  boer: ctx => {
+    for (const [x, y, r] of [[22, 38, 10], [34, 30, 12], [44, 40, 9], [30, 44, 8]]) rondje(ctx, x, y, r, '#b8d86e');
+    ctx.fillStyle = INKT; ctx.font = 'bold 13px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('BOER', 32, 24);
+  },
+  magneet: ctx => {
+    ctx.strokeStyle = INKT; ctx.lineWidth = 13; ctx.beginPath(); ctx.arc(32, 30, 13, Math.PI, 0); ctx.stroke();
+    ctx.strokeStyle = '#d1495b'; ctx.lineWidth = 9; ctx.beginPath(); ctx.arc(32, 30, 13, Math.PI, 0); ctx.stroke();
+    for (const x of [19, 45]) { ctx.fillStyle = '#e6ecf5'; ctx.strokeStyle = INKT; ctx.lineWidth = 2; ctx.fillRect(x - 5, 30, 10, 12); ctx.strokeRect(x - 5, 30, 10, 12); }
+    vorm(ctx, [[28, 48], [36, 48], [35, 56], [29, 56]], '#f2a33a');
+  },
+  statiegeld: ctx => {
+    vorm(ctx, [[22, 52], [22, 26], [27, 20], [27, 10], [37, 10], [37, 20], [42, 26], [42, 52]], '#5fae4e');
+    rondje(ctx, 44, 44, 9, '#f2c14e');
+    ctx.fillStyle = INKT; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('+1', 44, 48);
+  },
+  doorboor: ctx => {
+    for (const x of [22, 36]) rondje(ctx, x, 32, 7, '#5a49b8');
+    lijnPad(ctx, [[8, 32], [50, 32]], 3, '#8a4a1c'); vorm(ctx, [[50, 25], [59, 32], [50, 39]], '#e6ecf5');
+  },
+  slok: ctx => {
+    vorm(ctx, [[18, 18], [40, 18], [38, 50], [20, 50]], '#f2a33a');
+    for (const [x, r] of [[21, 6], [29, 7], [37, 6]]) rondje(ctx, x, 18, r, CREME);
+    hartVorm(ctx, 44, 42, 0.6, '#ff8a8a');
+  },
+  kebabradar: ctx => {
+    ctx.strokeStyle = 'rgba(255,250,240,.7)'; ctx.lineWidth = 2;
+    for (const r of [10, 18, 26]) { ctx.beginPath(); ctx.arc(32, 32, r, -1.2, 0.2); ctx.stroke(); }
+    ctx.save(); ctx.translate(-1, 2); ctx.scale(0.9, 0.9); tekenKebab(ctx); ctx.restore();
+  },
+});
 
 function maakIcoonTexturen(scene) {
   for (const [id, teken] of Object.entries(ICOON_TEKEN)) {

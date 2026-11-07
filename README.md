@@ -64,10 +64,27 @@ Daarna begint het opnieuw met Rivier 2, en alles is sterker.
 | 🌋 Vulkaan | **Lavalager** (ontploft als je te dichtbij komt) · **Brouwketel-golem** (groot en sterk, stampt schokgolven) · dwaallicht |
 | Overal, zeldzaam | **Gouden flesje met pootjes**: rent weg, vang hem voor een heel flesje! |
 
-### Power-ups
+### Power-ups (winkel)
 
 Dash · Dubbele sprong · Wall jump · Extra hartje · Zweven · Sterkere slash · Dubbele pijlen · Ontploffende pijlen · Smash.
 Elke power-up kun je meerdere keren kopen. Hij wordt dan beter én duurder.
+
+En de dure, gekke power-ups:
+
+| Power-up | Wat hij doet |
+|---|---|
+| Schuimschild | een bel van bierschuim vangt 1 (of 2) klappen per potje op |
+| Flesmaatje | een klein flesje vliegt met je mee en schiet zelf op monsters |
+| Bierbuik-stamp | spring bovenop een monster: schade en je stuitert omhoog |
+| Reservevat | ga je dood, dan krijg je 1 keer per potje een tweede kans |
+| Boerbom | word je geraakt, dan blaast een enorme boer de monsters om je heen weg |
+| Magneetkurk | shotjes vliegen van ver (of het hele scherm) naar je toe |
+| Statiegeld | elk verslagen monster laat 1 tot 3 shotjes extra vallen |
+| Doorboorpijlen | je pijlen gaan dwars door alle monsters heen |
+| Herstelslok | na elke 20 (of 12) verslagen monsters een hartje terug |
+| Kebabradar | veel vaker kebabrollen |
+
+In de winkel kun je **scrollen** (muiswiel, pijltjestoetsen of slepen met je vinger). Linksboven zit **↶ Ongedaan**: daarmee maak je je laatste aankoop van dit bezoek ongedaan en krijg je je flesjes terug. Met **🎡 Shop** ga je naar het draairad en weer terug naar de winkel.
 
 ### Geluid en muziek
 
