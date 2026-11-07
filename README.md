@@ -47,7 +47,7 @@ In de winkel zit linksonder de **levelknop** met een plaatje van het level waar 
 
 ### Huisdieren
 
-Op het titelscherm, in de shop en na het doodgaan zit **🐾 Dieren**. Draai aan het dierenrad (heel duur: 80 flesjes, en elk volgend dier 40 meer) en win een van 10 huisdieren. Upgrade ze tot niveau 5 (★★★★★). Je neemt er één mee; hij loopt of vliegt met je mee en helpt je:
+In het Game over-menu (na het doodgaan) en in de shop zit **🐾 Dieren**. Draai aan het dierenrad (heel duur: 80 flesjes, en elk volgend dier 40 meer) en win een van 10 huisdieren. Upgrade ze tot niveau 5 (★★★★★). Je neemt er één mee; hij loopt of vliegt met je mee en helpt je:
 
 Kuiken (shotjes meer waard) · Hondje (haalt shotjes van ver op) · Kat (krabt monsters) · Uil (hoger springen) · Schildpad (extra hartjes) · Vos (sneller lopen) · Papegaai (schiet pijlen) · Draakje (spuwt vuurballen) · Eenhoorn (kans op flesjes) · Bierbeestje (meer shotjes én schade).
 
@@ -61,11 +61,11 @@ In de shop zit de **🎰 Gokkast**. Kies hoeveel flesjes je inzet (1, 5, 10, 25 
 
 ### Prestaties
 
-Op het titelscherm en in de winkel (na doodgaan) zit **🏆 Prestaties**: 40 doelen van makkelijk (je eerste potje: 1 flesje) tot heel moeilijk (500 flesjes verdienen: 30 flesjes). Haal je er een, dan komt er een melding in beeld en krijg je de flesjes meteen.
+In het Game over-menu (na het doodgaan) zit **🏆 Prestaties**: 40 doelen van makkelijk (je eerste potje: 1 flesje) tot heel moeilijk (500 flesjes verdienen: 30 flesjes). Haal je er een, dan komt er een melding in beeld en krijg je de flesjes meteen.
 
 ### Shop en skins
 
-Op het titelscherm zit de **Shop**. Daar draai je aan een rad en win je een nieuwe **skin**: andere kleren en een ander flesje op je hoofd. De eerste keer draaien kost 5 flesjes, daarna elke keer 5 meer (10, 15, 20 …). Je wint altijd een skin die je nog niet had. Bij "Jouw skins" tik je een skin aan om hem aan te trekken.
+In het Game over-menu zit de tegel **Skins** (de shop). Daar draai je aan een rad en win je een nieuwe **skin**: andere kleren en een ander flesje op je hoofd. De eerste keer draaien kost 5 flesjes, daarna elke keer 5 meer (10, 15, 20 …). Je wint altijd een skin die je nog niet had. Bij "Jouw skins" tik je een skin aan om hem aan te trekken.
 
 Skins: Gewoon · Groene Fles · Goudkoning · Nachtridder · Rode Duivel · IJskoud · Roze Rosé · Zombie.
 

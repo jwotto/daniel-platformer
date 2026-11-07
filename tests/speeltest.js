@@ -272,11 +272,9 @@
         z.emit('pointerup', { y: t.y, x: t.x });
       };
       PROFIEL.flessen = 300;
-      doe('titel → shop'); druk(scene('Titel'), 'Shop'); await wacht(() => actief('Shop'), 4000, 'shop');
+      doe('shop'); scene('Titel').scene.start('Shop'); await wacht(() => actief('Shop'), 4000, 'shop');
       druk(scene('Shop'), 'Draai'); await wacht(() => !scene('Shop').draait, 8000, 'rad');
       druk(scene('Shop'), 'Terug'); await wacht(() => actief('Titel'), 4000, 'titel');
-      doe('titel → prestaties'); druk(scene('Titel'), 'Prestaties'); await wacht(() => actief('Prestaties'), 4000, 'prestaties');
-      druk(scene('Prestaties'), 'Terug'); await wacht(() => actief('Titel'), 4000, 'titel');
       doe('titel → start'); druk(scene('Titel'), 'Start'); await wacht(() => spelKlaar(0.5), 8000, 'spel');
       doe('instellingen → hoofdscherm');
       const sp = scene('Spel'); sp.scene.launch('Instellingen', { terug: 'Spel' }); sp.scene.pause();
@@ -308,7 +306,7 @@
       scene('Spel').gameOver(); await wacht(() => actief('Winkel'), 5000, 'winkel');
       kiesUpgrade(scene('Winkel'));
       druk(scene('Winkel'), 'Menu'); await wacht(() => actief('Titel'), 4000, 'menu vanuit winkel');
-      return 'Start, Shop, Draai, Terug, Prestaties, Hoofdscherm, Verder spelen, en in het Game over-menu: Power-ups (kopen/ongedaan), Eindbaas, Level, Gokkast, Dieren, Prestaties, Skins, Spelen en Menu werken';
+      return 'Start, Draai, Terug, Hoofdscherm, Verder spelen, en in het Game over-menu: Power-ups (kopen/ongedaan), Eindbaas, Level, Gokkast, Dieren, Prestaties, Skins, Spelen en Menu werken';
     },
 
     // regio-trucjes: trampoline, lopende band, bierplas, maan

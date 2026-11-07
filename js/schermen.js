@@ -227,20 +227,9 @@ class Titel extends Phaser.Scene {
       this.scene.start('Spel', { run: nieuweRun() });
     };
     // de Start-knop: klik erop (of druk op spatie/Enter) om te beginnen
-    const startKnop = knop(this, 92, 414, 180, 56, '▶  Start', 0xf2c14e, begin);
+    // het startscherm is alleen om te beginnen: alles anders zit in het Game over-menu
+    const startKnop = knop(this, 330, 410, 300, 64, '▶  Start', 0xf2c14e, begin, 30);
     for (const o of Object.values(startKnop)) o.setDepth(20);
-    const naar = (scene) => () => {
-      if (this.gestart || this.scene.isPaused()) return;
-      this.gestart = true;
-      this.scene.start(scene);
-    };
-    // de Shop-knop (draairad met skins) en de Prestaties-knop
-    const shopKnop = knop(this, 292, 414, 180, 56, '🎡  Shop', 0x3cc8bb, naar('Shop'));
-    for (const o of Object.values(shopKnop)) o.setDepth(20);
-    const dierKnop = knop(this, 492, 414, 180, 56, '🐾  Dieren', 0x5fd38a, naar('Dieren'));
-    for (const o of Object.values(dierKnop)) o.setDepth(20);
-    const prestKnop = knop(this, 692, 414, 180, 56, '🏆  Prestaties', 0xa9c4ee, naar('Prestaties'), 21);
-    for (const o of Object.values(prestKnop)) o.setDepth(20);
     // alle bazen verslagen? Dan kun je opnieuw brouwen (prestige)
     if (PROFIEL.regio >= REGIOS.length) {
       const pk = knop(this, 20, 46, 230, 40, '⭐ Opnieuw brouwen', 0xf2c14e, () => this.vraagOpnieuw(), 18);
