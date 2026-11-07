@@ -95,7 +95,7 @@ class Spel extends Phaser.Scene {
     }
 
     // wie botst met wie
-    this.physics.add.collider(this.speler, this.platforms, (sp, p) => { if (p.band && sp.body.touching.down) this.bandNu = p.band; });
+    this.physics.add.collider(this.speler, this.platforms);
     this.physics.add.overlap(this.speler, this.plassen, () => { this.glad = 0.15; });
     this.physics.add.overlap(this.speler, this.trampolines, (sp, t) => this.opTrampoline(t));
     this.physics.add.collider(this.speler, this.pilaren);
@@ -382,14 +382,19 @@ class Spel extends Phaser.Scene {
     this.maatjeUpdate(dt);
     this.schildBel.setVisible(this.schilden > 0).setPosition(this.speler.x, this.speler.y - 30);
     this.schildBel.setScale(1 + Math.sin(this.tijd * 4) * 0.04);
+    // lopende band: sta je erop, dan loop je vanzelf mee (dat telt op bij je loopsnelheid)
+    this.bandV = 0;
+    if (this.banden.length) {
+      const sp = this.speler, b = sp.body;
+      const p = (b.blocked.down || b.touching.down) && this.platforms.getChildren().find(p => p.band && sp.x >= p.x && sp.x <= p.x + p.displayWidth && Math.abs(b.bottom - p.y) < 6);
+      if (p) this.bandV = p.band * 130;
+    }
     this.spelerUpdate(dt, inp);
     this.plafondUpdate();
     // elke seconde: hoe ver ben je? (voor de meter-prestaties)
     this.prestT -= dt;
     if (this.prestT <= 0 && !this.baasModus) { this.prestT = 1; statMax('meters', this.meters()); checkPrestaties(this); }
-    // lopende band: duwt je mee
-    if (this.bandNu) this.speler.x += this.bandNu * 120 * dt;
-    this.bandNu = 0;
+
     if (this.glad > 0) this.glad -= dt;
     this.banden = this.banden.filter(b => b.active);
     for (const b of this.banden) b.tilePositionX -= b.richting * 120 * dt;
@@ -446,7 +451,7 @@ class Spel extends Phaser.Scene {
       // lopen (op ijs glij je een beetje)
       if (this.muurLock <= 0) {
         const grip = opGrond ? (this.th.id === 'ijs' || this.glad > 0 ? 0.08 : 0.4) : 0.18;
-        b.velocity.x = Phaser.Math.Linear(b.velocity.x, inp.x * LOOPSNELHEID * this.mod.loop, grip);
+        b.velocity.x = Phaser.Math.Linear(b.velocity.x, inp.x * LOOPSNELHEID * this.mod.loop + (this.bandV || 0), grip);
         if (Math.abs(inp.x) > 0.2) this.kijk = Math.sign(inp.x);
       }
       // springen

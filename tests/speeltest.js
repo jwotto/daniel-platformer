@@ -107,7 +107,7 @@
         const eind = Date.now() + 20000;
         while (Date.now() < eind && b.active && gezien.size < 2) {
           sp.run.harten = 99;
-          if (b.status !== 'wacht') gezien.add(b.aanvallen[(b.beurt - 1) % b.aanvallen.length]);
+          if (b.status !== 'wacht' && b.beurt > 0) gezien.add(b.aanvallen[(b.beurt - 1) % b.aanvallen.length]);
           await slaap(50);
         }
         b.hp = Math.floor(b.maxHp * 0.4); await slaap(300);
@@ -293,14 +293,21 @@
     async trucjes() {
       doe('speeltuin'); speel({ level: 8 }); await wacht(() => spelKlaar(0.5) && scene('Spel').n === 8, 8000, 'speeltuin');
       let sp = scene('Spel');
+      const leeg = (sp) => { // andere platforms en monsters rond de testplek weghalen
+        for (const g of [sp.platforms, sp.vijanden, sp.trampolines, sp.plassen, sp.spikes]) g.getChildren().slice().forEach(o => { if (o.x > sp.speler.x + 60 && o.x < sp.speler.x + 600) o.destroy(); });
+      };
+      leeg(sp);
       const p = sp.maakPlatform(sp.speler.x + 150, 400, 240, true); sp.maakTrampoline(p.x + 120, 400);
       sp.speler.body.reset(p.x + 120, 360); sp.speler.body.setVelocity(0, 200);
       await wacht(() => sp.speler.body.velocity.y < -600, 2000, 'trampoline stuitert');
       doe('fabriek'); speel({ level: 7 }); await wacht(() => spelKlaar(0.5) && scene('Spel').n === 7, 8000, 'fabriek');
-      sp = scene('Spel');
+      sp = scene('Spel'); leeg(sp);
       const b = sp.maakPlatform(sp.speler.x + 150, 400, 300, true); sp.maakBand(b, 1);
-      sp.speler.body.reset(b.x + 60, 398); await slaap(200); const x0 = sp.speler.x; await slaap(600);
-      moet(sp.speler.x - x0 > 40, 'lopende band duwt niet (' + Math.round(sp.speler.x - x0) + ')');
+      sp.speler.body.reset(b.x + 60, 398); await slaap(200);
+      // meten in speltijd: de testbrowser draait soms langzamer dan echt
+      const x0 = sp.speler.x, t0 = sp.tijd; await slaap(1000);
+      const snel = (sp.speler.x - x0) / Math.max(0.05, sp.tijd - t0);
+      moet(snel > 80, 'lopende band duwt niet (' + Math.round(snel) + ' per seconde)');
       doe('maan'); speel({ level: 9 }); await wacht(() => spelKlaar(0.5) && scene('Spel').n === 9, 8000, 'maan');
       moet(scene('Spel').physics.world.gravity.y < 1000, 'geen lage zwaartekracht op de maan');
       doe('rivier'); speel({ level: 0 }); await wacht(() => spelKlaar(0.5) && scene('Spel').n === 0, 8000, 'rivier');

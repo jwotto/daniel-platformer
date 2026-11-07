@@ -47,7 +47,8 @@ class KrachtDeel {
     if (this.maatjeCd > 0 || this.dood) return;
     let doel = null, best = 460;
     this.vijanden.getChildren().forEach(v => {
-      if (!v.active || v.soort === 'goud') return;
+      // alleen monsters die hij met pijlen kan raken (niet het gouden flesje)
+      if (!v.active || v.soort === 'goud' || (ZWAK[v.soort] && ZWAK[v.soort] !== 'pijl')) return;
       const d = Phaser.Math.Distance.Between(m.x, m.y, v.x, v.getCenter().y);
       if (d < best) { best = d; doel = v; }
     });
