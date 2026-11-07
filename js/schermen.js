@@ -86,6 +86,9 @@ class Boot extends Phaser.Scene {
       this.scene.start('Spel', { run: { level: PROFIEL.regio, up: PROFIEL.up, harten: 99, baas: true } });
     } else if (regios[h] !== undefined) {
       this.scene.start('Spel', { run: { level: regios[h], up: PROFIEL.up, harten: maxHarten(), baas: false } });
+    } else if (h === '#dieren') {
+      PROFIEL.flessen = 1000;
+      this.scene.start('Dieren');
     } else if (h === '#gokkast') {
       PROFIEL.flessen = 100;
       this.scene.start('Gokkast');
@@ -210,7 +213,7 @@ class Titel extends Phaser.Scene {
       fontFamily: FONT, fontSize: '17px', color: '#f3ead6', stroke: '#0a1028', strokeThickness: 5,
     }).setOrigin(0.5).setDepth(20);
     if (PROFIEL.flessen > 0 || PROFIEL.beste > 0) {
-      this.add.text(20, 14, `Beste: ${PROFIEL.beste} m   ·   ${PROFIEL.flessen} flesjes` + (PROFIEL.bazen ? `   ·   🏆 ${PROFIEL.bazen} bazen verslagen` : ''), {
+      this.add.text(20, 14, `Beste: ${PROFIEL.beste} m   ·   ${PROFIEL.flessen} flesjes` + (PROFIEL.bazen ? `   ·   🏆 ${PROFIEL.bazen} bazen` : '') + (PROFIEL.sterren ? `   ·   ⭐ ${PROFIEL.sterren}` : ''), {
         fontFamily: FONT, fontSize: '18px', fontStyle: 'bold', color: '#f2c14e', stroke: '#0a1028', strokeThickness: 5,
       }).setDepth(20);
     }
@@ -224,7 +227,7 @@ class Titel extends Phaser.Scene {
       this.scene.start('Spel', { run: nieuweRun() });
     };
     // de Start-knop: klik erop (of druk op spatie/Enter) om te beginnen
-    const startKnop = knop(this, 190, 414, 180, 56, '▶  Start', 0xf2c14e, begin);
+    const startKnop = knop(this, 92, 414, 180, 56, '▶  Start', 0xf2c14e, begin);
     for (const o of Object.values(startKnop)) o.setDepth(20);
     const naar = (scene) => () => {
       if (this.gestart || this.scene.isPaused()) return;
@@ -232,16 +235,53 @@ class Titel extends Phaser.Scene {
       this.scene.start(scene);
     };
     // de Shop-knop (draairad met skins) en de Prestaties-knop
-    const shopKnop = knop(this, 390, 414, 180, 56, '🎡  Shop', 0x3cc8bb, naar('Shop'));
+    const shopKnop = knop(this, 292, 414, 180, 56, '🎡  Shop', 0x3cc8bb, naar('Shop'));
     for (const o of Object.values(shopKnop)) o.setDepth(20);
-    const prestKnop = knop(this, 590, 414, 180, 56, '🏆  Prestaties', 0xa9c4ee, naar('Prestaties'), 21);
+    const dierKnop = knop(this, 492, 414, 180, 56, '🐾  Dieren', 0x5fd38a, naar('Dieren'));
+    for (const o of Object.values(dierKnop)) o.setDepth(20);
+    const prestKnop = knop(this, 692, 414, 180, 56, '🏆  Prestaties', 0xa9c4ee, naar('Prestaties'), 21);
     for (const o of Object.values(prestKnop)) o.setDepth(20);
+    // alle bazen verslagen? Dan kun je opnieuw brouwen (prestige)
+    if (PROFIEL.regio >= REGIOS.length) {
+      const pk = knop(this, 20, 46, 230, 40, '⭐ Opnieuw brouwen', 0xf2c14e, () => this.vraagOpnieuw(), 18);
+      for (const o of Object.values(pk)) o.setDepth(20);
+      this.tweens.add({ targets: [pk.g, pk.t], alpha: 0.7, yoyo: true, repeat: -1, duration: 700 });
+    }
     // de knop zachtjes laten kloppen, zodat je ziet dat je erop moet drukken
     this.tweens.add({ targets: [startKnop.g, startKnop.t], alpha: 0.75, yoyo: true, repeat: -1, duration: 650 });
     this.input.keyboard.on('keydown-SPACE', () => begin());
     this.input.keyboard.on('keydown-ENTER', () => begin());
     void tandwiel;
   }
+  // Opnieuw brouwen: alles opnieuw, maar je krijgt een ster (+10% shotjes voor altijd)
+  vraagOpnieuw() {
+    if (this.gestart || this.vraag) return;
+    const laag = [];
+    const vast = o => { laag.push(o); return o.setDepth(300); };
+    vast(this.add.rectangle(0, 0, 960, 540, 0x0a1028, 0.9).setOrigin(0).setInteractive());
+    vast(this.add.text(480, 110, '⭐ Opnieuw brouwen?', { fontFamily: FONT_TITEL, fontSize: '40px', color: '#f2c14e' }).setOrigin(0.5));
+    vast(this.add.text(480, 220, [
+      'Je begint weer bij de Rivier, zonder flesjes en zonder power-ups.',
+      'Je skins, huisdieren en prestaties houd je.',
+      `Je krijgt ster nummer ${PROFIEL.sterren + 1}: shotjes zijn voor altijd ${10 * (PROFIEL.sterren + 1)}% meer waard!`,
+    ].join('\n'), { fontFamily: FONT, fontSize: '19px', fontStyle: 'bold', color: '#f3ead6', align: 'center', lineSpacing: 8 }).setOrigin(0.5));
+    const ja = knop(this, 270, 320, 200, 56, 'Ja, brouwen!', 0xf2c14e, () => this.opnieuwBrouwen(), 22);
+    const nee = knop(this, 490, 320, 200, 56, 'Nee', 0xa9c4ee, () => { laag.forEach(o => o.destroy()); this.vraag = false; });
+    for (const k of [ja, nee]) for (const o of Object.values(k)) laag.push(o.setDepth(301));
+    this.vraag = true;
+  }
+
+  opnieuwBrouwen() {
+    PROFIEL.sterren++;
+    PROFIEL.regio = 0; PROFIEL.startRegio = 0; PROFIEL.flessen = 0; PROFIEL.shotjes = 0;
+    PROFIEL.ticket = false; PROFIEL.keuze = ''; PROFIEL.aan = {};
+    POWERUPS.forEach(p => { PROFIEL.up[p.id] = 0; });
+    statTel('prestige');
+    bewaarProfiel();
+    Geluid.effect('baasWeg');
+    this.scene.restart();
+  }
+
   update(time, delta) {
     this.t += delta / 1000;
     this.achtergrond.update(this.t * 40, this.t);
@@ -278,11 +318,13 @@ class Winkel extends Phaser.Scene {
     this.shotTekst = this.add.text(940, 54, '', { fontFamily: FONT, fontSize: '14px', color: '#f2c14e' }).setOrigin(1, 0);
     maakInstellingenKnop(this, 30, 28);
     // kleine knoppen linksboven: aankoop ongedaan maken en naar de shop met skins
-    this.ongedaanKnop = knop(this, 60, 9, 140, 38, '↶ Ongedaan', 0xa9c4ee, () => this.ongedaan(), 18);
-    knop(this, 210, 9, 120, 38, '🎡 Shop', 0x3cc8bb, () => this.naarShop(), 18);
-    // rechts van de titel: je prestaties bekijken, of terug naar het hoofdmenu
-    knop(this, 596, 9, 140, 38, '🏆 Prestaties', 0xf2c14e, () => this.naarPrestaties(), 17);
-    knop(this, 744, 9, 96, 38, '⌂ Menu', 0xa9c4ee, () => this.naarMenu(), 17);
+    // de balk bovenaan: alles is altijd te zien
+    this.ongedaanKnop = knop(this, 56, 9, 50, 38, '↶', 0xa9c4ee, () => this.ongedaan(), 22);
+    knop(this, 112, 9, 88, 38, '🎡 Shop', 0x3cc8bb, () => this.naar('Shop'), 16);
+    knop(this, 206, 9, 78, 38, '🎰 Gok', 0xd1495b, () => this.naar('Gokkast'), 16);
+    knop(this, 290, 9, 96, 38, '🐾 Dieren', 0x5fd38a, () => this.naar('Dieren'), 16);
+    knop(this, 590, 9, 128, 38, '🏆 Prestaties', 0xf2c14e, () => this.naar('Prestaties'), 16);
+    knop(this, 724, 9, 90, 38, '⌂ Menu', 0xa9c4ee, () => this.naarMenu(), 16);
 
     // alle kaarten zitten in een lijst die je kunt scrollen (muiswiel, pijltjes of slepen met je vinger)
     this.lijst = this.add.container(0, 0);
@@ -559,12 +601,15 @@ class Winkel extends Phaser.Scene {
     this.tweens.add({ targets: f, alpha: 0, duration: 300, onComplete: () => f.destroy() });
   }
 
-  naarPrestaties() {
+  // naar een ander scherm, en daarna weer terug naar deze winkel
+  naar(scene) {
     if (this.kiest || this.weg || this.scene.isPaused()) return;
     this.weg = true;
     const terug = Object.assign({}, this.data0, { keuzeGedaan: true, gekocht: this.gekocht });
-    this.scene.start('Prestaties', { terugNaar: 'Winkel', terugData: terug });
+    if (scene === 'Shop') this.scene.start('Shop', { terugNaar: 'Winkel', winkelData: terug });
+    else this.scene.start(scene, { terugNaar: 'Winkel', terugData: terug });
   }
+  naarPrestaties() { this.naar('Prestaties'); }
 
   naarMenu() {
     if (this.weg || this.scene.isPaused()) return;
@@ -572,12 +617,7 @@ class Winkel extends Phaser.Scene {
     this.scene.start('Titel');
   }
 
-  naarShop() {
-    if (this.kiest || this.weg || this.scene.isPaused()) return;
-    this.weg = true;
-    const terug = Object.assign({}, this.data0, { keuzeGedaan: true, gekocht: this.gekocht });
-    this.scene.start('Shop', { terugNaar: 'Winkel', winkelData: terug });
-  }
+  naarShop() { this.naar('Shop'); }
 
   // het levelkeuzescherm openen (de winkel wacht even)
   openLevels() {

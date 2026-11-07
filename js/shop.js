@@ -31,11 +31,13 @@ class Shop extends Phaser.Scene {
 
     knop(this, 500, 466, 200, 54, '← Terug', 0x3cc8bb, () => this.terug());
     // naar de gokkast (en daarna weer terug naar de shop)
-    knop(this, 170, 470, 200, 50, '🎰 Gokkast', 0xd1495b, () => {
+    const naar = (scene) => () => {
       if (this.draait || this.weg) return;
       this.weg = true;
-      this.scene.start('Gokkast', { terugNaar: 'Shop', terugData: { terugNaar: this.terugNaar, winkelData: this.winkelData } });
-    }, 21);
+      this.scene.start(scene, { terugNaar: 'Shop', terugData: { terugNaar: this.terugNaar, winkelData: this.winkelData } });
+    };
+    knop(this, 40, 470, 200, 50, '🎰 Gokkast', 0xd1495b, naar('Gokkast'), 21);
+    knop(this, 250, 470, 200, 50, '🐾 Huisdieren', 0x5fd38a, naar('Dieren'), 21);
     this.draaiKnop = knop(this, 720, 466, 220, 54, '', 0xf2c14e, () => this.draai());
     this.input.keyboard.on('keydown-ESC', () => this.terug());
     this.input.keyboard.on('keydown-SPACE', () => this.draai());

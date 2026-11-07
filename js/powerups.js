@@ -119,16 +119,17 @@ function drieKeuzes() { return Phaser.Utils.Array.Shuffle(KEUZES.slice()).slice(
 function hartenMet(id) {
   const k = keuzeVan(id);
   if (k.hartenVast) return k.hartenVast;
-  return Math.max(1, maxHarten() + k.harten);
+  // de schildpad geeft extra hartjes
+  return Math.max(1, maxHarten() + k.harten + Math.ceil(dierLvl('schildpad') / 2));
 }
 
 // ---------- OPSLAAN ----------
 // Je flesjes, power-ups en regio's worden in de browser bewaard, ook als je doodgaat.
 const OPSLAG = 'flesje_profiel_v2';
-const TESTMODUS = ['#test', '#winkel', '#shop', '#kebab', '#baas', '#ijs', '#berg', '#vulkaan', '#grot', '#savanne', '#kroeg', '#fabriek', '#speeltuin', '#maan', '#prestaties', '#gokkast', '#levels', '#spel'].some(h => location.hash.startsWith(h));
+const TESTMODUS = ['#test', '#winkel', '#shop', '#kebab', '#baas', '#ijs', '#berg', '#vulkaan', '#grot', '#savanne', '#kroeg', '#fabriek', '#speeltuin', '#maan', '#prestaties', '#gokkast', '#levels', '#dieren', '#spel'].some(h => location.hash.startsWith(h));
 
 function laadProfiel() {
-  const p = { up: {}, flessen: 0, shotjes: 0, beste: 0, regio: 0, startRegio: 0, ticket: false, skin: 'standaard', skins: ['standaard'], draaien: 0, keuze: '', bazen: 0, aan: {}, stats: {}, prestaties: [] };
+  const p = { up: {}, flessen: 0, shotjes: 0, beste: 0, regio: 0, startRegio: 0, ticket: false, skin: 'standaard', skins: ['standaard'], draaien: 0, keuze: '', bazen: 0, aan: {}, stats: {}, prestaties: [], dier: '', dieren: {}, sterren: 0 };
   POWERUPS.forEach(x => { p.up[x.id] = 0; });
   if (TESTMODUS) return p;
   try {
@@ -145,6 +146,9 @@ function laadProfiel() {
       p.draaien = Number(d.draaien) || 0;
       p.bazen = Number(d.bazen) || 0;
       if (d.stats && typeof d.stats === 'object') for (const [k, w] of Object.entries(d.stats)) if (typeof w === 'number') p.stats[k] = w;
+      if (typeof d.dier === 'string') p.dier = d.dier;
+      if (d.dieren && typeof d.dieren === 'object') for (const [k, w] of Object.entries(d.dieren)) if (typeof w === 'number') p.dieren[k] = Math.min(5, w);
+      p.sterren = Number(d.sterren) || 0;
       if (Array.isArray(d.prestaties)) p.prestaties = d.prestaties.filter(x => typeof x === 'string');
       if (d.aan && typeof d.aan === 'object') for (const k of Object.keys(p.up)) if (typeof d.aan[k] === 'number') p.aan[k] = d.aan[k];
       if (typeof d.keuze === 'string') p.keuze = d.keuze;

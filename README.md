@@ -45,6 +45,16 @@ Op elke power-up-kaart in de winkel staat links het niveau dat **aan** staat (me
 
 In de winkel zit linksonder de **levelknop** met een plaatje van het level waar je start. Tik erop en je krijgt alle levels als kaarten: met een plaatje, de eindbaas, een ✔ als je hem verslagen hebt en een 🔒 als het level nog dicht zit. Elk level heeft een eigen melodietje als je hem kiest. Alle knoppen in de game veren in als je ze indrukt, met een klikje.
 
+### Huisdieren
+
+Op het titelscherm, in de shop en na het doodgaan zit **🐾 Dieren**. Draai aan het dierenrad (heel duur: 80 flesjes, en elk volgend dier 40 meer) en win een van 10 huisdieren. Upgrade ze tot niveau 5 (★★★★★). Je neemt er één mee; hij loopt of vliegt met je mee en helpt je:
+
+Kuiken (shotjes meer waard) · Hondje (haalt shotjes van ver op) · Kat (krabt monsters) · Uil (hoger springen) · Schildpad (extra hartjes) · Vos (sneller lopen) · Papegaai (schiet pijlen) · Draakje (spuwt vuurballen) · Eenhoorn (kans op flesjes) · Bierbeestje (meer shotjes én schade).
+
+### Opnieuw brouwen (prestige)
+
+Heb je alle 10 eindbazen verslagen? Dan staat op het titelscherm **⭐ Opnieuw brouwen**. Je begint weer bij de Rivier zonder flesjes en power-ups, maar je houdt je skins, huisdieren en prestaties, én je krijgt een ster: elke ster maakt shotjes voor altijd 10% meer waard.
+
 ### Gokkast
 
 In de shop zit de **🎰 Gokkast**. Kies hoeveel flesjes je inzet (1, 5, 10, 25 of alles) en draai: ×2, ×3 of ×5 (jackpot)... maar 12 van de 16 vakjes zijn "niks". Je verliest dus veel vaker dan je wint; gemiddeld krijg je maar 75% terug.
@@ -159,6 +169,7 @@ Grot gebruikt de Bergmars, Savanne de Bierpolka. Een nieuw liedje maken? Voeg in
 | `js/schermen.js` | titelscherm, instellingen en winkel |
 | `js/shop.js` | de shop met het draairad en je skins |
 | `js/gokkast.js` | de gokkast |
+| `js/dieren.js` | de huisdieren: tekeningen, wat ze doen en de dierenwinkel |
 | `js/prestaties.js` | de 40 prestaties, de tellers en het prestatiescherm |
 | `js/iconen.js` | de icoontjes van de power-ups en de upgrade-keuzes |
 | `js/main.js` | zet alles aan |

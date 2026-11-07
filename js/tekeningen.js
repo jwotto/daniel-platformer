@@ -774,6 +774,7 @@ function maakTexturen(scene) {
   tekenProjectielen(scene);
   maakMonsterTexturen(scene);
   maakIcoonTexturen(scene);
+  maakDierTexturen(scene);
   // titelbord: een glas bier met een schuimkraag
   tekenTextuur(scene, 'titelbord', 380, 170, ctx => {
     const g = ctx.createLinearGradient(0, 40, 0, 160);

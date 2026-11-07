@@ -119,6 +119,9 @@ class Spel extends Phaser.Scene {
     }).setDepth(12);
 
     this.besturing = new Besturing(this);
+    this.maakDier();
+    // bonussen van sterren (prestige) en huisdieren
+    this.shotBonus = 1 + 0.1 * PROFIEL.sterren + 0.05 * dierLvl('kuiken') + 0.06 * dierLvl('bierbeest');
     this.time.delayedCall(800, () => checkPrestaties(this));
     this.maakHud();
 
@@ -380,6 +383,7 @@ class Spel extends Phaser.Scene {
     }
     this.pijlenUpdate(dt);
     this.maatjeUpdate(dt);
+    this.dierUpdate(dt);
     this.schildBel.setVisible(this.schilden > 0).setPosition(this.speler.x, this.speler.y - 30);
     this.schildBel.setScale(1 + Math.sin(this.tijd * 4) * 0.04);
     // lopende band: sta je erop, dan loop je vanzelf mee (dat telt op bij je loopsnelheid)
@@ -451,13 +455,13 @@ class Spel extends Phaser.Scene {
       // lopen (op ijs glij je een beetje)
       if (this.muurLock <= 0) {
         const grip = opGrond ? (this.th.id === 'ijs' || this.glad > 0 ? 0.08 : 0.4) : 0.18;
-        b.velocity.x = Phaser.Math.Linear(b.velocity.x, inp.x * LOOPSNELHEID * this.mod.loop + (this.bandV || 0), grip);
+        b.velocity.x = Phaser.Math.Linear(b.velocity.x, inp.x * LOOPSNELHEID * this.mod.loop * (1 + 0.04 * dierLvl('vos')) + (this.bandV || 0), grip);
         if (Math.abs(inp.x) > 0.2) this.kijk = Math.sign(inp.x);
       }
       // springen
       if (this.springBuffer > 0) {
         if (this.coyote > 0) {
-          this.spring(SPRONG * this.mod.sprong);
+          this.spring(SPRONG * this.mod.sprong * (1 + 0.03 * dierLvl('uil')));
           Geluid.effect('spring');
         } else if (this.muurTijd > 0 && !opGrond) {
           this.spring(-540 * this.mod.sprong);
@@ -650,7 +654,7 @@ class Spel extends Phaser.Scene {
     const zwak = ZWAK[v.soort];
     const telt = !zwak || bron === zwak || bron === 'boer' || (zwak === 'stamp' && bron === 'smash');
     if (!telt) { this.ketst(v, zwak); return; }
-    v.hp -= schade * this.mod.schade;
+    v.hp -= schade * this.mod.schade * (1 + 0.06 * dierLvl('bierbeest'));
     v.setTintFill(0xffffff);
     this.time.delayedCall(70, () => { if (v.active) { v.clearTint(); if (v.woedend) v.setTint(0xff9a9a); } });
     if (v.soort === 'baas') {
@@ -671,6 +675,8 @@ class Spel extends Phaser.Scene {
       this.dropShotjes(v.x, my, v.shots + (this.run.up.statiegeld || 0));
       // tellen voor de prestaties
       statTel('monsters');
+      // de eenhoorn: soms een heel flesje
+      if (Math.random() < 0.04 * dierLvl('eenhoorn')) { PROFIEL.flessen++; statTel('flessenTotaal'); this.popTekst('Eenhoorn: +1 flesje!'); }
       this.potjeMonsters++; statMax('potjeMonsters', this.potjeMonsters);
       if (bron === 'slash' || bron === 'pijl') statTel(bron);
       if (bron === 'stamp' || bron === 'smash') statTel('stamp');
@@ -743,7 +749,7 @@ class Spel extends Phaser.Scene {
     this.shotjes.getChildren().forEach(s => {
       if (!s.active) return;
       const dx = sp.x - s.x, dy = (sp.y - 30) - s.y, d = Math.hypot(dx, dy);
-      if (s.magneet || d < [70, 190, 420][this.run.up.magneet || 0]) {
+      if (s.magneet || d < [70, 190, 420][this.run.up.magneet || 0] + 40 * dierLvl('hond')) {
         s.magneet = true; s.zweeft = false;
         s.body.setAllowGravity(false);
         if (d > 1) s.body.setVelocity(dx / d * 400, dy / d * 400);
@@ -757,7 +763,7 @@ class Spel extends Phaser.Scene {
     if (!s.active) return;
     s.destroy();
     // met een upgrade kan een shotje meer (of minder) waard zijn; kommagetallen sparen we op
-    this.shotRest += this.waarde * this.mod.shot;
+    this.shotRest += this.waarde * this.mod.shot * (this.shotBonus || 1);
     const heel = Math.floor(this.shotRest);
     this.shotRest -= heel;
     PROFIEL.shotjes += heel;

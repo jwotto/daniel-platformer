@@ -282,15 +282,19 @@
       doe('winkel'); scene('Spel').gameOver(); await wacht(() => actief('Winkel'), 5000, 'winkel');
       const w = scene('Winkel'); kiesUpgrade(w);
       w.kaarten[0].g; w.koop(w.kaarten[1]);
-      druk(w, 'Ongedaan'); moet(PROFIEL.up.dubbel === 0, 'Ongedaan-knop werkte niet');
-      druk(w, 'Prestaties'); await wacht(() => actief('Prestaties'), 4000, 'prestaties vanuit winkel');
+      druk(w, '↶'); moet(PROFIEL.up.dubbel === 0, 'Ongedaan-knop werkte niet');
+      druk(w, 'Gok'); await wacht(() => actief('Gokkast'), 4000, 'gokkast vanuit winkel');
+      druk(scene('Gokkast'), 'Terug'); await wacht(() => actief('Winkel'), 4000, 'terug naar winkel');
+      druk(scene('Winkel'), 'Dieren'); await wacht(() => actief('Dieren'), 4000, 'dieren vanuit winkel');
+      druk(scene('Dieren'), 'Terug'); await wacht(() => actief('Winkel'), 4000, 'terug naar winkel');
+      druk(scene('Winkel'), 'Prestaties'); await wacht(() => actief('Prestaties'), 4000, 'prestaties vanuit winkel');
       druk(scene('Prestaties'), 'Terug'); await wacht(() => actief('Winkel') && !scene('Winkel').kiest, 4000, 'terug naar winkel');
       druk(scene('Winkel'), 'Shop'); await wacht(() => actief('Shop'), 4000, 'shop vanuit winkel');
       druk(scene('Shop'), 'Terug'); await wacht(() => actief('Winkel'), 4000, 'terug naar winkel');
       druk(scene('Winkel'), 'Spelen'); await wacht(() => spelKlaar(0.5), 8000, 'spelen');
       scene('Spel').gameOver(); await wacht(() => actief('Winkel'), 5000, 'winkel');
       druk(scene('Winkel'), 'Menu'); await wacht(() => actief('Titel'), 4000, 'menu vanuit winkel');
-      return 'Start, Shop, Draai, Terug, Prestaties, Hoofdscherm, Verder spelen, Ongedaan, Prestaties↔winkel, Shop↔winkel, Spelen en Menu werken';
+      return 'Start, Shop, Draai, Terug, Prestaties, Hoofdscherm, Verder spelen, Ongedaan, Gok↔winkel, Dieren↔winkel, Prestaties↔winkel, Shop↔winkel, Spelen en Menu werken';
     },
 
     // regio-trucjes: trampoline, lopende band, bierplas, maan
@@ -350,6 +354,38 @@
       moet(PROFIEL.flessen === 0, 'alles inzetten klopt niet');
       g.terug(); await wacht(() => actief('Shop'), 5000, 'terug naar shop');
       return 'verlies -5, jackpot ×5 = +25, alles kwijt bij niks; gemiddeld ' + Math.round(ev * 100) + '% terug';
+    },
+
+    // huisdieren: draaien, upgraden, meenemen, en het dier werkt in het spel
+    async dieren() {
+      PROFIEL.flessen = 1000; PROFIEL.prestaties = PRESTATIES.map(p => p.id);
+      scene('Titel').scene.start('Dieren'); await wacht(() => actief('Dieren'), 5000, 'dierenwinkel');
+      const d = scene('Dieren');
+      doe('draaien'); d.draai(); await wacht(() => !d.draait, 8000, 'rad stopt');
+      const id = Object.keys(PROFIEL.dieren)[0];
+      moet(id && PROFIEL.dier === id && PROFIEL.flessen === 920 && dierPrijs() === 120, 'draaien klopt niet');
+      doe('upgraden'); const v = d.vakjes.find(v => v.d.id === id);
+      for (let i = 0; i < 5; i++) d.upgrade(v);
+      moet(PROFIEL.dieren[id] === 5 && PROFIEL.flessen === 920 - 50 - 100 - 150 - 200, 'upgraden klopt niet (' + PROFIEL.dieren[id] + ', ' + PROFIEL.flessen + ')');
+      doe('thuislaten en meenemen'); d.neemMee(v); moet(PROFIEL.dier === '', 'thuislaten werkte niet'); d.neemMee(v); moet(PROFIEL.dier === id, 'meenemen werkte niet');
+      doe('in het spel'); PROFIEL.dieren.schildpad = 4; PROFIEL.dier = 'schildpad';
+      d.terug(); await wacht(() => actief('Titel'), 4000, 'titel');
+      scene('Titel').scene.start('Spel', { run: nieuweRun(false) }); await wacht(() => spelKlaar(0.5), 8000, 'spel');
+      moet(scene('Spel').dier && scene('Spel').maxH === maxHarten() + 2, 'schildpad geeft geen 2 hartjes extra');
+      return 'gewonnen: ' + DIEREN.find(x => x.id === id).naam + ', tot niveau 5 geüpgraded; schildpad niveau 4 = +2 hartjes';
+    },
+
+    // opnieuw brouwen: alles terug naar het begin, maar een ster erbij
+    async prestige() {
+      PROFIEL.regio = REGIOS.length; PROFIEL.flessen = 300; PROFIEL.up.dash = 3; PROFIEL.skins.push('goud');
+      scene('Titel').scene.restart(); await wacht(() => actief('Titel'), 4000, 'titel');
+      const t = scene('Titel');
+      doe('vraag'); t.vraagOpnieuw(); moet(t.vraag, 'geen vraag');
+      t.opnieuwBrouwen(); await wacht(() => actief('Titel'), 4000, 'titel na brouwen');
+      moet(PROFIEL.sterren === 1 && PROFIEL.regio === 0 && PROFIEL.flessen === 0 && PROFIEL.up.dash === 0 && PROFIEL.skins.includes('goud'), 'opnieuw brouwen klopt niet');
+      scene('Titel').scene.start('Spel', { run: nieuweRun(false) }); await wacht(() => spelKlaar(0.5), 8000, 'spel');
+      moet(Math.abs(scene('Spel').shotBonus - 1.1) < 0.001, 'ster geeft geen +10% shotjes');
+      return 'ster 1: alles terug naar het begin, skins blijven, shotjes ×1.1';
     },
 
     // kebabrol eten: scheet en heel hoog de lucht in
