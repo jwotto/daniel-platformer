@@ -290,6 +290,217 @@ function tekenDwaallicht(ctx, k) {
   ctx.restore();
 }
 
+// ---------- NIEUWE MONSTERS (per regio) ----------
+// Ze kijken allemaal naar links; het spel spiegelt ze als ze naar rechts lopen.
+function boosOog(ctx, x, y, r, iris, wenkbrauw) {
+  ctx.fillStyle = '#fff'; ctx.strokeStyle = INKT; ctx.lineWidth = 1.6;
+  ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = iris || INKT; ctx.beginPath(); ctx.arc(x - r * 0.35, y + r * 0.1, r * 0.55, 0, TAU); ctx.fill();
+  if (wenkbrauw) {
+    ctx.lineWidth = 2.2; ctx.beginPath();
+    ctx.moveTo(x - r * 1.2, y - r * 1.5); ctx.lineTo(x + r * 1.1, y - r * 0.9); ctx.stroke();
+  }
+}
+
+// IJsvlakte: een boos ijsklontje met een bevroren bierbelletje erin
+function tekenIJsklont(ctx, w, h) {
+  const k = w / 48;
+  ctx.save(); ctx.scale(k, k);
+  const g = ctx.createLinearGradient(0, 4, 0, 42);
+  g.addColorStop(0, '#eef8ff'); g.addColorStop(1, '#7fb6e6');
+  ctx.fillStyle = g; ctx.strokeStyle = INKT; ctx.lineWidth = 2.5;
+  rondRect(ctx, 4, 6, 40, 36, 8); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = 'rgba(242,193,78,.55)'; ctx.beginPath(); ctx.arc(31, 30, 5, 0, TAU); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.8)';
+  ctx.beginPath(); ctx.moveTo(9, 12); ctx.lineTo(20, 10); ctx.lineTo(10, 17); ctx.closePath(); ctx.fill();
+  boosOog(ctx, 14, 22, 4.6, '#1b2f6b', true);
+  boosOog(ctx, 27, 22, 4.2, '#1b2f6b', false);
+  ctx.strokeStyle = INKT; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(13, 34); ctx.lineTo(17, 31); ctx.lineTo(21, 34); ctx.lineTo(25, 31); ctx.stroke();
+  ctx.restore();
+}
+
+// IJsvlakte: een pinguïn-ober met een strikje en een dienblad met bier
+function tekenPinguin(ctx) {
+  ctx.save();
+  ctx.strokeStyle = INKT; ctx.lineWidth = 2.2;
+  ctx.fillStyle = '#ff9a2c';
+  for (const fx of [20, 33]) { ctx.beginPath(); ctx.ellipse(fx, 57, 6, 2.6, 0, 0, TAU); ctx.fill(); ctx.stroke(); }
+  const g = ctx.createLinearGradient(14, 0, 44, 0);
+  g.addColorStop(0, '#1a1f36'); g.addColorStop(1, '#2e365c');
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.ellipse(28, 34, 15, 22, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#f3ead6';
+  ctx.beginPath(); ctx.ellipse(25, 38, 9, 16, 0, 0, TAU); ctx.fill();
+  ctx.fillStyle = '#d1495b'; ctx.lineWidth = 1.4;
+  ctx.beginPath(); ctx.moveTo(25, 24); ctx.lineTo(19, 21); ctx.lineTo(19, 27); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(25, 24); ctx.lineTo(31, 21); ctx.lineTo(31, 27); ctx.closePath(); ctx.fill(); ctx.stroke();
+  boosOog(ctx, 22, 15, 3.6, INKT, true);
+  ctx.fillStyle = '#ff9a2c'; ctx.lineWidth = 1.6;
+  ctx.beginPath(); ctx.moveTo(15, 18); ctx.lineTo(7, 20); ctx.lineTo(15, 22); ctx.closePath(); ctx.fill(); ctx.stroke();
+  // vleugel met dienblad
+  ctx.fillStyle = '#1a1f36'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.ellipse(15, 36, 4, 10, 0.6, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#cfd6e6';
+  ctx.beginPath(); ctx.ellipse(8, 29, 9, 2.4, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  tekenBierglasOp(ctx, 8, 27, 0.8);
+  ctx.restore();
+}
+
+function tekenBierglasOp(ctx, x, onder, s) {
+  ctx.save(); ctx.translate(x, onder); ctx.scale(s, s);
+  ctx.strokeStyle = INKT; ctx.lineWidth = 1.6;
+  ctx.fillStyle = '#f2a33a';
+  ctx.beginPath(); ctx.moveTo(-6, -16); ctx.lineTo(6, -16); ctx.lineTo(5, 0); ctx.lineTo(-5, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#fffaf0';
+  for (const [bx, r] of [[-4, 3.2], [0, 3.8], [4, 3.2]]) { ctx.beginPath(); ctx.arc(bx, -17, r, 0, TAU); ctx.fill(); ctx.stroke(); }
+  ctx.restore();
+}
+
+// Bergen: een biervat dat op je af rolt
+function tekenFust(ctx) {
+  ctx.save(); ctx.translate(23, 23);
+  ctx.strokeStyle = INKT; ctx.lineWidth = 2.5;
+  const g = ctx.createRadialGradient(-6, -6, 3, 0, 0, 22);
+  g.addColorStop(0, '#c98a4a'); g.addColorStop(1, '#6b3a12');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 20, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle = '#3a2a1a'; ctx.lineWidth = 1.5;
+  for (const r of [8, 14]) { ctx.beginPath(); ctx.arc(0, 0, r, 0, TAU); ctx.stroke(); }
+  ctx.strokeStyle = '#9aa4b8'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(0, 0, 18, 0, TAU); ctx.stroke();
+  ctx.fillStyle = '#f2c14e'; ctx.strokeStyle = INKT; ctx.lineWidth = 1.4;
+  ctx.beginPath(); ctx.arc(0, 0, 3.5, 0, TAU); ctx.fill(); ctx.stroke();
+  boosOog(ctx, -7, -5, 4, '#d1495b', true);
+  boosOog(ctx, 6, -5, 3.6, '#d1495b', false);
+  ctx.strokeStyle = INKT; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(0, 8, 5, Math.PI + 0.3, -0.3); ctx.stroke();
+  ctx.restore();
+}
+
+// Bergen: een vleermuis met een hopbel als lijfje
+function tekenVleermuis(ctx) {
+  ctx.save(); ctx.translate(32, 20);
+  ctx.strokeStyle = INKT; ctx.lineWidth = 2;
+  ctx.fillStyle = '#4a2a5a';
+  for (const z of [-1, 1]) {
+    ctx.beginPath(); ctx.moveTo(z * 8, -4);
+    ctx.quadraticCurveTo(z * 22, -18, z * 31, -6);
+    ctx.quadraticCurveTo(z * 26, -2, z * 25, 4);
+    ctx.quadraticCurveTo(z * 20, 0, z * 17, 7);
+    ctx.quadraticCurveTo(z * 13, 3, z * 8, 8);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+  }
+  // hopbel: schubjes over elkaar
+  for (let rij = 0; rij < 4; rij++) {
+    for (let i = -1; i <= 1; i++) {
+      if (rij === 3 && i !== 0) continue;
+      const x = i * 5.5 + (rij % 2 ? 2.7 : 0) - (rij % 2 ? 2.7 : 0) * (i === 1 ? 2 : 0);
+      ctx.fillStyle = rij % 2 ? '#7cc45a' : '#9ad86e';
+      ctx.beginPath(); ctx.ellipse(x * (rij === 3 ? 0 : 1), -9 + rij * 6, 5.5 - rij * 0.6, 4.5, 0, 0, TAU); ctx.fill(); ctx.stroke();
+    }
+  }
+  ctx.fillStyle = '#4a2a5a';
+  for (const z of [-1, 1]) { ctx.beginPath(); ctx.moveTo(z * 3, -13); ctx.lineTo(z * 7, -20); ctx.lineTo(z * 7, -11); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+  ctx.shadowColor = '#ff4a4a'; ctx.shadowBlur = 6;
+  ctx.fillStyle = '#ff4a4a';
+  for (const z of [-1, 1]) { ctx.beginPath(); ctx.arc(z * 3.2 - 1, -8, 2, 0, TAU); ctx.fill(); }
+  ctx.shadowBlur = 0;
+  ctx.restore();
+}
+
+// Vulkaan: een glas gloeiend lavabier dat ontploft
+function tekenLavalager(ctx) {
+  ctx.save();
+  ctx.strokeStyle = INKT; ctx.lineWidth = 2.4;
+  ctx.shadowColor = '#ff6a2c'; ctx.shadowBlur = 8;
+  const g = ctx.createLinearGradient(0, 14, 0, 48);
+  g.addColorStop(0, '#ffd27a'); g.addColorStop(0.5, '#ff6a2c'); g.addColorStop(1, '#a01a10');
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.moveTo(6, 14); ctx.lineTo(32, 14); ctx.lineTo(29, 47); ctx.lineTo(9, 47); ctx.closePath(); ctx.fill();
+  ctx.shadowBlur = 0; ctx.stroke();
+  ctx.fillStyle = '#3a2a2a';
+  for (const [x, y, r] of [[10, 13, 4.5], [17, 10, 5.5], [25, 11, 5], [31, 14, 3.6]]) { ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill(); ctx.stroke(); }
+  ctx.fillStyle = '#ff8a2c';
+  for (const [x, y] of [[16, 9], [24, 11]]) { ctx.beginPath(); ctx.arc(x, y, 1.6, 0, TAU); ctx.fill(); }
+  ctx.fillStyle = 'rgba(255,240,180,.8)';
+  for (const [x, y] of [[13, 38], [22, 32], [18, 42]]) { ctx.beginPath(); ctx.arc(x, y, 1.8, 0, TAU); ctx.fill(); }
+  boosOog(ctx, 14, 25, 3.8, '#a01a10', true);
+  boosOog(ctx, 24, 25, 3.4, '#a01a10', false);
+  ctx.strokeStyle = INKT; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(13, 35); ctx.quadraticCurveTo(19, 31, 25, 35); ctx.stroke();
+  ctx.restore();
+}
+
+// Vulkaan: een grote koperen brouwketel op pootjes
+function tekenGolem(ctx) {
+  ctx.save();
+  ctx.strokeStyle = INKT; ctx.lineWidth = 3;
+  ctx.fillStyle = '#3a2a2a';
+  for (const fx of [26, 52]) { rondRect(ctx, fx - 7, 66, 14, 16, 4); ctx.fill(); ctx.stroke(); }
+  // schoorsteen
+  ctx.fillStyle = '#8a4a1c';
+  ctx.beginPath(); ctx.moveTo(48, 22); ctx.lineTo(56, 2); ctx.lineTo(64, 4); ctx.lineTo(57, 24); ctx.closePath(); ctx.fill(); ctx.stroke();
+  const g = ctx.createRadialGradient(30, 30, 4, 40, 44, 40);
+  g.addColorStop(0, '#ffb070'); g.addColorStop(0.5, '#c8682a'); g.addColorStop(1, '#6b2a10');
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.moveTo(6, 66); ctx.bezierCurveTo(2, 24, 18, 14, 40, 14); ctx.bezierCurveTo(62, 14, 78, 24, 74, 66); ctx.closePath(); ctx.fill(); ctx.stroke();
+  // klinknagels en band
+  ctx.fillStyle = '#6b2a10'; ctx.fillRect(7, 52, 66, 6); ctx.strokeRect(7, 52, 66, 6);
+  ctx.fillStyle = '#f2c14e';
+  for (let x = 12; x < 72; x += 10) { ctx.beginPath(); ctx.arc(x, 55, 1.6, 0, TAU); ctx.fill(); }
+  // gloeiende ogen
+  ctx.shadowColor = '#ffd27a'; ctx.shadowBlur = 10; ctx.fillStyle = '#ffd27a';
+  ctx.beginPath(); ctx.ellipse(26, 34, 6, 4, -0.3, 0, TAU); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(44, 34, 6, 4, 0.3, 0, TAU); ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = INKT; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(18, 26); ctx.lineTo(31, 31); ctx.moveTo(52, 26); ctx.lineTo(39, 31); ctx.stroke();
+  ctx.fillStyle = '#2a0a06';
+  rondRect(ctx, 24, 42, 22, 6, 3); ctx.fill();
+  // armpjes
+  ctx.strokeStyle = INKT; ctx.lineWidth = 7;
+  ctx.beginPath(); ctx.moveTo(8, 44); ctx.lineTo(0, 56); ctx.stroke();
+  ctx.strokeStyle = '#8a4a1c'; ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.moveTo(8, 44); ctx.lineTo(0, 56); ctx.stroke();
+  ctx.restore();
+}
+
+// Overal (zeldzaam): een gouden flesje met pootjes dat wegrent
+function tekenGoudfles(ctx) {
+  ctx.save();
+  ctx.strokeStyle = INKT; ctx.lineWidth = 2;
+  ctx.strokeStyle = INKT; ctx.lineWidth = 3;
+  for (const [x1, x2] of [[11, 8], [19, 22]]) { ctx.beginPath(); ctx.moveTo(x1, 42); ctx.lineTo(x2, 50); ctx.stroke(); }
+  ctx.lineWidth = 2;
+  ctx.shadowColor = '#fff2a0'; ctx.shadowBlur = 10;
+  const g = ctx.createLinearGradient(5, 0, 25, 0);
+  g.addColorStop(0, '#b8862a'); g.addColorStop(0.45, '#ffe08a'); g.addColorStop(1, '#b8862a');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.moveTo(5, 44); ctx.lineTo(5, 22); ctx.quadraticCurveTo(5, 15, 11, 13); ctx.lineTo(11, 4);
+  ctx.lineTo(19, 4); ctx.lineTo(19, 13); ctx.quadraticCurveTo(25, 15, 25, 22); ctx.lineTo(25, 44); ctx.closePath();
+  ctx.fill(); ctx.shadowBlur = 0; ctx.stroke();
+  ctx.fillStyle = '#d1495b'; rondRect(ctx, 6.5, 26, 17, 9, 2); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(15, 30.5, 2, 0, TAU); ctx.fill();
+  boosOog(ctx, 11, 19, 2.8, INKT, false);
+  boosOog(ctx, 19, 19, 2.8, INKT, false);
+  ctx.fillStyle = '#f2c14e'; ctx.lineWidth = 1.2;
+  ctx.beginPath(); for (let i = 0; i <= 6; i++) ctx.lineTo(11 + i * 8 / 6, i % 2 ? 2.4 : 0.6); ctx.lineTo(19, 4); ctx.lineTo(11, 4); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.restore();
+}
+
+function maakMonsterTexturen(scene) {
+  tekenTextuur(scene, 'ijsklont', 48, 44, tekenIJsklont);
+  tekenTextuur(scene, 'ijsklont_klein', 26, 24, tekenIJsklont);
+  tekenTextuur(scene, 'pinguin', 52, 60, tekenPinguin);
+  tekenTextuur(scene, 'bierglas', 16, 24, ctx => tekenBierglasOp(ctx, 8, 23, 1));
+  tekenTextuur(scene, 'fust', 46, 46, tekenFust);
+  tekenTextuur(scene, 'vleermuis', 64, 40, tekenVleermuis);
+  tekenTextuur(scene, 'lavalager', 38, 50, tekenLavalager);
+  tekenTextuur(scene, 'golem', 80, 84, tekenGolem);
+  tekenTextuur(scene, 'goudfles', 30, 52, tekenGoudfles);
+}
+
 // ---------- KLEINE DINGEN ----------
 function tekenShotje(ctx) {
   const gl = ctx.createRadialGradient(12, 14, 2, 12, 14, 12);
@@ -799,6 +1010,7 @@ function maakTexturen(scene) {
   tekenTextuur(scene, 'baas_geit', 170, 152, tekenGeit);
   tekenTextuur(scene, 'baas_draak', 220, 152, tekenDraak);
   tekenProjectielen(scene);
+  maakMonsterTexturen(scene);
   tekenTextuur(scene, 'tandwiel', 40, 40, ctx => {
     ctx.fillStyle = 'rgba(10,16,40,.55)'; rondRect(ctx, 1, 1, 38, 38, 9); ctx.fill();
     ctx.fillStyle = '#f3ead6';

@@ -93,6 +93,8 @@ const Geluid = (() => {
       toon(180, 1200, 0.45, 'square', 0.18, sfx, t + 0.4);
     },
     draai: () => toon(900, 700, 0.03, 'square', 0.12),
+    lont: () => rijtje([1400, 1500, 1400, 1500, 1400, 1500, 1400, 1500], 0.09, 'square', 0.12),
+    duik: () => toon(1200, 300, 0.25, 'sawtooth', 0.15),
     prijs: () => rijtje([523, 659, 784, 1047, 1319, 1568], 0.07, 'square', 0.24),
     nee: () => toon(110, 90, 0.18, 'square', 0.25),
     baasRaak: () => toon(160, 70, 0.1, 'sawtooth', 0.28),

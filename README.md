@@ -54,6 +54,16 @@ Skins: Gewoon · Groene Fles · Goudkoning · Nachtridder · Rode Duivel · IJsk
 
 Daarna begint het opnieuw met Rivier 2, en alles is sterker.
 
+### Monsters per regio
+
+| Regio | Monsters |
+|---|---|
+| 🐸 Rivier | kruiper (loopt heen en weer) · dwaallicht (zweeft op je af) |
+| 🧊 IJsvlakte | **IJsklontje** (breekt in 3 kleintjes) · **Pinguïn-ober** (gooit glazen bier) · dwaallicht |
+| ⛰️ Bergen | **Rollend fust** (rolt op je af, spring eroverheen) · **Hopvleermuis** (hangt onder platforms en duikt op je af) |
+| 🌋 Vulkaan | **Lavalager** (ontploft als je te dichtbij komt) · **Brouwketel-golem** (groot en sterk, stampt schokgolven) · dwaallicht |
+| Overal, zeldzaam | **Gouden flesje met pootjes**: rent weg, vang hem voor een heel flesje! |
+
 ### Power-ups
 
 Dash · Dubbele sprong · Wall jump · Extra hartje · Zweven · Sterkere slash · Dubbele pijlen · Ontploffende pijlen · Smash.
@@ -102,5 +112,5 @@ Waarom een versienummer? Je browser bewaart de bestanden van de game een tijdje 
 - **De uitleg van de toetsen op het titelscherm was onzichtbaar.** Oorzaak: de tekst lag achter het water. Oplossing: de tekst een hogere laag geven.
 - **Volledig scherm werkt niet op iPhone.** Oorzaak: Apple staat dat niet toe voor websites. Oplossing: de game op je beginscherm zetten, dan opent hij als app op volledig scherm.
 - **Na "Vecht tegen de baas!" kon je nergens meer op drukken.** Oorzaak: Phaser gebruikt het level steeds opnieuw, en het level onthield nog de meterteller van het vorige potje. Die was al weggegooid, maar het baasgevecht probeerde hem toch bij te werken en liep vast. Oplossing: aan het begin van elk potje die oude dingen leegmaken. Getest: doodgaan → baas kopen → vechten → doodgaan → gewoon spelen.
-- **Na in het water vallen ging je soms meteen weer dood.** Oorzaak: je kwam terug op het platform dat het dichtst bij was, ook als dat smal was of helemaal links in beeld. Het scherm schoof door en duwde je er weer af. Oplossing: je komt nu terug op een breed platform midden in beeld (liefst zonder vijand), en het scherm wacht 2 seconden. Is er geen goed platform, dan komt er een reddingsplatform. Getest door 5 keer in het water te vallen: elke keer 1 hartje kwijt en veilig op een platform.
+- **Na in het water vallen ging je soms meteen weer dood.** Oorzaak: je kwam terug op een bestaand platform, soms laag, smal of vlak bij een vijand. Oplossing: je komt nu altijd terug op een eigen veilig platformpje, hoog en midden in beeld. Vijanden en kogels vlakbij worden weggehaald, je knippert 2,5 seconde (onkwetsbaar) en het scherm wacht even. Getest: na een val 1 hartje kwijt en je staat stil op het platformpje.
 - **Fouten zien op je telefoon?** Als er iets misgaat, komt er onderaan een rode balk met de fout. Maak daar een screenshot van en geef hem aan Claude.
