@@ -36,12 +36,12 @@ function maakInstellingenKnop(scene, x, y) {
     .on('pointerup', open);
 }
 
-function knop(scene, x, y, w, h, tekst, kleur, actie) {
+function knop(scene, x, y, w, h, tekst, kleur, actie, grootte) {
   const g = scene.add.graphics();
   g.fillStyle(kleur, 1).fillRoundedRect(x, y, w, h, h / 2);
   g.lineStyle(3, 0x0a1028, 1).strokeRoundedRect(x, y, w, h, h / 2);
   const t = scene.add.text(x + w / 2, y + h / 2, tekst, {
-    fontFamily: FONT, fontSize: '24px', fontStyle: 'bold', color: '#0a1028',
+    fontFamily: FONT, fontSize: (grootte || 24) + 'px', fontStyle: 'bold', color: '#0a1028',
   }).setOrigin(0.5);
   const z = scene.add.zone(x, y, w, h).setOrigin(0).setInteractive({ useHandCursor: true }).on('pointerup', actie);
   return { g, t, z };
@@ -213,6 +213,9 @@ class Winkel extends Phaser.Scene {
   create(data) {
     // elke keer opnieuw op nul, anders blijft "verder" de tweede keer hangen
     this.weg = false;
+    this.data0 = data;
+    // wat je bij dit winkelbezoek gekocht hebt (om ongedaan te kunnen maken)
+    this.gekocht = data.gekocht || [];
     const regio = data.regio || 0;
     this.add.image(0, 0, 'lucht_' + regioVan(regio).id).setOrigin(0);
     this.add.rectangle(0, 0, 960, 540, 0x0a1028, 0.62).setOrigin(0);
@@ -231,6 +234,9 @@ class Winkel extends Phaser.Scene {
     }).setOrigin(1, 0);
     this.shotTekst = this.add.text(940, 54, '', { fontFamily: FONT, fontSize: '14px', color: '#f2c14e' }).setOrigin(1, 0);
     maakInstellingenKnop(this, 30, 28);
+    // kleine knoppen linksboven: aankoop ongedaan maken en naar de shop met skins
+    this.ongedaanKnop = knop(this, 60, 9, 140, 38, '↶ Ongedaan', 0xa9c4ee, () => this.ongedaan(), 18);
+    knop(this, 210, 9, 120, 38, '🎡 Shop', 0x3cc8bb, () => this.naarShop(), 18);
 
     this.kaarten = POWERUPS.map((p, i) => this.maakKaart(p, 15 + (i % 5) * 188, 80 + Math.floor(i / 5) * 186));
     this.baasKaart = this.maakKaart(null, 15 + 4 * 188, 80 + 186);
@@ -246,7 +252,12 @@ class Winkel extends Phaser.Scene {
     this.input.keyboard.on('keydown-ENTER', () => this.spelen());
     this.input.keyboard.on('keydown-SPACE', () => this.spelen());
     this.vernieuwAlles();
-    this.toonKeuzes();
+    // terug uit de shop? dan heb je al gekozen
+    if (data.keuzeGedaan) {
+      this.kiest = false;
+      const k = keuzeVan(PROFIEL.keuze);
+      if (k.id) this.sub.setText(this.subTekst + '   ·   Volgende potje: ✦ ' + k.naam);
+    } else this.toonKeuzes();
   }
 
   // Eerst kiezen: 1 van 3 upgrades voor je volgende potje
@@ -322,6 +333,7 @@ class Winkel extends Phaser.Scene {
     this.pijlL.setVisible(PROFIEL.startRegio > 0);
     this.pijlR.setVisible(PROFIEL.startRegio < PROFIEL.regio);
     for (const o of Object.values(this.vechtKnop)) o.setVisible(PROFIEL.ticket);
+    if (this.ongedaanKnop) for (const o of [this.ongedaanKnop.g, this.ongedaanKnop.t]) o.setAlpha(this.gekocht.length ? 1 : 0.4);
   }
 
   vernieuw(k) {
@@ -372,14 +384,39 @@ class Winkel extends Phaser.Scene {
       if (PROFIEL.ticket) { this.vechten(); return; }
       if (PROFIEL.flessen < kost) { this.schud(k); return; }
       PROFIEL.flessen -= kost; PROFIEL.ticket = true;
+      this.gekocht.push({ baas: true, kost });
     } else {
       const lvl = PROFIEL.up[k.p.id], kost = prijs(k.p, lvl);
       if (lvl >= k.p.max || PROFIEL.flessen < kost) { this.schud(k); return; }
       PROFIEL.flessen -= kost; PROFIEL.up[k.p.id]++;
+      this.gekocht.push({ id: k.p.id, kost });
     }
     bewaarProfiel();
     this.vernieuwAlles();
     this.flits(k);
+  }
+
+  // de laatste aankoop van dit bezoek terugdraaien: je krijgt je flesjes terug
+  ongedaan() {
+    if (this.kiest || this.weg || this.scene.isPaused()) return;
+    const laatste = this.gekocht.pop();
+    if (!laatste) { Geluid.effect('nee'); return; }
+    if (laatste.baas) PROFIEL.ticket = false;
+    else PROFIEL.up[laatste.id] = Math.max(0, PROFIEL.up[laatste.id] - 1);
+    PROFIEL.flessen += laatste.kost;
+    bewaarProfiel();
+    this.vernieuwAlles();
+    Geluid.effect('draai');
+    const k = laatste.baas ? this.baasKaart : this.kaarten.find(x => x.p.id === laatste.id);
+    const f = this.add.rectangle(k.x, k.y, k.w, k.h, 0xa9c4ee, 0.5).setOrigin(0);
+    this.tweens.add({ targets: f, alpha: 0, duration: 300, onComplete: () => f.destroy() });
+  }
+
+  naarShop() {
+    if (this.kiest || this.weg || this.scene.isPaused()) return;
+    this.weg = true;
+    const terug = Object.assign({}, this.data0, { keuzeGedaan: true, gekocht: this.gekocht });
+    this.scene.start('Shop', { terugNaar: 'Winkel', winkelData: terug });
   }
 
   kiesRegio(r) {

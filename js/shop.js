@@ -9,7 +9,10 @@ const RAD_SKINS = SKINS.filter(k => k.id !== 'standaard');
 class Shop extends Phaser.Scene {
   constructor() { super('Shop'); }
 
-  create() {
+  create(data) {
+    // waar ga je heen met "Terug"? Normaal naar het titelscherm, maar vanuit de winkel terug naar de winkel
+    this.terugNaar = (data && data.terugNaar) || 'Titel';
+    this.winkelData = data && data.winkelData;
     this.draait = false;
     this.weg = false;
     this.add.image(0, 0, 'lucht_rivier').setOrigin(0);
@@ -174,6 +177,6 @@ class Shop extends Phaser.Scene {
   terug() {
     if (this.draait || this.weg || this.scene.isPaused()) return;
     this.weg = true;
-    this.scene.start('Titel');
+    this.scene.start(this.terugNaar, this.winkelData);
   }
 }
