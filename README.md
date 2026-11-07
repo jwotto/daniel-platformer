@@ -107,11 +107,15 @@ Een nieuw liedje maken? Voeg in `LIEDJES` een schema en een rijtje melodie-patro
 | Bestand | Wat zit erin |
 |---|---|
 | `index.html` | de pagina die de game start |
-| `js/tekeningen.js` | alle plaatjes (met code getekend), ook de eindbazen, en de kleuren |
+| `js/tekeningen.js` | plaatjes van de held, achtergronden en kleine dingen, en de kleuren |
+| `js/tekeningen-monsters.js` | plaatjes van alle monsters en eindbazen |
 | `js/geluid.js` | geluidjes en muziek |
 | `js/powerups.js` | power-ups, prijzen, regio's, eindbazen en opslaan |
 | `js/besturing.js` | toetsenbord en touch-knoppen |
-| `js/spel.js` | het level en de eindbaas-gevechten |
+| `js/spel.js` | het level, de speler, aanvallen, schade en de HUD |
+| `js/monsters.js` | alle gewone monsters per regio en wat ze doen |
+| `js/bazen.js` | de eindbazen: arena, aanvallen, ritme, woedefase |
+| `js/krachten.js` | effecten van Reservevat, Boerbom en Flesmaatje |
 | `js/schermen.js` | titelscherm, instellingen en winkel |
 | `js/shop.js` | de shop met het draairad en je skins |
 | `js/iconen.js` | de icoontjes van de power-ups en de upgrade-keuzes |
