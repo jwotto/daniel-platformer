@@ -40,8 +40,8 @@ const POWERUPS = [
   { id: 'smash', naam: 'Smash', basis: 2, max: 4, uitleg: [
     'In de lucht omlaag: knal naar beneden!',
     'Grotere en hardere klap.'] },
-  { id: 'behendig', naam: 'Behendigheid', basis: 2, max: ONEINDIG, uitleg: [
-    'Elk niveau: 3% sneller lopen en 2% hoger springen.'] },
+  { id: 'behendig', naam: 'Behendigheid', basis: 2, max: 10, uitleg: [
+    'Elk niveau: 3% sneller lopen en 2% hoger springen (max 10, anders ben je té snel).'] },
   { id: 'boogkracht', naam: 'Boogkracht', basis: 2, max: ONEINDIG, uitleg: [
     'Elk niveau: je pijlen doen 15% meer schade.'] },
   { id: 'krit', naam: 'Kritieke klap', basis: 3, max: ONEINDIG, vanaf: 2, uitleg: [

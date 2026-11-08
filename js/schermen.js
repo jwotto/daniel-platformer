@@ -673,7 +673,7 @@ class PowerUps extends Phaser.Scene {
     };
     const zone = this.add.zone(x, y, w, h).setOrigin(0).setInteractive({ useHandCursor: true }).on('pointerup', (ptr) => {
       // niet kopen als je aan het scrollen was, of als de kaart buiten beeld zit
-      if (this.gesleept || ptr.y < WINKEL_BOVEN || ptr.y > WINKEL_ONDER) return;
+      if (this.gesleept || ptr.y - this.cameras.main.y < WINKEL_BOVEN || ptr.y - this.cameras.main.y > WINKEL_ONDER) return;
       this.koop(kaart);
     });
     this.lijst.add([kaart.g, kaart.naam, kaart.uitleg, kaart.prijsT, kaart.icoon, zone]);
@@ -684,7 +684,7 @@ class PowerUps extends Phaser.Scene {
       const pijl = (dx, r) => {
         const t = this.add.text(x + dx, y + 52, r < 0 ? '◀' : '▶', { fontFamily: FONT, fontSize: '16px', color: '#3cc8bb' }).setOrigin(0.5);
         const z = this.add.zone(x + dx, y + 52, 26, 26).setInteractive({ useHandCursor: true }).on('pointerup', (ptr) => {
-          if (this.gesleept || this.kiest || ptr.y < WINKEL_BOVEN || ptr.y > WINKEL_ONDER) return;
+          if (this.gesleept || this.kiest || ptr.y - this.cameras.main.y < WINKEL_BOVEN || ptr.y - this.cameras.main.y > WINKEL_ONDER) return;
           this.zetAan(kaart, r);
         });
         this.lijst.add([t, z]);
@@ -720,7 +720,7 @@ class PowerUps extends Phaser.Scene {
     this.input.keyboard.on('keydown-UP', () => zet(this.scroll - 90));
     // slepen met je vinger (of de muis)
     let start = null;
-    this.input.on('pointerdown', p => { this.gesleept = false; start = (p.y >= WINKEL_BOVEN && p.y <= WINKEL_ONDER) ? { y: p.y, s: this.scroll } : null; });
+    this.input.on('pointerdown', p => { const y = p.y - this.cameras.main.y; this.gesleept = false; start = (y >= WINKEL_BOVEN && y <= WINKEL_ONDER) ? { y: p.y, s: this.scroll } : null; });
     this.input.on('pointermove', p => {
       if (!start || !p.isDown || this.kiest) return;
       if (Math.abs(p.y - start.y) > 8) this.gesleept = true;

@@ -33,17 +33,20 @@ class Besturing {
     this.stick = null;
 
     if (this.touch) {
+      // de camera staat in het midden van het scherm: reken aanrakingen om naar camera-plekken
+      const cam = this.scene.cameras.main;
       for (const p of this.scene.input.manager.pointers) {
         if (!p.isDown) continue;
-        if (p.downX < 480) {
-          const dx = p.x - p.downX, dy = p.y - p.downY;
-          this.stick = { bx: p.downX, by: p.downY, dx, dy };
+        const px = p.x - cam.x, py = p.y - cam.y, dX = p.downX - cam.x, dY = p.downY - cam.y;
+        if (dX < 480) {
+          const dx = px - dX, dy = py - dY;
+          this.stick = { bx: dX, by: dY, dx, dy };
           x = Math.abs(dx) < 10 ? 0 : Phaser.Math.Clamp(dx / 45, -1, 1);
           y = Math.abs(dy) < 10 ? 0 : Phaser.Math.Clamp(dy / 45, -1, 1);
         } else {
           for (const kn of this.knoppen) {
             if (kn.id === 'dash' && !dashVrij) continue;
-            if (Math.hypot(p.x - kn.x, p.y - kn.y) < kn.r + 14) ingedrukt[kn.id] = true;
+            if (Math.hypot(px - kn.x, py - kn.y) < kn.r + 14) ingedrukt[kn.id] = true;
           }
         }
       }

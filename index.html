@@ -32,7 +32,7 @@
     text-align: center; padding: 24px;
   }
   #draai span { font-size: 56px; }
-  @media (orientation: portrait) and (pointer: coarse) { #draai { display: flex; } }
+  /* de game draait zichzelf als je de telefoon rechtop houdt (js/scherm.js), dus geen draai-melding meer */
   #fout {
     position: fixed; left: 8px; right: 8px; bottom: 8px; z-index: 20;
     background: #d1495b; color: #fff; font: 13px/1.4 monospace; padding: 8px 10px;
@@ -84,6 +84,7 @@
 <script src="js/schermen.js?v=20261108090015"></script>
 <script src="js/shop.js?v=20261108090015"></script>
 <script src="js/gokkast.js?v=20261108090015"></script>
+<script src="js/scherm.js?v=20261108090015"></script>
 <script src="js/main.js?v=20261108090015"></script>
 </body>
 </html>

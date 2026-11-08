@@ -108,7 +108,7 @@ class BaasDeel {
     if (b.baas === 'salamander') { this.salamanderUpdate(b, dt, woede); return; }
     if (b.baas === 'lepelaar' && this.lepelaarZwaarte(b, dt)) return;
     // licht uit: het gat in het donker volgt jou
-    if (this.donker && this.donker.visible) this.donker.setPosition(sp.x, sp.y - 30);
+    if (this.donker && this.donker.visible) this.donker.setPosition(sp.x - this.cameras.main.scrollX, sp.y - 30 - this.cameras.main.scrollY);
     // moederschip: de trekstraal trekt je omhoog
     if (b.status === 'straal' && this.straalG) {
       this.straalG.setPosition(b.x, b.y + 20);

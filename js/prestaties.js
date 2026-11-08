@@ -147,7 +147,7 @@ class Prestaties extends Phaser.Scene {
     this.input.keyboard.on('keydown-DOWN', () => zet(scroll + 90));
     this.input.keyboard.on('keydown-UP', () => zet(scroll - 90));
     let start = null;
-    this.input.on('pointerdown', p => { start = p.y >= BOVEN && p.y <= ONDER ? { y: p.y, s: scroll } : null; });
+    this.input.on('pointerdown', p => { const y = p.y - this.cameras.main.y; start = y >= BOVEN && y <= ONDER ? { y: p.y, s: scroll } : null; });
     this.input.on('pointermove', p => { if (start && p.isDown) zet(start.s - (p.y - start.y)); });
     this.input.on('pointerup', () => { start = null; });
 

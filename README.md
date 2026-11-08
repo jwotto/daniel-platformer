@@ -126,8 +126,8 @@ Drie soorten power-ups:
 
 | Soort | Welke | Prijs |
 |---|---|---|
-| Gewoon (met MAX) | Dash, Dubbele sprong, Wall jump, Zweven, Dubbele pijlen, Ontploffende pijlen, Smash, Schuimschild, Bierbuik-stamp, Magneetkurk, Herstelslok, Kebabradar | elk niveau 1,6× duurder |
-| **Oneindig** (∞, geen MAX) | Extra hartje, Sterkere slash, Statiegeld, **Behendigheid** (sneller lopen, hoger springen), **Boogkracht** (meer pijlschade), **Kritieke klap** (kans op dubbele schade: 5% op niveau 1, 20% op 5, 33% op 10, nooit meer dan 50%; vanaf de Bergen) | elk niveau 1,35× duurder: wordt vanzelf heel duur |
+| Gewoon (met MAX) | **Behendigheid** (sneller lopen en hoger springen, max 10), Dash, Dubbele sprong, Wall jump, Zweven, Dubbele pijlen, Ontploffende pijlen, Smash, Schuimschild, Bierbuik-stamp, Magneetkurk, Herstelslok, Kebabradar | elk niveau 1,6× duurder |
+| **Oneindig** (∞, geen MAX) | Extra hartje, Sterkere slash, Statiegeld, **Boogkracht** (meer pijlschade), **Kritieke klap** (kans op dubbele schade: 5% op niveau 1, 20% op 5, 33% op 10, nooit meer dan 50%; vanaf de Bergen) | elk niveau 1,35× duurder: wordt vanzelf heel duur |
 | Heel duur | Flesmaatje (90), Boerbom (60), Doorboorpijlen (120), Reservevat (300) | |
 
 Sommige dingen gaan pas open als je ver genoeg bent (in de winkel zie je dan een 🔒):
@@ -179,6 +179,7 @@ Grot gebruikt de Bergmars, Savanne de Bierpolka. Een nieuw liedje maken? Voeg in
 | `js/prestaties.js` | de 40 prestaties, de tellers en het prestatiescherm |
 | `js/iconen.js` | de icoontjes van de power-ups en de upgrade-keuzes |
 | `js/main.js` | zet alles aan |
+| `js/scherm.js` | altijd liggend spelen en het hele scherm vullen |
 | `manifest.webmanifest`, `icoon-*.png` | zodat de game als app op je beginscherm kan |
 
 ### Vaste speeltest
@@ -202,6 +203,12 @@ Zet dit achter het adres van de game (je opgeslagen spel wordt dan niet aangeraa
 Typ `./zet-online.sh`. Dat geeft de game een nieuw versienummer, maakt een commit en zet hem op GitHub. Na 1 à 2 minuten staat hij online.
 
 Waarom een versienummer? Je browser bewaart de bestanden van de game een tijdje (de *cache*), zodat hij sneller laadt. Zonder nieuw nummer speel je dan nog de oude versie. Met een nieuw nummer haalt de browser alles opnieuw op. De game kijkt bij het opstarten ook zelf of er een nieuwere versie is, en laadt dan meteen opnieuw.
+
+## Scherm
+
+- **Altijd liggend:** houd je je telefoon rechtop, dan draait de game zichzelf een kwartslag (`js/scherm.js`). Je hoeft niet eerst te draaien.
+- **Hele scherm:** de game is 960×540 en staat in het midden. Op een breder of hoger scherm loopt de wereld aan de randen gewoon door (lucht, bergen, water, platforms, monsters). Menu's en knoppen blijven in het midden.
+- Testen zonder telefoon: `index.html?draai#spel` doet alsof je telefoon rechtop staat; `?canvas` maakt het beeld opslaanbaar voor tests.
 
 ## Voortgang opnieuw beginnen
 
