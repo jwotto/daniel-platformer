@@ -54,6 +54,7 @@ class Spel extends Phaser.Scene {
     // regio-trucjes: bierplassen (kroeg), lopende banden (fabriek), trampolines (speeltuin)
     this.plassen = this.physics.add.staticGroup();
     this.trampolines = this.physics.add.staticGroup();
+    this.kisten = this.physics.add.group({ allowGravity: false });
     this.banden = [];
     this.bandNu = 0; this.glad = 0;
     // grot: een dicht plafond (je kunt niet boven het scherm uit)
@@ -98,6 +99,7 @@ class Spel extends Phaser.Scene {
     this.physics.add.collider(this.speler, this.platforms);
     this.physics.add.overlap(this.speler, this.plassen, () => { this.glad = 0.15; });
     this.physics.add.overlap(this.speler, this.trampolines, (sp, t) => this.opTrampoline(t));
+    this.physics.add.overlap(this.speler, this.kisten, (sp, k) => this.openKist(k));
     this.physics.add.collider(this.speler, this.pilaren);
     this.physics.add.collider(this.vijanden, this.platforms, null, v => v.loopt || (v.soort === 'baas' && !v.vliegt));
     this.physics.add.collider(this.vijanden, this.pilaren, null, v => v.soort === 'baas' && !v.vliegt);
@@ -205,6 +207,8 @@ class Spel extends Phaser.Scene {
     if (w >= 150 && this.genX > 1200 && Math.random() < 0.035) this.maakGoud(x + w * 0.3, y, x, x + w);
     // spikes op sommige platforms (niet helemaal aan het begin)
     if (w >= 200 && this.genX > 1400 && Math.random() < Math.min(0.3, 0.1 + 0.05 * L)) this.maakSpikes(x + w * 0.3, y, Math.min(90, w * 0.3));
+    // heel soms een schatkist
+    if (w >= 120 && this.genX > 1500 && Math.random() < 0.03) this.maakKist(x + w * 0.5, y);
     // kroeg: gladde bierplassen
     if (this.reg.id === 'kroeg' && w >= 160 && Math.random() < 0.45) this.maakPlas(x + Phaser.Math.Between(10, w - 90), y);
     // fabriek: lopende banden
@@ -235,6 +239,22 @@ class Spel extends Phaser.Scene {
       this.rijShotjes(x + 24, y - 205, 3);
     }
     this.genX = x + 48; this.genY = y;
+  }
+
+  maakKist(x, y) {
+    const k = this.kisten.create(x, y - 18, 'schatkist').setDepth(8);
+    k.body.setSize(40, 30);
+    this.tweens.add({ targets: k, y: y - 24, yoyo: true, repeat: -1, duration: 700, ease: 'Sine.easeInOut' });
+  }
+
+  // schatkist gevonden: spel even op pauze, en kiezen: nemen of gokken
+  openKist(k) {
+    if (!k.active || this.dood || this.scene.isPaused()) return;
+    k.destroy();
+    const inzet = 3 + this.n * 3 + Phaser.Math.Between(0, 3);
+    Geluid.effect('flesVol');
+    this.scene.launch('Schatkist', { inzet, klaar: () => { this.scene.resume(); checkPrestaties(this); } });
+    this.scene.pause();
   }
 
   // kroeg: een plas bier waar je op uitglijdt
@@ -359,6 +379,7 @@ class Spel extends Phaser.Scene {
     }
     this.spikes.getChildren().slice().forEach(o => { if (o.x + o.displayWidth < grens) o.destroy(); });
     this.pegels.getChildren().slice().forEach(o => { if (o.x < grens || o.y > 640) o.destroy(); });
+    this.kisten.getChildren().slice().forEach(o => { if (o.x < grens) o.destroy(); });
     for (const grp of [this.plassen, this.trampolines]) grp.getChildren().slice().forEach(o => { if (o.x + o.displayWidth < grens) o.destroy(); });
     for (const grp of [this.vijanden, this.shotjes, this.kebabs]) {
       grp.getChildren().slice().forEach(o => { if (o.x < grens || o.y > 640) o.destroy(); });

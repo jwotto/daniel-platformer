@@ -519,27 +519,31 @@ class BaasDeel {
     this.kogels.getChildren().slice().forEach(k => k.destroy());
     this.dropShotjes(b.x, b.y - 60, 20);
     b.destroy();
+    // eerst de beloning uitrekenen (een nieuwe baas levert meer op dan een die je al had verslagen)
+    const flesjes = baasBeloning(this.n);
     PROFIEL.regio = Math.max(PROFIEL.regio, this.n + 1);
     PROFIEL.startRegio = this.n + 1;
     PROFIEL.ticket = false;
     // de beloning: flink wat flesjes, en de eerste keer een baas-skin met een kroon
-    const flesjes = baasBeloning(this.n);
-    PROFIEL.flessen += flesjes;
     PROFIEL.bazen = (PROFIEL.bazen || 0) + 1;
     const skin = SKINS.find(k => k.baas === b.baas);
     const nieuweSkin = skin && !PROFIEL.skins.includes(skin.id);
     if (nieuweSkin) PROFIEL.skins.push(skin.id);
-    statTel('flessenTotaal', flesjes);
     statTel('baas_' + b.baas);
     if (!this.baasGeraakt) statMax('zonderGeraakt', 1);
     if (this.run.harten === 1) statMax('eenHart', 1);
     bewaarProfiel();
     this.time.delayedCall(2500, () => checkPrestaties(this));
     this.toonBeloning(flesjes, nieuweSkin ? skin : null);
-    this.time.delayedCall(5500, () => {
-      Geluid.effect('regio');
-      // je upgrade blijft, want het is nog hetzelfde potje
-      this.scene.start('Spel', { run: { level: this.n + 1, up: this.run.up, harten: hartenMet(this.run.keuze), baas: false, keuze: this.run.keuze } });
+    // de beloning zit in een schatkist: nemen of gokken. Daarna door naar de volgende regio.
+    this.time.delayedCall(3000, () => {
+      this.scene.launch('Schatkist', { inzet: flesjes, baas: true, klaar: () => {
+        this.scene.resume();
+        Geluid.effect('regio');
+        // je upgrade blijft, want het is nog hetzelfde potje
+        this.scene.start('Spel', { run: { level: this.n + 1, up: this.run.up, harten: hartenMet(this.run.keuze), baas: false, keuze: this.run.keuze } });
+      } });
+      this.scene.pause();
     });
   }
 }

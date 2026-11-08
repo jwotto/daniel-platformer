@@ -16,6 +16,7 @@ const PRESTATIES = [
   { id: 'slasher', naam: 'Slasher', uitleg: 'Versla 25 monsters door te slaan', stat: 'slash', doel: 25, beloning: 3 },
   { id: 'schutter', naam: 'Scherpschutter', uitleg: 'Versla 25 monsters met pijlen', stat: 'pijl', doel: 25, beloning: 3 },
   { id: 'stamper', naam: 'Stamper', uitleg: 'Versla 10 monsters door erop te springen', stat: 'stamp', doel: 10, beloning: 3 },
+  { id: 'kist', naam: 'Schatzoeker', uitleg: 'Open een schatkist', stat: 'kisten', doel: 1, beloning: 2 },
   { id: 'goud1', naam: 'Goudzoeker', uitleg: 'Vang een gouden flesje', stat: 'goud', doel: 1, beloning: 3 },
   { id: 'm300', naam: '300 meter', uitleg: 'Kom 300 meter ver in één potje', stat: 'meters', doel: 300, beloning: 3 },
   { id: 'pad', naam: 'Koning gevloerd', uitleg: 'Versla Koning Bierpad', stat: 'baas_pad', doel: 1, beloning: 4 },

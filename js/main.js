@@ -10,7 +10,7 @@ const config = {
   // EXPAND: de game wordt breder (of hoger) zodat hij het hele scherm vult; scherm.js vult de randen op
   scale: { mode: Phaser.Scale.EXPAND, autoCenter: Phaser.Scale.NO_CENTER },
   input: { activePointers: 4 },
-  scene: [Boot, Titel, Spel, Winkel, PowerUps, Shop, Prestaties, LevelKeuze, Gokkast, Dieren, Instellingen, StopVraag],
+  scene: [Boot, Titel, Spel, Winkel, PowerUps, Shop, Prestaties, LevelKeuze, Gokkast, Dieren, Instellingen, StopVraag, Schatkist],
 };
 
 // Eerst de lettertypes laden (maximaal 2,5 seconde wachten), dan beginnen

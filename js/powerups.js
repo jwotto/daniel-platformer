@@ -146,7 +146,7 @@ function hartenMet(id) {
 // v3: reset op 8 november 2026, na de grote balans-update.
 const OPSLAG = 'flesje_profiel_v3';
 try { localStorage.removeItem('flesje_profiel_v2'); } catch (e) { /* geeft niks */ }
-const TESTMODUS = ['#test', '#winkel', '#shop', '#kebab', '#baas', '#ijs', '#berg', '#vulkaan', '#grot', '#savanne', '#kroeg', '#fabriek', '#speeltuin', '#maan', '#prestaties', '#gokkast', '#levels', '#dieren', '#spel'].some(h => location.hash.startsWith(h));
+const TESTMODUS = ['#test', '#winkel', '#shop', '#kebab', '#baas', '#ijs', '#berg', '#vulkaan', '#grot', '#savanne', '#kroeg', '#fabriek', '#speeltuin', '#maan', '#prestaties', '#gokkast', '#levels', '#dieren', '#kist', '#spel'].some(h => location.hash.startsWith(h));
 
 function laadProfiel() {
   const p = { up: {}, flessen: 0, shotjes: 0, beste: 0, regio: 0, startRegio: 0, ticket: false, skin: 'standaard', skins: ['standaard'], draaien: 0, keuze: '', bazen: 0, aan: {}, stats: {}, prestaties: [], dier: '', dieren: {}, sterren: 0 };

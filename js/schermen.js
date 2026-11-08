@@ -86,6 +86,9 @@ class Boot extends Phaser.Scene {
       this.scene.start('Spel', { run: { level: PROFIEL.regio, up: PROFIEL.up, harten: 99, baas: true } });
     } else if (regios[h] !== undefined) {
       this.scene.start('Spel', { run: { level: regios[h], up: PROFIEL.up, harten: maxHarten(), baas: false } });
+    } else if (h === '#kist') {
+      this.scene.start('Spel', { run: { level: 2, up: PROFIEL.up, harten: 99, baas: false } });
+      this.time.delayedCall(800, () => { const sp = this.scene.get('Spel'); sp.maakKist(sp.speler.x + 60, sp.speler.y); });
     } else if (h === '#dieren') {
       PROFIEL.flessen = 1000;
       this.scene.start('Dieren');

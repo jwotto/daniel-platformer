@@ -820,6 +820,7 @@ function maakTexturen(scene) {
     tekenAchtergronden(scene, id);
   }
   tekenTextuur(scene, 'plafond_grot', 512, 90, tekenPlafond);
+  tekenTextuur(scene, 'schatkist', 44, 36, tekenSchatkist);
   // stopknop in het spel
   tekenTextuur(scene, 'stopknop', 40, 40, ctx => {
     ctx.fillStyle = 'rgba(10,16,40,.55)'; rondRect(ctx, 1, 1, 38, 38, 9); ctx.fill();

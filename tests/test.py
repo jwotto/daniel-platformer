@@ -11,8 +11,8 @@ Fouten in de game (de rode balk) tellen ook als FOUT.
 import http.server, os, socketserver, subprocess, sys, tempfile, threading, time, urllib.parse, shutil
 
 MAP = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ONDERDELEN = ['ronde', 'vallen', 'monsters', 'zwak', 'bazen', 'beloning', 'opnieuw', 'powerups', 'shop', 'spikes', 'kebab', 'prestaties', 'aan', 'knoppen', 'trucjes', 'levels', 'gokken', 'dieren', 'prestige', 'balansregels']
-TIJD = {'balans': 900, 'ronde': 40, 'vallen': 160, 'monsters': 160, 'bazen': 260, 'powerups': 40, 'shop': 30, 'zwak': 150, 'beloning': 40, 'opnieuw': 30, 'kebab': 20, 'spikes': 20, 'prestaties': 30, 'aan': 30, 'knoppen': 60, 'trucjes': 40, 'levels': 30, 'gokken': 40, 'dieren': 40, 'prestige': 30, 'balansregels': 40}
+ONDERDELEN = ['ronde', 'vallen', 'monsters', 'zwak', 'bazen', 'beloning', 'opnieuw', 'powerups', 'shop', 'spikes', 'kebab', 'prestaties', 'aan', 'knoppen', 'trucjes', 'levels', 'gokken', 'dieren', 'prestige', 'balansregels', 'schatkist']
+TIJD = {'balans': 900, 'ronde': 40, 'vallen': 160, 'monsters': 160, 'bazen': 260, 'powerups': 40, 'shop': 30, 'zwak': 150, 'beloning': 40, 'opnieuw': 30, 'kebab': 20, 'spikes': 20, 'prestaties': 30, 'aan': 30, 'knoppen': 60, 'trucjes': 40, 'levels': 30, 'gokken': 40, 'dieren': 40, 'prestige': 30, 'balansregels': 40, 'schatkist': 50}
 uitslag = {}
 
 

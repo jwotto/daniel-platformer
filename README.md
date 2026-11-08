@@ -55,6 +55,10 @@ Kuiken (shotjes meer waard) · Otje de bruine Franse bulldog (haalt shotjes van 
 
 Heb je alle 10 eindbazen verslagen? Dan staat op het titelscherm **⭐ Opnieuw brouwen**. Je begint weer bij de Rivier zonder flesjes en power-ups, maar je houdt je skins, huisdieren en prestaties, én je krijgt een ster: elke ster maakt shotjes voor altijd 10% meer waard.
 
+### Schatkist
+
+Heel soms staat er een **schatkist** op een platform, en na elke eindbaas zit je beloning in een schatkist. Je kiest: **💰 Neem het**, of **🎡 Waag het!** aan het rad: 50% alles weg, 25% ×1,5, 12,5% ×2 en 12,5% ×3. Gemiddeld krijg je precies je inzet terug: echt gokken dus.
+
 ### Gokkast
 
 In de shop zit de **🎰 Gokkast**. Kies hoeveel flesjes je inzet (1, 5, 10, 25 of alles) en draai: ×2, ×3 of ×5 (jackpot)... maar 12 van de 16 vakjes zijn "niks". Je verliest dus veel vaker dan je wint; gemiddeld krijg je maar 75% terug.
@@ -175,6 +179,7 @@ Grot gebruikt de Bergmars, Savanne de Bierpolka. Een nieuw liedje maken? Voeg in
 | `js/schermen.js` | titelscherm, instellingen en winkel |
 | `js/shop.js` | de shop met het draairad en je skins |
 | `js/gokkast.js` | de gokkast |
+| `js/schatkist.js` | de schatkist met het gokrad |
 | `js/dieren.js` | de huisdieren: tekeningen, wat ze doen en de dierenwinkel |
 | `js/prestaties.js` | de 40 prestaties, de tellers en het prestatiescherm |
 | `js/iconen.js` | de icoontjes van de power-ups en de upgrade-keuzes |
@@ -224,4 +229,5 @@ De voortgang wordt in de browser bewaard onder de naam in `OPSLAG` (in `js/power
 - **Na "Vecht tegen de baas!" kon je nergens meer op drukken.** Oorzaak: Phaser gebruikt het level steeds opnieuw, en het level onthield nog de meterteller van het vorige potje. Die was al weggegooid, maar het baasgevecht probeerde hem toch bij te werken en liep vast. Oplossing: aan het begin van elk potje die oude dingen leegmaken. Getest: doodgaan → baas kopen → vechten → doodgaan → gewoon spelen.
 - **Na in het water vallen ging je soms meteen weer dood.** Oorzaak: je kwam terug op een bestaand platform, soms laag, smal of vlak bij een vijand. Oplossing: je komt nu altijd terug op een eigen veilig platformpje, hoog en midden in beeld. Vijanden en kogels vlakbij worden weggehaald, je knippert 2,5 seconde (onkwetsbaar) en het scherm wacht even. Getest: na een val 1 hartje kwijt en je staat stil op het platformpje.
 - **Na een val zakte je door het veilige platformpje heen.** Oorzaak: de speler werd in één keer van onder water naar boven het platform verplaatst. De natuurkunde van het spel dacht daardoor dat je van onderen tegen het platform aan sprong, en duwde je eronder. Oplossing: de speler op de nieuwe plek *resetten* (`body.reset`) in plaats van alleen verplaatsen. Getest: 20 keer vallen in alle 4 regio's; vóór de fix 20 keer mis, erna 20 keer goed.
+- **Een nieuwe baas gaf de lagere beloning.** Oorzaak: de beloning werd uitgerekend nádat de volgende regio open ging, dus telde de baas als "al verslagen". Oplossing: eerst de beloning uitrekenen, dan pas de regio openzetten. Gevonden door de test `beloning`.
 - **Fouten zien op je telefoon?** Als er iets misgaat, komt er onderaan een rode balk met de fout. Maak daar een screenshot van en geef hem aan Claude.

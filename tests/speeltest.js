@@ -145,15 +145,19 @@
     // eindbaas verslaan: flesjes, baas-skin en door naar de volgende regio
     async beloning() {
       PROFIEL.regio = 0; PROFIEL.flessen = 0;
+      PROFIEL.prestaties = PRESTATIES.map(p => p.id); // geen extra flesjes van prestaties
       speel({ level: 0, baas: true }); await wacht(() => spelKlaar(1) && scene('Spel').baasModus, 8000, 'baasgevecht');
       const sp = scene('Spel');
+      const beloning = baasBeloning(0); // vóór het verslaan: de eerste keer is de beloning hoger
       doe('baas verslaan'); sp.baas.hp = 1; sp.raakVijand(sp.baas, 5, 1, 'slash');
       moet(sp.gewonnen, 'baas niet verslagen');
-      moet(PROFIEL.flessen === baasBeloning(0), 'geen ' + baasBeloning(0) + ' flesjes maar ' + PROFIEL.flessen);
+      await wacht(() => actief('Schatkist'), 15000, 'schatkist met de beloning');
+      scene('Schatkist').neem();
+      moet(PROFIEL.flessen === beloning, 'geen ' + beloning + ' flesjes maar ' + PROFIEL.flessen);
       moet(PROFIEL.skins.includes('padkoning'), 'geen Padkoning-skin');
       moet(PROFIEL.regio === 1, 'volgende regio niet open');
       doe('door naar volgende regio'); await wacht(() => spelKlaar(0.5) && scene('Spel').n === 1, 15000, 'IJsvlakte start');
-      return '+' + baasBeloning(0) + ' flesjes, Padkoning-skin en door naar de IJsvlakte';
+      return '+' + beloning + ' flesjes (uit de schatkist), Padkoning-skin en door naar de IJsvlakte';
     },
 
     // draairad: kost 5, je wint een nieuwe skin, daarna kost het 10
@@ -446,6 +450,27 @@
       moet(sp.maxH === 11, 'hartjes kloppen niet (' + sp.maxH + ')');
       moet(Math.abs(kritKans(1) - 0.05) < 0.001 && kritKans(100) < 0.5 && kritKans(10) > 0.3, 'kritieke kans klopt niet');
       return 'gokkast en flesmaatje op slot; hartje tot 8 (∞); boogkracht 1.15× schade; 11 hartjes; krit 5% → max 50%';
+    },
+
+    // schatkist: nemen, of gokken (verlies, ×3)
+    async schatkist() {
+      PROFIEL.flessen = 0; PROFIEL.prestaties = PRESTATIES.map(p => p.id);
+      speel({ level: 2 }); await wacht(() => spelKlaar(0.5), 8000, 'spel');
+      const sp = scene('Spel');
+      doe('kist vinden'); sp.maakKist(sp.speler.x, sp.speler.y);
+      await wacht(() => actief('Schatkist') && M().isPaused('Spel'), 4000, 'schatkist gaat open en spel pauzeert');
+      const inzet = scene('Schatkist').inzet; scene('Schatkist').neem();
+      await wacht(() => !actief('Schatkist') && !M().isPaused('Spel'), 4000, 'spel gaat verder');
+      moet(PROFIEL.flessen === inzet, 'nemen klopt niet');
+      doe('gokken: verlies'); sp.maakKist(sp.speler.x, sp.speler.y); await wacht(() => actief('Schatkist'), 4000, 'kist 2');
+      const v = PROFIEL.flessen; scene('Schatkist').draai(0); await wacht(() => !actief('Schatkist'), 8000, 'rad stopt');
+      moet(PROFIEL.flessen === v, 'verlies klopt niet');
+      doe('gokken: ×3'); sp.maakKist(sp.speler.x, sp.speler.y); await wacht(() => actief('Schatkist'), 4000, 'kist 3');
+      const i2 = scene('Schatkist').inzet, v2 = PROFIEL.flessen; scene('Schatkist').draai(KIST_VAKJES.indexOf(3)); await wacht(() => !actief('Schatkist'), 8000, 'rad stopt');
+      moet(PROFIEL.flessen === v2 + i2 * 3, '×3 klopt niet');
+      const ev = KIST_VAKJES.reduce((a, b) => a + b, 0) / KIST_VAKJES.length;
+      moet(KIST_VAKJES.filter(x => !x).length === KIST_VAKJES.length / 2 && Math.abs(ev - 1) < 0.001, 'kansen kloppen niet');
+      return 'nemen, verlies en ×3 werken; 50% weg, gemiddeld precies je inzet terug';
     },
 
     // kebabrol eten: scheet en heel hoog de lucht in
