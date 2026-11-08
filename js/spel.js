@@ -700,6 +700,7 @@ class Spel extends Phaser.Scene {
       Geluid.effect('baasRaak');
       if (v.hp <= 0) this.baasVerslagen(v);
       else if (v.baas === 'salamander') this.salamanderVlucht(v);
+      else if (v.baas === 'clown') this.clownGeraakt(v);
       return;
     }
     // de mol kun je alleen raken als hij boven de grond is

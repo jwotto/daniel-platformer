@@ -855,7 +855,7 @@ BaasDeel.prototype.clownUpdate = function (b, dt, woede) {
   const sp = this.speler;
   if (b.status === 'rijdt') {
     // heen en weer rijden over zijn vlak
-    b.plek += b.rijRichting * 0.22 * woede * dt;
+    b.plek += b.rijRichting * 0.44 * woede * dt; // 2× zo snel als eerst
     if (b.plek < 0) { b.plek = 0; b.rijRichting = 1; } else if (b.plek > 1) { b.plek = 1; b.rijRichting = -1; }
     const p = clownPlek(b.vlak, b.plek);
     b.setPosition(p.x, p.y).setAngle(p.hoek).setFlipX(b.rijRichting > 0);
@@ -866,16 +866,13 @@ BaasDeel.prototype.clownUpdate = function (b, dt, woede) {
       b.aanvalNr++;
       b.aanvalT = 2.4;
       if (b.aanvalNr % 3 === 0) {
-        this.baasRoep('Taart in je gezicht!');
-        const d = Math.hypot(sp.x - b.x, sp.y - 40 - b.y) || 1;
-        const k = this.kogel('taart', b.x, b.y, (sp.x - b.x) / d * 520, (sp.y - 40 - b.y) / d * 520, 0);
-        k.taart = true;
+        this.clownTaart(b);
       } else {
-        // 3× zo grote, 2× zo snelle ballen die blijven stuiteren tot ze je raken
+        // 4 grote, snelle ballen die blijven stuiteren tot ze je raken (hooguit 12 tegelijk)
         const aantal = this.kogels.getChildren().filter(k => k.eeuwig && k.active).length;
-        for (let i = 0; i < Math.min(2, 6 - aantal); i++) {
+        for (let i = 0; i < Math.min(4, 12 - aantal); i++) {
           const k = this.kogel('bal', b.x, b.y, (Math.random() < 0.5 ? -1 : 1) * Phaser.Math.Between(300, 520), -Phaser.Math.Between(500, 840), 1000);
-          k.setScale(3); k.body.setCircle(11, 2, 2);
+          k.setScale(2.7); k.body.setCircle(11, 2, 2);
           k.eeuwig = true; k.golf = true;
         }
         Geluid.effect('boing');
@@ -885,32 +882,54 @@ BaasDeel.prototype.clownUpdate = function (b, dt, woede) {
     b.springT -= dt;
     if (b.springT <= 0) {
       b.springT = 4;
-      let nieuw; do { nieuw = Phaser.Math.Between(0, 3); } while (nieuw === b.vlak);
-      const van = clownPlek(b.vlak, b.plek), naar = clownPlek(nieuw, Math.random());
-      b.status = 'springt';
-      this.baasRoep('Nieuwe eenwieler!');
-      Geluid.effect('dubbel');
-      this.tweens.addCounter({ from: 0, to: 1, duration: 1000, ease: 'Sine.easeInOut',
-        onUpdate: tw => {
-          const f = tw.getValue();
-          // een boog: halverwege 120 pixels richting het midden van de arena
-          const mx = (van.x + naar.x) / 2, my = (van.y + naar.y) / 2;
-          const bx = mx + (480 - mx) * 0.4 * Math.sin(f * Math.PI), by = my + (270 - my) * 0.4 * Math.sin(f * Math.PI);
-          const x = (1 - f) * (1 - f) * van.x + 2 * (1 - f) * f * bx + f * f * naar.x;
-          const y = (1 - f) * (1 - f) * van.y + 2 * (1 - f) * f * by + f * f * naar.y;
-          b.setPosition(x, y).setAngle(van.hoek + (naar.hoek - van.hoek) * f + f * 360);
-          b.body.reset(x, y);
-        },
-        onComplete: () => {
-          if (!b.active) return;
-          b.vlak = nieuw; b.plek = Phaser.Math.Clamp((naar.x - CLOWN_VLAKKEN[nieuw].x1) / ((CLOWN_VLAKKEN[nieuw].x2 - CLOWN_VLAKKEN[nieuw].x1) || 1), 0, 1);
-          if (CLOWN_VLAKKEN[nieuw].x1 === CLOWN_VLAKKEN[nieuw].x2) b.plek = Phaser.Math.Clamp((naar.y - CLOWN_VLAKKEN[nieuw].y1) / (CLOWN_VLAKKEN[nieuw].y2 - CLOWN_VLAKKEN[nieuw].y1), 0, 1);
-          b.status = 'rijdt';
-          this.cameras.main.shake(120, 0.008);
-        },
-      });
+      this.clownSpring(b);
     }
   }
+};
+
+// de clown gooit een taart naar je toe
+BaasDeel.prototype.clownTaart = function (b) {
+  const sp = this.speler;
+  this.baasRoep('Taart in je gezicht!');
+  const d = Math.hypot(sp.x - b.x, sp.y - 40 - b.y) || 1;
+  const k = this.kogel('taart', b.x, b.y, (sp.x - b.x) / d * 520, (sp.y - 40 - b.y) / d * 520, 0);
+  k.taart = true;
+};
+
+// de clown springt in een boog naar een ander vlak, op een nieuwe eenwieler
+BaasDeel.prototype.clownSpring = function (b) {
+  let nieuw; do { nieuw = Phaser.Math.Between(0, 3); } while (nieuw === b.vlak);
+  const van = clownPlek(b.vlak, b.plek), naar = clownPlek(nieuw, Math.random());
+  b.status = 'springt';
+  this.baasRoep('Nieuwe eenwieler!');
+  Geluid.effect('dubbel');
+  this.tweens.addCounter({ from: 0, to: 1, duration: 1000, ease: 'Sine.easeInOut',
+    onUpdate: tw => {
+      const f = tw.getValue();
+      // een boog: halverwege 120 pixels richting het midden van de arena
+      const mx = (van.x + naar.x) / 2, my = (van.y + naar.y) / 2;
+      const bx = mx + (480 - mx) * 0.4 * Math.sin(f * Math.PI), by = my + (270 - my) * 0.4 * Math.sin(f * Math.PI);
+      const x = (1 - f) * (1 - f) * van.x + 2 * (1 - f) * f * bx + f * f * naar.x;
+      const y = (1 - f) * (1 - f) * van.y + 2 * (1 - f) * f * by + f * f * naar.y;
+      b.setPosition(x, y).setAngle(van.hoek + (naar.hoek - van.hoek) * f + f * 360);
+      b.body.reset(x, y);
+    },
+    onComplete: () => {
+      if (!b.active) return;
+      b.vlak = nieuw; b.plek = Phaser.Math.Clamp((naar.x - CLOWN_VLAKKEN[nieuw].x1) / ((CLOWN_VLAKKEN[nieuw].x2 - CLOWN_VLAKKEN[nieuw].x1) || 1), 0, 1);
+      if (CLOWN_VLAKKEN[nieuw].x1 === CLOWN_VLAKKEN[nieuw].x2) b.plek = Phaser.Math.Clamp((naar.y - CLOWN_VLAKKEN[nieuw].y1) / (CLOWN_VLAKKEN[nieuw].y2 - CLOWN_VLAKKEN[nieuw].y1), 0, 1);
+      b.status = 'rijdt';
+      this.cameras.main.shake(120, 0.008);
+    },
+  });
+};
+
+// geraakt? Dan gooit hij meteen een taart en springt hij weg.
+// De gewone klokjes (taart/ballen en de sprong om de 4 seconden) lopen gewoon door.
+BaasDeel.prototype.clownGeraakt = function (b) {
+  if (b.status !== 'rijdt' || b.hp <= 0) return;
+  this.clownTaart(b);
+  this.clownSpring(b);
 };
 
 // ---------- HET MOEDERSCHIP ----------
