@@ -38,6 +38,7 @@ class Spel extends Phaser.Scene {
     this.levelTekst = null; this.meterTekst = null;
     this.donker = null; this.splat = null; this.straalG = null; this.tong = null; this.bandVloer = null;
     this.kistGestart = false; this.gewonnenTijd = 0;
+    this.vierkant = null; this.hudCam = null; this.luchtCam = null;
     this.achtergrond = maakAchtergrond(this, this.reg.id);
 
     this.platforms = this.physics.add.staticGroup();

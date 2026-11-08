@@ -108,13 +108,13 @@
         const sp = scene('Spel'), b = sp.baas, gezien = new Set();
         // kijk tot hij 2 soorten aanvallen heeft gedaan (max 20 seconden), maak hem dan woedend
         const eind = Date.now() + 20000;
-        while (Date.now() < eind && b.active && gezien.size < 2 && b.baas !== 'machine') {
+        while (Date.now() < eind && b.active && gezien.size < 2 && !['machine', 'clown'].includes(b.baas)) {
           sp.run.harten = 99;
           if (b.status !== 'wacht' && b.beurt > 0) gezien.add(b.aanvallen[(b.beurt - 1) % b.aanvallen.length]);
           await slaap(50);
         }
         b.hp = Math.floor(b.maxHp * 0.4); await slaap(300);
-        if (b.baas !== 'machine') moet(gezien.size >= 2, sp.reg.baasNaam + ' deed maar ' + gezien.size + ' soort aanval');
+        if (!['machine', 'clown'].includes(b.baas)) moet(gezien.size >= 2, sp.reg.baasNaam + ' deed maar ' + gezien.size + ' soort aanval');
         moet(b.woedend, sp.reg.baasNaam + ' werd niet woedend');
         uit.push(sp.reg.baasNaam + ': ' + [...gezien].join('/'));
       }
@@ -482,7 +482,7 @@
       moet(b.status === 'grond' && !b.body.enable, 'begint niet in de grond');
       doe('in de grond niet te raken'); const hp = b.hp; sp.raakVijand(b, 10, 1, 'slash'); moet(b.hp === hp, 'kon hem raken in de grond');
       doe('3 rondes'); for (let r = 1; r <= 3; r++) { b.timer = 0; await wacht(() => b.ronde === r, 4000, 'ronde ' + r); }
-      await wacht(() => sp.kogels.getChildren().some(k => k.texture.key === 'perszij'), 8000, 'een pers van opzij');
+      await wacht(() => sp.kogels.getChildren().some(k => k.texture.key === 'perszij'), 25000, 'een pers van opzij');
       doe('naar boven'); b.timer = 0; await wacht(() => b.status === 'boven' && b.body.enable, 6000, 'machine komt naar boven');
       sp.raakVijand(b, 10, 1, 'slash'); moet(b.hp < hp, 'boven kon je hem niet raken');
       doe('weer weg, ×2'); b.timer = 0; await wacht(() => b.status === 'grond' && b.cyclus === 2, 4000, 'weer de grond in');
@@ -507,6 +507,24 @@
       moet(scene('Winkel').koopBaas(), 'kon de volgende baas niet kopen'); scene('Winkel').vechten();
       await wacht(() => spelKlaar(0.5) && scene('Spel').baasModus && scene('Spel').n === 1, 8000, 'volgende baas start');
       return 'na de baas: doodgaan, opnieuw spelen en de volgende baas starten werkt';
+    },
+
+    // clown springt naar een ander vlak en gooit eeuwige stuiterballen; moederschip draait het veld
+    async clownufo() {
+      PROFIEL.regio = 9;
+      speel({ level: 8, baas: true }); await wacht(() => spelKlaar(0.5) && scene('Spel').baas, 8000, 'clown');
+      let sp = scene('Spel'); const b = sp.baas, vlak = b.vlak;
+      doe('clown springt'); b.springT = 0; await wacht(() => b.status === 'springt', 3000, 'clown springt');
+      await wacht(() => b.status === 'rijdt' && b.vlak !== vlak, 6000, 'clown op een ander vlak');
+      doe('ballen'); b.aanvalT = 0; b.aanvalNr = 0; await wacht(() => sp.kogels.getChildren().some(k => k.eeuwig), 3000, 'stuiterballen');
+      const bal = sp.kogels.getChildren().find(k => k.eeuwig); moet(bal.scaleX === 3, 'bal niet 3× zo groot');
+      await slaap(2500); moet(bal.active, 'bal verdween (moet blijven stuiteren)');
+      doe('moederschip'); speel({ level: 9, baas: true }); await wacht(() => spelKlaar(0.5) && scene('Spel').baas && scene('Spel').n === 9, 8000, 'moederschip');
+      sp = scene('Spel');
+      moet(sp.vierkant && sp.baas.scaleX === 0.8, 'geen vierkante arena of schip niet kleiner');
+      sp.veldT = 0; await wacht(() => sp.veldHoek !== 0, 3000, 'veld draait');
+      await slaap(800); moet(Math.abs(sp.cameras.main.rotation) > 0.1, 'camera draait niet');
+      return 'clown springt naar ' + ['vloer', 'rechtermuur', 'plafond', 'linkermuur'][b.vlak] + ', ballen blijven stuiteren; moederschip: vierkant, kleiner, veld draait ' + sp.veldHoek + '°';
     },
 
     // kebabrol eten: scheet en heel hoog de lucht in

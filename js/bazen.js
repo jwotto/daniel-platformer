@@ -33,21 +33,25 @@ class BaasDeel {
   maakArena() {
     // de vloer van de arena ligt vóór het water
     const machine = this.reg.baas === 'machine';
-    // bij de Brouwmachine houdt de vloer links én rechts op: de lopende band kan je eraf duwen
-    const vloer = this.maakPlatform(machine ? 100 : 0, 470, machine ? 760 : 960, true).setDepth(8);
-    if (!machine) { this.maakPilaar(-36, 0); this.maakPilaar(948, 0); }
-    if (machine) {
-      // de vloer is één grote lopende band (de streepjes laten zien welke kant hij op gaat)
-      this.bandVloer = this.add.tileSprite(vloer.x + 6, vloer.y + 2, vloer.displayWidth - 12, 10, 'band').setOrigin(0).setDepth(9);
+    if (this.reg.baas === 'moederschip') this.maakVierkanteArena();
+    else {
+      // bij de Brouwmachine houdt de vloer links én rechts op: de lopende band kan je eraf duwen
+      const vloer = this.maakPlatform(machine ? 100 : 0, 470, machine ? 760 : 960, true).setDepth(8);
+      if (!machine) { this.maakPilaar(-36, 0); this.maakPilaar(948, 0); }
+      if (machine) {
+        // de vloer is één grote lopende band (de streepjes laten zien welke kant hij op gaat)
+        this.bandVloer = this.add.tileSprite(vloer.x + 6, vloer.y + 2, vloer.displayWidth - 12, 10, 'band').setOrigin(0).setDepth(9);
+      }
+      this.maakPlatform(130, 340, 190);
+      this.maakPlatform(640, 340, 190);
+      this.maakPlatform(385, 225, 190);
+      this.speler.setPosition(150, 468);
     }
-    this.maakPlatform(130, 340, 190);
-    this.maakPlatform(640, 340, 190);
-    this.maakPlatform(385, 225, 190);
-    this.speler.setPosition(150, 468);
 
     const soort = this.reg.baas, info = BAZEN[soort];
     const vliegt = soort === 'draak' || soort === 'salamander' || soort === 'moederschip';
     const b = this.vijanden.create(vliegt ? 720 : 760, vliegt ? 150 : 468, 'baas_' + soort).setDepth(9);
+    if (soort === 'moederschip') { b.setScale(0.8); b.setPosition(560, 150); }
     b.setOrigin(0.5, vliegt ? 0.5 : 1);
     const w = b.width, h = b.height;
     b.body.setSize(w * 0.62, h * 0.66).setOffset(w * 0.19, h * (vliegt ? 0.2 : 0.32));
@@ -59,6 +63,11 @@ class BaasDeel {
     if (vliegt) { b.body.setAllowGravity(false); b.body.setImmovable(true); }
     if (soort === 'salamander') { b.setOrigin(0.5); b.rand = 0; b.doelRand = 0.5; b.loopRichting = 1; b.status = 'kruip'; }
     if (soort === 'lepelaar') b.zwaarteT = 5;
+    if (soort === 'clown') {
+      // de clown rijdt over vloer, muren en plafond, en springt elke 8 seconden naar een ander vlak
+      b.setOrigin(0.5); b.body.setAllowGravity(false).setImmovable(true);
+      b.vlak = 0; b.plek = 0.7; b.rijRichting = -1; b.springT = 8; b.aanvalT = 2; b.aanvalNr = 0; b.status = 'rijdt';
+    }
     if (soort === 'machine') {
       // begint verstopt in de grond
       b.body.setImmovable(true).setAllowGravity(false); b.body.enable = false;
@@ -128,6 +137,8 @@ class BaasDeel {
       if (Math.abs(sp.x - b.x) < 70 && sp.y > b.y) sp.body.setVelocityY(Math.max(sp.body.velocity.y - 90, -300));
     }
     if (b.baas === 'machine') { this.machineUpdate(b, dt); return; }
+    if (b.baas === 'clown') { this.clownUpdate(b, dt, woede); return; }
+    if (b.baas === 'moederschip') this.veldDraaien(dt);
 
     if (b.vliegt) {
       if (b.status === 'straal') {
@@ -135,7 +146,9 @@ class BaasDeel {
         b.x += Phaser.Math.Clamp(sp.x - b.x, -260 * dt, 260 * dt);
         b.y += (130 - b.y) * Math.min(1, dt * 3);
       } else if (b.status !== 'duik' && b.status !== 'spiraal') {
-        b.x = 480 + Math.sin(b.t * 0.6) * 300;
+        // het moederschip blijft binnen zijn vierkante arena
+        const breed = b.baas === 'moederschip' ? 160 : 300;
+        b.x = 480 + Math.sin(b.t * 0.6) * breed;
         b.y = 140 + Math.sin(b.t * 1.4) * 40;
       }
       b.setFlipX(naar > 0);
@@ -340,7 +353,7 @@ class BaasDeel {
       for (let i = 0; i < 5; i++) this.time.delayedCall(i * 140, () => {
         if (!b.active) return;
         const hoek = Math.atan2(sp.y - 30 - b.y, sp.x - b.x) + Phaser.Math.FloatBetween(-0.12, 0.12);
-        this.kogel('laser', b.x, b.y + 20, Math.cos(hoek) * 480, Math.sin(hoek) * 480, 0).setRotation(hoek);
+        this.kogel('laser', b.x, b.y + 20, Math.cos(hoek) * 720, Math.sin(hoek) * 720, 0).setRotation(hoek);
         Geluid.effect('laser');
       });
       klaar(1.2);
@@ -468,6 +481,15 @@ class BaasDeel {
     this.kogels.getChildren().slice().forEach(k => {
       k.leeft -= dt;
       if (k.rolt) k.rotation += k.body.velocity.x * dt / 20;
+      // clownballen stuiteren tegen vloer, muren en plafond tot ze je raken
+      if (k.eeuwig) {
+        const v = k.body.velocity, r = k.displayWidth / 2;
+        if (k.y + r > 470 && v.y > 0) { v.y = -Math.max(Math.abs(v.y) * 0.95, 700); Geluid.effect('boing'); }
+        if (k.y - r < 10 && v.y < 0) v.y = Math.abs(v.y);
+        if ((k.x - r < 12 && v.x < 0) || (k.x + r > 948 && v.x > 0)) v.x = -v.x;
+        k.leeft = 99;
+        return;
+      }
       // stuiterballen stuiteren op de vloer
       if (k.stuiter && k.y > 450 && k.body.velocity.y > 0) {
         k.body.velocity.y *= -0.8; k.stuiter--;
@@ -491,6 +513,7 @@ class BaasDeel {
   kogelRaakt(k) {
     if (!k.active || this.onkwetsbaar > 0 || this.dood || this.gewonnen) return;
     if (!k.golf && !k.rolt) k.destroy();
+    if (k.eeuwig) k.destroy();
     if (k.taart) {
       // taart in je gezicht: even zie je bijna niks
       if (!this.splat) this.splat = this.add.image(480, 270, 'taartsplat').setDepth(96).setScrollFactor(0);
@@ -785,7 +808,8 @@ BaasDeel.prototype.rodeBaan = function (x, y, w, h, duur) {
 // een pers die vanaf de zijkant over de vloer schuift: spring eroverheen!
 BaasDeel.prototype.zijPers = function (links) {
   if (this.gewonnen || this.dood) return;
-  const x = links ? -60 : 1020, y = 446;
+  // niet alleen over de vloer, maar ook op de hoogte van de middelste en de bovenste platforms
+  const x = links ? -60 : 1020, y = Phaser.Utils.Array.GetRandom([446, 446, 316, 200]);
   // doorzichtige rode strook over de vloer: hier schuift de pers langs
   this.rodeBaan(0, y - 25, 960, 50, 0.7);
   this.time.delayedCall(700, () => {
@@ -807,6 +831,129 @@ BaasDeel.prototype.machineVal = function () {
   sp.body.reset(480, 222);
   sp.body.setVelocity(0, 0);
   this.onkwetsbaar = 2; this.knipper = 2;
+};
+
+// ---------- DE EENWIELERCLOWN ----------
+// Rijdt op zijn eenwieler over een vlak (vloer, rechtermuur, plafond, linkermuur) en springt
+// elke 8 seconden naar een ander vlak, op een nieuwe eenwieler. Springt hij door je heen: 1 hartje.
+const CLOWN_VLAKKEN = [
+  { x1: 100, x2: 860, y1: 394, y2: 394, hoek: 0 },     // vloer
+  { x1: 872, x2: 872, y1: 380, y2: 100, hoek: -90 },   // rechtermuur
+  { x1: 860, x2: 100, y1: 82, y2: 82, hoek: 180 },     // plafond
+  { x1: 88, x2: 88, y1: 100, y2: 380, hoek: 90 },      // linkermuur
+];
+function clownPlek(vlak, t) {
+  const v = CLOWN_VLAKKEN[vlak];
+  return { x: v.x1 + (v.x2 - v.x1) * t, y: v.y1 + (v.y2 - v.y1) * t, hoek: v.hoek };
+}
+BaasDeel.prototype.clownUpdate = function (b, dt, woede) {
+  const sp = this.speler;
+  if (b.status === 'rijdt') {
+    // heen en weer rijden over zijn vlak
+    b.plek += b.rijRichting * 0.22 * woede * dt;
+    if (b.plek < 0) { b.plek = 0; b.rijRichting = 1; } else if (b.plek > 1) { b.plek = 1; b.rijRichting = -1; }
+    const p = clownPlek(b.vlak, b.plek);
+    b.setPosition(p.x, p.y).setAngle(p.hoek).setFlipX(b.rijRichting > 0);
+    b.body.reset(p.x, p.y);
+    // aanvallen: stuiterballen en af en toe een taart
+    b.aanvalT -= dt * woede;
+    if (b.aanvalT <= 0) {
+      b.aanvalNr++;
+      b.aanvalT = 2.4;
+      if (b.aanvalNr % 3 === 0) {
+        this.baasRoep('Taart in je gezicht!');
+        const d = Math.hypot(sp.x - b.x, sp.y - 40 - b.y) || 1;
+        const k = this.kogel('taart', b.x, b.y, (sp.x - b.x) / d * 520, (sp.y - 40 - b.y) / d * 520, 0);
+        k.taart = true;
+      } else {
+        // 3× zo grote, 2× zo snelle ballen die blijven stuiteren tot ze je raken
+        const aantal = this.kogels.getChildren().filter(k => k.eeuwig && k.active).length;
+        for (let i = 0; i < Math.min(2, 6 - aantal); i++) {
+          const k = this.kogel('bal', b.x, b.y, (Math.random() < 0.5 ? -1 : 1) * Phaser.Math.Between(300, 520), -Phaser.Math.Between(500, 840), 1000);
+          k.setScale(3); k.body.setCircle(11, 2, 2);
+          k.eeuwig = true; k.golf = true;
+        }
+        Geluid.effect('boing');
+      }
+    }
+    // elke 8 seconden: naar een ander vlak springen
+    b.springT -= dt;
+    if (b.springT <= 0) {
+      b.springT = 8;
+      let nieuw; do { nieuw = Phaser.Math.Between(0, 3); } while (nieuw === b.vlak);
+      const van = clownPlek(b.vlak, b.plek), naar = clownPlek(nieuw, Math.random());
+      b.status = 'springt';
+      this.baasRoep('Nieuwe eenwieler!');
+      Geluid.effect('dubbel');
+      this.tweens.addCounter({ from: 0, to: 1, duration: 1000, ease: 'Sine.easeInOut',
+        onUpdate: tw => {
+          const f = tw.getValue();
+          // een boog: halverwege 120 pixels richting het midden van de arena
+          const mx = (van.x + naar.x) / 2, my = (van.y + naar.y) / 2;
+          const bx = mx + (480 - mx) * 0.4 * Math.sin(f * Math.PI), by = my + (270 - my) * 0.4 * Math.sin(f * Math.PI);
+          const x = (1 - f) * (1 - f) * van.x + 2 * (1 - f) * f * bx + f * f * naar.x;
+          const y = (1 - f) * (1 - f) * van.y + 2 * (1 - f) * f * by + f * f * naar.y;
+          b.setPosition(x, y).setAngle(van.hoek + (naar.hoek - van.hoek) * f + f * 360);
+          b.body.reset(x, y);
+        },
+        onComplete: () => {
+          if (!b.active) return;
+          b.vlak = nieuw; b.plek = Phaser.Math.Clamp((naar.x - CLOWN_VLAKKEN[nieuw].x1) / ((CLOWN_VLAKKEN[nieuw].x2 - CLOWN_VLAKKEN[nieuw].x1) || 1), 0, 1);
+          if (CLOWN_VLAKKEN[nieuw].x1 === CLOWN_VLAKKEN[nieuw].x2) b.plek = Phaser.Math.Clamp((naar.y - CLOWN_VLAKKEN[nieuw].y1) / (CLOWN_VLAKKEN[nieuw].y2 - CLOWN_VLAKKEN[nieuw].y1), 0, 1);
+          b.status = 'rijdt';
+          this.cameras.main.shake(120, 0.008);
+        },
+      });
+    }
+  }
+};
+
+// ---------- HET MOEDERSCHIP ----------
+// Een vierkante, dichte arena (540×540 in het midden). Elke 6 seconden draait het veld:
+// je speelt opzij of ondersteboven. Alleen de wereld draait; de lucht en de HUD blijven recht.
+BaasDeel.prototype.maakVierkanteArena = function () {
+  const L = 210, R = 750;
+  this.maakPlatform(L, 500, R - L, true).setDepth(8);           // vloer
+  const plafond = this.maakPlatform(L, 0, R - L, true).setDepth(8); // plafond
+  this.maakPilaar(L - 48, 0); this.maakPilaar(R, 0);              // muren
+  this.maakPlatform(L + 30, 380, 160); this.maakPlatform(R - 190, 380, 160); this.maakPlatform(400, 255, 160);
+  this.speler.setPosition(L + 70, 498);
+  this.vierkant = { L, R, boven: 30, onder: 500 };
+  this.plafondY = 30;
+  void plafond;
+  this.veldHoek = 0; this.veldT = 6;
+};
+
+BaasDeel.prototype.veldDraaien = function (dt) {
+  if (!this.vierkant) return;
+  const main = this.cameras.main;
+  // camera's: lucht onder (recht), wereld (draait), HUD boven (recht)
+  if (!this.hudCam) {
+    this.luchtCam = this.cameras.add(main.x, main.y, main.width, main.height);
+    this.hudCam = this.cameras.add(main.x, main.y, main.width, main.height);
+    const lijst = this.cameras.cameras;
+    lijst.splice(lijst.indexOf(this.luchtCam), 1); lijst.splice(lijst.indexOf(main), 0, this.luchtCam);
+  }
+  for (const c of [this.luchtCam, this.hudCam]) c.setViewport(main.x, main.y, main.width, main.height);
+  for (const o of this.children.list) {
+    if (o.__randKopie) continue;
+    const vast = o.scrollFactorX === 0;
+    if (vast) { if (!(o.cameraFilter & main.id)) main.ignore(o); }
+    const luchtLaag = vast && o.depth < 0;
+    if (!luchtLaag && !(o.cameraFilter & this.luchtCam.id)) this.luchtCam.ignore(o);
+    if (!(vast && !luchtLaag) && !(o.cameraFilter & this.hudCam.id)) this.hudCam.ignore(o);
+  }
+  this.veldT -= dt;
+  if (this.veldT <= 0 && !this.gewonnen) {
+    this.veldT = 6;
+    let nieuw; do { nieuw = Phaser.Utils.Array.GetRandom([0, 90, 180, 270]); } while (nieuw === this.veldHoek);
+    this.veldHoek = nieuw;
+    this.baasRoep(nieuw === 0 ? 'Weer gewoon!' : nieuw === 180 ? 'Ondersteboven!' : 'Opzij!');
+    Geluid.effect('duik');
+    const van = main.rotation, naar = Phaser.Math.DegToRad(nieuw);
+    let verschil = Phaser.Math.Angle.Wrap(naar - van);
+    this.tweens.addCounter({ from: 0, to: 1, duration: 600, ease: 'Sine.easeInOut', onUpdate: tw => main.setRotation(van + verschil * tw.getValue()) });
+  }
 };
 
 voegToeAanSpel(BaasDeel);
