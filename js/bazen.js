@@ -64,9 +64,9 @@ class BaasDeel {
     if (soort === 'salamander') { b.setOrigin(0.5); b.rand = 0; b.doelRand = 0.5; b.loopRichting = 1; b.status = 'kruip'; }
     if (soort === 'lepelaar') b.zwaarteT = 5;
     if (soort === 'clown') {
-      // de clown rijdt over vloer, muren en plafond, en springt elke 8 seconden naar een ander vlak
+      // de clown rijdt over vloer, muren en plafond, en springt elke 4 seconden naar een ander vlak
       b.setOrigin(0.5); b.body.setAllowGravity(false).setImmovable(true);
-      b.vlak = 0; b.plek = 0.7; b.rijRichting = -1; b.springT = 8; b.aanvalT = 2; b.aanvalNr = 0; b.status = 'rijdt';
+      b.vlak = 0; b.plek = 0.7; b.rijRichting = -1; b.springT = 4; b.aanvalT = 2; b.aanvalNr = 0; b.status = 'rijdt';
     }
     if (soort === 'machine') {
       // begint verstopt in de grond
@@ -835,7 +835,7 @@ BaasDeel.prototype.machineVal = function () {
 
 // ---------- DE EENWIELERCLOWN ----------
 // Rijdt op zijn eenwieler over een vlak (vloer, rechtermuur, plafond, linkermuur) en springt
-// elke 8 seconden naar een ander vlak, op een nieuwe eenwieler. Springt hij door je heen: 1 hartje.
+// elke 4 seconden naar een ander vlak, op een nieuwe eenwieler. Springt hij door je heen: 1 hartje.
 const CLOWN_VLAKKEN = [
   { x1: 100, x2: 860, y1: 394, y2: 394, hoek: 0 },     // vloer
   { x1: 872, x2: 872, y1: 380, y2: 100, hoek: -90 },   // rechtermuur
@@ -876,10 +876,10 @@ BaasDeel.prototype.clownUpdate = function (b, dt, woede) {
         Geluid.effect('boing');
       }
     }
-    // elke 8 seconden: naar een ander vlak springen
+    // elke 4 seconden: naar een ander vlak springen
     b.springT -= dt;
     if (b.springT <= 0) {
-      b.springT = 8;
+      b.springT = 4;
       let nieuw; do { nieuw = Phaser.Math.Between(0, 3); } while (nieuw === b.vlak);
       const van = clownPlek(b.vlak, b.plek), naar = clownPlek(nieuw, Math.random());
       b.status = 'springt';
@@ -909,7 +909,7 @@ BaasDeel.prototype.clownUpdate = function (b, dt, woede) {
 };
 
 // ---------- HET MOEDERSCHIP ----------
-// Een vierkante, dichte arena (540×540 in het midden). Elke 6 seconden draait het veld:
+// Een vierkante, dichte arena (540×540 in het midden). Elke 4 seconden draait het veld:
 // je speelt opzij of ondersteboven. Alleen de wereld draait; de lucht en de HUD blijven recht.
 BaasDeel.prototype.maakVierkanteArena = function () {
   const L = 210, R = 750;
@@ -921,7 +921,7 @@ BaasDeel.prototype.maakVierkanteArena = function () {
   this.vierkant = { L, R, boven: 30, onder: 500 };
   this.plafondY = 30;
   void plafond;
-  this.veldHoek = 0; this.veldT = 6;
+  this.veldHoek = 0; this.veldT = 4;
 };
 
 BaasDeel.prototype.veldDraaien = function (dt) {
@@ -945,7 +945,7 @@ BaasDeel.prototype.veldDraaien = function (dt) {
   }
   this.veldT -= dt;
   if (this.veldT <= 0 && !this.gewonnen) {
-    this.veldT = 6;
+    this.veldT = 4;
     let nieuw; do { nieuw = Phaser.Utils.Array.GetRandom([0, 90, 180, 270]); } while (nieuw === this.veldHoek);
     this.veldHoek = nieuw;
     this.baasRoep(nieuw === 0 ? 'Weer gewoon!' : nieuw === 180 ? 'Ondersteboven!' : 'Opzij!');
