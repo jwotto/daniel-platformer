@@ -399,7 +399,8 @@
       t.opnieuwBrouwen(); await wacht(() => actief('Titel'), 4000, 'titel na brouwen');
       moet(PROFIEL.sterren === 1 && PROFIEL.regio === 0 && PROFIEL.flessen === 0 && PROFIEL.up.dash === 0 && PROFIEL.skins.includes('goud'), 'opnieuw brouwen klopt niet');
       scene('Titel').scene.start('Spel', { run: nieuweRun(false) }); await wacht(() => spelKlaar(0.5), 8000, 'spel');
-      moet(Math.abs(scene('Spel').shotBonus - 1.1) < 0.001, 'ster geeft geen +10% shotjes');
+      const dag = scene('Spel').run.dagbonus ? 2 : 1; // het eerste potje van de dag telt dubbel
+      moet(Math.abs(scene('Spel').shotBonus - 1.1 * dag) < 0.001, 'ster geeft geen +10% shotjes');
       return 'ster 1: alles terug naar het begin, skins blijven, shotjes ×1.1';
     },
 

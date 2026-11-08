@@ -549,6 +549,17 @@ class Winkel extends Phaser.Scene {
     else this.scene.start(scene, { terugNaar: 'Winkel', terugData: terug });
   }
 
+  // naar een scherm dat pas later open gaat
+  naarOpSlot(scene, vanaf) {
+    if (PROFIEL.regio < vanaf) {
+      Geluid.effect('nee');
+      const t = this.tegels[scene], tekst = this.add.text(t.x + t.w / 2, t.y - 4, '🔒 ' + vanafNaam(vanaf), { fontFamily: FONT, fontSize: '18px', fontStyle: 'bold', color: '#ff8a8a', stroke: '#0a1028', strokeThickness: 5 }).setOrigin(0.5).setDepth(50);
+      this.tweens.add({ targets: tekst, y: tekst.y - 26, alpha: 0, duration: 1100, onComplete: () => tekst.destroy() });
+      return;
+    }
+    this.naar(scene);
+  }
+
   openInstellingen() {
     if (this.kiest || this.weg || this.scene.isPaused()) return;
     this.scene.launch('Instellingen', { terug: 'Winkel' });
