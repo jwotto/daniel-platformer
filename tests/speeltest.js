@@ -434,11 +434,13 @@
       moet(prijs(POWERUPS.find(p => p.id === 'hart'), 20) > 500, 'oneindig wordt niet duur genoeg');
       doe('boogkracht en behendigheid'); pu.koop(kaart('boogkracht')); pu.koop(kaart('behendig'));
       moet(PROFIEL.up.boogkracht === 1 && PROFIEL.up.behendig === 1, 'nieuwe power-ups niet te koop');
+      PROFIEL.keuze = ''; // geen willekeurige upgrade (Gulzig zet je hartjes op 1)
       pu.spelen(); await wacht(() => spelKlaar(0.5), 8000, 'spel');
       const sp = scene('Spel');
       moet(Math.abs(sp.pijlSchade() - 1.15) < 0.001, 'boogkracht doet niks');
       moet(sp.maxH === 11, 'hartjes kloppen niet (' + sp.maxH + ')');
-      return 'gokkast en flesmaatje op slot; hartje tot 8 (∞); boogkracht 1.15× schade; 11 hartjes';
+      moet(Math.abs(kritKans(1) - 0.05) < 0.001 && kritKans(100) < 0.5 && kritKans(10) > 0.3, 'kritieke kans klopt niet');
+      return 'gokkast en flesmaatje op slot; hartje tot 8 (∞); boogkracht 1.15× schade; 11 hartjes; krit 5% → max 50%';
     },
 
     // kebabrol eten: scheet en heel hoog de lucht in

@@ -44,6 +44,8 @@ const POWERUPS = [
     'Elk niveau: 3% sneller lopen en 2% hoger springen.'] },
   { id: 'boogkracht', naam: 'Boogkracht', basis: 2, max: ONEINDIG, uitleg: [
     'Elk niveau: je pijlen doen 15% meer schade.'] },
+  { id: 'krit', naam: 'Kritieke klap', basis: 3, max: ONEINDIG, vanaf: 2, uitleg: [
+    'Kans dat een klap dubbel zo hard aankomt (KRIT!). Groeit per niveau, nooit meer dan 50%.'] },
   // ---- de dure, gekke power-ups ----
   { id: 'schild', naam: 'Schuimschild', basis: 6, max: 2, vanaf: 2, uitleg: [
     'Een bel van bierschuim om je heen. Vangt 1 klap per potje op.',
@@ -102,6 +104,8 @@ function baasPrijs(n) { return 15 + n * 12; }
 function baasBeloning(n) { return baasPrijs(n) + (n < PROFIEL.regio ? 5 + n * 2 : 10 + n * 5); }
 
 function oneindig(p) { return p.max === ONEINDIG; }
+// Kritieke klap: kans op dubbele schade. Groeit steeds minder snel en komt nooit boven de 50%.
+function kritKans(niveau) { return 0.5 * (1 - Math.pow(0.9, niveau || 0)); }
 function prijs(p, niveau) { return Math.round(p.basis * 3 * Math.pow(oneindig(p) ? 1.35 : 1.6, niveau)); }
 // kun je hem al kopen? (sommige power-ups gaan pas open in latere regio's)
 function powerupOpen(p) { return PROFIEL.regio >= (p.vanaf || 0); }

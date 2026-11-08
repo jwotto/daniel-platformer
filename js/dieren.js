@@ -4,8 +4,8 @@
 
 const DIEREN = [
   { id: 'kuiken', naam: 'Kuiken', uitleg: l => `Shotjes ${5 * l}% meer waard`, vliegt: false },
-  { id: 'hond', naam: 'Hondje', uitleg: l => `Haalt shotjes van ${40 * l} pixels verder op`, vliegt: false },
-  { id: 'kat', naam: 'Kat', uitleg: l => `Krabt monsters vlakbij, elke ${(4 - l * 0.5).toFixed(1)} s`, vliegt: false },
+  { id: 'hond', naam: 'Otje', uitleg: l => `Haalt shotjes van ${40 * l} pixels verder op`, vliegt: false },
+  { id: 'kat', naam: 'Tara', uitleg: l => `Krabt monsters vlakbij, elke ${(4 - l * 0.5).toFixed(1)} s`, vliegt: false },
   { id: 'uil', naam: 'Uil', uitleg: l => `Je springt ${3 * l}% hoger`, vliegt: true },
   { id: 'schildpad', naam: 'Schildpad', uitleg: l => `${Math.ceil(l / 2)} hartje${Math.ceil(l / 2) > 1 ? 's' : ''} extra`, vliegt: false },
   { id: 'vos', naam: 'Vos', uitleg: l => `Je loopt ${4 * l}% sneller`, vliegt: false },
@@ -13,6 +13,8 @@ const DIEREN = [
   { id: 'draakje', naam: 'Draakje', uitleg: l => `Spuwt vuurballen, elke ${(4 - l * 0.5).toFixed(1)} s`, vliegt: true },
   { id: 'eenhoorn', naam: 'Eenhoorn', uitleg: l => `${4 * l}% kans op een flesje per monster`, vliegt: false },
   { id: 'bierbeest', naam: 'Bierbeestje', uitleg: l => `Shotjes én schade ${6 * l}% meer`, vliegt: false },
+  { id: 'flin', naam: 'Flin', uitleg: l => `Huilt (WAAAH!): monsters verdoofd, kogels weg, elke ${(6 - l * 0.8).toFixed(1)} s`, vliegt: false },
+  { id: 'dikkop', naam: 'Alexander Dikkop', uitleg: l => `Kopstoot: ${2 + l} schade, op élk monster, elke ${(5 - l * 0.6).toFixed(1)} s`, vliegt: false },
 ];
 const DIER_MAX = 5;
 function dierPrijs() { return 500 + Object.keys(PROFIEL.dieren).length * 250; }
@@ -30,12 +32,28 @@ function tekenDier(ctx, id) {
     rond(22, 26, 13, 11, '#ffe066'); rond(14, 14, 8, 8, '#ffe066'); drie([[6, 14], [1, 16], [6, 18]], '#f2a33a'); oogje(12, 12);
     drie([[20, 36], [18, 40], [22, 40]], '#f2a33a'); drie([[26, 36], [24, 40], [28, 40]], '#f2a33a');
   } else if (id === 'hond') {
-    rond(24, 26, 14, 9, '#c8924a'); rond(11, 17, 9, 8, '#c8924a'); rond(8, 12, 3, 6, '#7a4a1c'); rond(5, 19, 3, 2, INKT); oogje(10, 15);
-    for (const x of [16, 30]) { ctx.fillStyle = '#c8924a'; ctx.fillRect(x - 2, 32, 4, 8); ctx.strokeRect(x - 2, 32, 4, 8); }
-    ctx.beginPath(); ctx.moveTo(37, 24); ctx.quadraticCurveTo(44, 16, 40, 12); ctx.stroke();
+    // Otje: een bruine Franse bulldog met hangoortjes
+    for (const x of [16, 31]) { ctx.fillStyle = '#8a5a2a'; ctx.fillRect(x - 3, 30, 6, 10); ctx.strokeRect(x - 3, 30, 6, 10); }
+    rond(25, 26, 14, 10, '#8a5a2a');
+    rond(12, 16, 10, 9, '#8a5a2a');
+    // hangoortjes
+    ctx.fillStyle = '#5a3a1a'; ctx.beginPath(); ctx.ellipse(4, 15, 3.5, 7, 0.35, 0, TAU); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(20, 14, 3.5, 7, -0.35, 0, TAU); ctx.fill(); ctx.stroke();
+    rond(8, 20, 6, 4.5, '#c8a07a');
+    ctx.fillStyle = INKT; ctx.beginPath(); ctx.ellipse(5, 18, 2.4, 1.6, 0, 0, TAU); ctx.fill();
+    oogje(9, 13); oogje(16, 13);
+    ctx.strokeStyle = 'rgba(40,20,10,.7)'; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.moveTo(10, 9); ctx.quadraticCurveTo(13, 8, 16, 9); ctx.stroke();
+    ctx.strokeStyle = INKT; ctx.lineWidth = 2;
+    ctx.fillStyle = '#d1495b'; ctx.fillRect(14, 23, 10, 3);
   } else if (id === 'kat') {
-    rond(24, 28, 13, 9, '#5a5a6a'); rond(12, 18, 9, 8, '#5a5a6a');
-    drie([[5, 13], [6, 4], [11, 11]], '#5a5a6a'); drie([[13, 11], [18, 4], [19, 13]], '#5a5a6a');
+    // Tara: een donkergrijze kat met korte oortjes
+    rond(24, 28, 13, 9, '#4a4c56'); rond(12, 18, 9, 8, '#4a4c56');
+    drie([[5, 13], [6, 8], [10, 11]], '#4a4c56'); drie([[14, 11], [17, 8], [19, 13]], '#4a4c56');
+    ctx.fillStyle = '#ffb0c0'; ctx.beginPath(); ctx.moveTo(6.5, 11.5); ctx.lineTo(6.6, 9.5); ctx.lineTo(8.5, 11); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = '#2e3038'; ctx.lineWidth = 1.5;
+    for (const x of [20, 25, 30]) { ctx.beginPath(); ctx.moveTo(x, 20); ctx.lineTo(x - 1, 26); ctx.stroke(); }
+    ctx.strokeStyle = INKT; ctx.lineWidth = 2;
     ctx.fillStyle = '#7aff8a'; ctx.beginPath(); ctx.ellipse(9, 17, 1.6, 2.4, 0, 0, TAU); ctx.ellipse(15, 17, 1.6, 2.4, 0, 0, TAU); ctx.fill();
     ctx.beginPath(); ctx.moveTo(36, 26); ctx.quadraticCurveTo(46, 22, 42, 8); ctx.stroke();
   } else if (id === 'uil') {
@@ -63,6 +81,26 @@ function tekenDier(ctx, id) {
     ctx.fillStyle = '#ff8ac8'; ctx.beginPath(); ctx.ellipse(17, 12, 3, 7, -0.5, 0, TAU); ctx.fill();
     for (const x of [16, 30]) { ctx.fillStyle = '#fff6fb'; ctx.fillRect(x - 2, 32, 4, 8); ctx.strokeRect(x - 2, 32, 4, 8); }
     ctx.strokeStyle = '#7a5cff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(38, 22); ctx.quadraticCurveTo(46, 26, 42, 34); ctx.stroke();
+  } else if (id === 'flin') {
+    // Flin: een kleine baby met een luier, een speen en een krulletje
+    rond(26, 30, 11, 8, '#f1c49b');
+    ctx.fillStyle = '#fffaf0'; ctx.beginPath(); ctx.ellipse(31, 32, 8, 6, 0, 0, TAU); ctx.fill(); ctx.stroke();
+    for (const [x, y] of [[16, 36], [36, 37]]) rond(x, y, 4, 3, '#f1c49b');
+    rond(14, 18, 12, 12, '#f1c49b');
+    ctx.beginPath(); ctx.moveTo(12, 6); ctx.quadraticCurveTo(18, 2, 16, 8); ctx.stroke();
+    oogje(10, 16); oogje(18, 16);
+    ctx.fillStyle = 'rgba(232,120,110,.55)'; ctx.beginPath(); ctx.arc(7, 21, 2.4, 0, TAU); ctx.arc(21, 21, 2.4, 0, TAU); ctx.fill();
+    rond(14, 24, 4, 3, '#3cc8bb'); rond(14, 24, 1.6, 1.6, '#f2c14e');
+  } else if (id === 'dikkop') {
+    // Alexander Dikkop: een klein lijfje met een enorme kop
+    for (const x of [19, 26]) { ctx.fillStyle = '#2c4387'; ctx.fillRect(x - 2.5, 34, 5, 8); ctx.strokeRect(x - 2.5, 34, 5, 8); }
+    ctx.fillStyle = '#d1495b'; rondRect(ctx, 15, 26, 15, 10, 3); ctx.fill(); ctx.stroke();
+    rond(22, 13, 18, 16, '#f1c49b');
+    ctx.fillStyle = '#5a3a1a'; ctx.beginPath(); ctx.ellipse(22, 2, 16, 6, 0, Math.PI, 0); ctx.fill();
+    rond(5, 14, 3, 4, '#f1c49b'); rond(39, 14, 3, 4, '#f1c49b');
+    for (const x of [15, 29]) { rond(x, 11, 4, 4, '#fff'); oogje(x, 11); }
+    ctx.beginPath(); ctx.arc(22, 19, 7, 0.2, Math.PI - 0.2); ctx.stroke();
+    ctx.fillStyle = '#fff'; ctx.fillRect(18, 20, 8, 3);
   } else if (id === 'bierbeest') {
     ctx.fillStyle = '#f2a33a'; rondRect(ctx, 10, 12, 24, 26, 6); ctx.fill(); ctx.stroke();
     for (const [x, r] of [[13, 6], [22, 7], [31, 6]]) rond(x, 12, r, r, '#fffaf0');
@@ -110,6 +148,33 @@ class DierDeel {
       if (d < best) { best = d; doel = v; }
     });
     if (!doel) return;
+    if (id === 'flin') {
+      // WAAAH! Monsters in de buurt verdoofd, kogels in de buurt weg
+      m.cd = 6 - l * 0.8;
+      this.vijanden.getChildren().forEach(v => {
+        if (!v.active || v.soort === 'baas' || Phaser.Math.Distance.Between(m.x, m.y, v.x, v.y) > 240) return;
+        v.verdoofd = 1.5; if (v.body) v.body.setVelocityX(0);
+      });
+      this.kogels.getChildren().slice().forEach(k => { if (Phaser.Math.Distance.Between(m.x, m.y, k.x, k.y) < 240) k.destroy(); });
+      const t = this.add.text(m.x, m.y - 30, 'WAAAH!', { fontFamily: FONT_TITEL, fontSize: '22px', color: '#3cc8bb', stroke: '#0a1028', strokeThickness: 5 }).setOrigin(0.5).setDepth(20);
+      this.tweens.add({ targets: t, y: t.y - 30, alpha: 0, scale: 1.4, duration: 800, onComplete: () => t.destroy() });
+      const ring = this.add.circle(m.x, m.y, 30, 0x3cc8bb, 0.25).setDepth(9);
+      this.tweens.add({ targets: ring, scale: 8, alpha: 0, duration: 450, onComplete: () => ring.destroy() });
+      Geluid.effect('au');
+      return;
+    }
+    if (id === 'dikkop') {
+      if (!doel || best > 130) return;
+      m.cd = 5 - l * 0.6;
+      this.tweens.add({ targets: m, x: doel.x, y: doel.getCenter().y, yoyo: true, duration: 140, ease: 'Quad.easeIn' });
+      this.time.delayedCall(140, () => {
+        if (!doel.active) return;
+        this.raakVijand(doel, 2 + l, Math.sign(doel.x - m.x) || 1, 'boer');
+        this.vonken.explode(10, doel.x, doel.getCenter().y);
+        Geluid.effect('baasRaak');
+      });
+      return;
+    }
     if (id === 'kat') {
       m.cd = 4 - l * 0.5;
       this.raakVijand(doel, 1 + Math.floor(l / 2), Math.sign(doel.x - m.x) || 1, 'boer');
@@ -143,7 +208,7 @@ class Dieren extends Phaser.Scene {
     this.flesTekst = this.add.text(910, 16, '', { fontFamily: FONT, fontSize: '26px', fontStyle: 'bold', color: '#f3ead6', stroke: '#0a1028', strokeThickness: 5 }).setOrigin(1, 0);
     this.maakRad(240, 280, 165);
     this.add.text(716, 62, 'Tik op een dier om hem mee te nemen', { fontFamily: FONT, fontSize: '16px', fontStyle: 'bold', color: '#f3ead6' }).setOrigin(0.5, 0);
-    this.vakjes = DIEREN.map((d, i) => this.maakVakje(d, 492 + (i % 5) * 90, 86 + Math.floor(i / 5) * 172));
+    this.vakjes = DIEREN.map((d, i) => this.maakVakje(d, 492 + (i % 6) * 75, 86 + Math.floor(i / 6) * 172));
     this.info = this.add.text(716, 438, '', { fontFamily: FONT, fontSize: '15px', fontStyle: 'bold', color: '#f2c14e', align: 'center', wordWrap: { width: 440 } }).setOrigin(0.5);
     knop(this, 500, 466, 200, 54, '← Terug', 0x3cc8bb, () => this.terug());
     this.draaiKnop = knop(this, 720, 466, 220, 54, '', 0xf2c14e, () => this.draai());
@@ -177,16 +242,16 @@ class Dieren extends Phaser.Scene {
   }
 
   maakVakje(d, x, y) {
-    const w = 84, h = 166;
+    const w = 70, h = 166;
     const v = {
       d, x, y, w, h, g: this.add.graphics(),
-      img: this.add.image(x + w / 2, y + 44, 'dier_groot_' + d.id).setScale(0.5),
-      slot: this.add.text(x + w / 2, y + 44, '?', { fontFamily: FONT_TITEL, fontSize: '34px', color: '#5a6a9a' }).setOrigin(0.5),
-      naam: this.add.text(x + w / 2, y + 82, d.naam, { fontFamily: FONT, fontSize: '13px', fontStyle: 'bold', color: '#f3ead6', align: 'center', wordWrap: { width: w - 6 } }).setOrigin(0.5, 0),
-      sterren: this.add.text(x + w / 2, y + 104, '', { fontFamily: FONT, fontSize: '13px', color: '#f2c14e' }).setOrigin(0.5, 0),
+      img: this.add.image(x + w / 2, y + 42, 'dier_groot_' + d.id).setScale(0.42),
+      slot: this.add.text(x + w / 2, y + 42, '?', { fontFamily: FONT_TITEL, fontSize: '30px', color: '#5a6a9a' }).setOrigin(0.5),
+      naam: this.add.text(x + w / 2, y + 76, d.naam, { fontFamily: FONT, fontSize: '12px', fontStyle: 'bold', color: '#f3ead6', align: 'center', wordWrap: { width: w - 4 }, lineSpacing: -3 }).setOrigin(0.5, 0),
+      sterren: this.add.text(x + w / 2, y + 106, '', { fontFamily: FONT, fontSize: '11px', color: '#f2c14e' }).setOrigin(0.5, 0),
     };
     this.add.zone(x, y, w, 120).setOrigin(0).setInteractive({ useHandCursor: true }).on('pointerup', () => this.neemMee(v));
-    v.up = knop(this, x + 4, y + 126, w - 8, 34, '', 0x5fd38a, () => this.upgrade(v), 14);
+    v.up = knop(this, x + 4, y + 126, w - 8, 34, '', 0x5fd38a, () => this.upgrade(v), 13);
     return v;
   }
 

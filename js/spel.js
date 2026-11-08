@@ -658,6 +658,13 @@ class Spel extends Phaser.Scene {
     const zwak = ZWAK[v.soort];
     const telt = !zwak || bron === zwak || bron === 'boer' || (zwak === 'stamp' && bron === 'smash');
     if (!telt) { this.ketst(v, zwak); return; }
+    // Kritieke klap: soms dubbele schade
+    if (this.run.up.krit && Math.random() < kritKans(this.run.up.krit)) {
+      schade *= 2;
+      const t = this.add.text(v.x, v.getTopCenter().y - 10, 'KRIT!', { fontFamily: FONT_TITEL, fontSize: '22px', color: '#ffd24a', stroke: '#0a1028', strokeThickness: 5 }).setOrigin(0.5).setDepth(20).setScale(0.5);
+      this.tweens.add({ targets: t, scale: 1.2, y: t.y - 30, alpha: 0, duration: 650, onComplete: () => t.destroy() });
+      Geluid.effect('krit');
+    }
     v.hp -= schade * this.mod.schade * (1 + 0.06 * dierLvl('bierbeest'));
     v.setTintFill(0xffffff);
     this.time.delayedCall(70, () => { if (v.active) { v.clearTint(); if (v.woedend) v.setTint(0xff9a9a); } });

@@ -47,9 +47,9 @@ In de winkel zit linksonder de **levelknop** met een plaatje van het level waar 
 
 ### Huisdieren
 
-In het Game over-menu (na het doodgaan) en in de shop zit **🐾 Dieren**. Draai aan het dierenrad (heel duur: 80 flesjes, en elk volgend dier 40 meer) en win een van 10 huisdieren. Upgrade ze tot niveau 5 (★★★★★). Je neemt er één mee; hij loopt of vliegt met je mee en helpt je:
+In het Game over-menu (na het doodgaan) en in de shop zit **🐾 Dieren**. Draai aan het dierenrad (heel duur: 80 flesjes, en elk volgend dier 40 meer) en win een van 12 huisdieren. Upgrade ze tot niveau 5 (★★★★★). Je neemt er één mee; hij loopt of vliegt met je mee en helpt je:
 
-Kuiken (shotjes meer waard) · Hondje (haalt shotjes van ver op) · Kat (krabt monsters) · Uil (hoger springen) · Schildpad (extra hartjes) · Vos (sneller lopen) · Papegaai (schiet pijlen) · Draakje (spuwt vuurballen) · Eenhoorn (kans op flesjes) · Bierbeestje (meer shotjes én schade).
+Kuiken (shotjes meer waard) · Otje de bruine Franse bulldog (haalt shotjes van ver op) · Tara de donkergrijze kat (krabt monsters) · Uil (hoger springen) · Schildpad (extra hartjes) · Vos (sneller lopen) · Papegaai (schiet pijlen) · Draakje (spuwt vuurballen) · Eenhoorn (kans op flesjes) · Bierbeestje (meer shotjes én schade) · Flin de baby (huilt WAAAH!: monsters verdoofd, kogels weg) · Alexander Dikkop (kopstoot op élk monster).
 
 ### Opnieuw brouwen (prestige)
 
@@ -127,7 +127,7 @@ Drie soorten power-ups:
 | Soort | Welke | Prijs |
 |---|---|---|
 | Gewoon (met MAX) | Dash, Dubbele sprong, Wall jump, Zweven, Dubbele pijlen, Ontploffende pijlen, Smash, Schuimschild, Bierbuik-stamp, Magneetkurk, Herstelslok, Kebabradar | elk niveau 1,6× duurder |
-| **Oneindig** (∞, geen MAX) | Extra hartje, Sterkere slash, Statiegeld, **Behendigheid** (sneller lopen, hoger springen), **Boogkracht** (meer pijlschade) | elk niveau 1,35× duurder: wordt vanzelf heel duur |
+| **Oneindig** (∞, geen MAX) | Extra hartje, Sterkere slash, Statiegeld, **Behendigheid** (sneller lopen, hoger springen), **Boogkracht** (meer pijlschade), **Kritieke klap** (kans op dubbele schade: 5% op niveau 1, 20% op 5, 33% op 10, nooit meer dan 50%; vanaf de Bergen) | elk niveau 1,35× duurder: wordt vanzelf heel duur |
 | Heel duur | Flesmaatje (90), Boerbom (60), Doorboorpijlen (120), Reservevat (300) | |
 
 Sommige dingen gaan pas open als je ver genoeg bent (in de winkel zie je dan een 🔒):

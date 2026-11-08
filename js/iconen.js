@@ -10,6 +10,7 @@ const ICOON_KLEUR = {
   maan: '#2c4387', kracht: '#c8682a', spaarvarken: '#ff8ac8', raket: '#ff6a2c', zwaar: '#4a4a5e',
   // dure power-ups
   schild: '#a9c4ee', maatje: '#3cc8bb', stomp: '#c8682a', reserve: '#8a4a1c', boer: '#5fae4e',
+  krit: '#d1495b', behendig: '#3cc8bb', boogkracht: '#8a4a1c',
   magneet: '#d1495b', statiegeld: '#5a6a9a', doorboor: '#7a5cff', slok: '#d1495b', kebabradar: '#f2a33a',
 };
 
@@ -121,6 +122,19 @@ const ICOON_TEKEN = {
 };
 
 Object.assign(ICOON_TEKEN, {
+  krit: ctx => {
+    sterVorm(ctx, 32, 32, 22, 10, 6, '#ffd24a');
+    vorm(ctx, [[34, 14], [24, 34], [32, 34], [28, 50], [40, 28], [32, 28]], '#fffaf0');
+  },
+  behendig: ctx => {
+    ICOON_TEKEN.renner(ctx);
+    pijltjeOp(ctx, 48, 20, 0.6, '#f2c14e');
+  },
+  boogkracht: ctx => {
+    ctx.strokeStyle = INKT; ctx.lineWidth = 7; ctx.beginPath(); ctx.arc(22, 32, 18, -1.2, 1.2); ctx.stroke();
+    ctx.strokeStyle = '#8a4a1c'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(22, 32, 18, -1.2, 1.2); ctx.stroke();
+    lijnPad(ctx, [[14, 32], [48, 32]], 3, '#e6ecf5'); vorm(ctx, [[48, 26], [57, 32], [48, 38]], '#d1495b');
+  },
   schild: ctx => {
     ctx.fillStyle = 'rgba(255,250,240,.35)'; ctx.strokeStyle = CREME; ctx.lineWidth = 3;
     ctx.beginPath(); ctx.arc(32, 32, 19, 0, TAU); ctx.fill(); ctx.stroke();
