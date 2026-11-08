@@ -60,8 +60,9 @@ class Spel extends Phaser.Scene {
     this.banden = [];
     this.bandNu = 0; this.glad = 0;
     // grot: een dicht plafond (je kunt niet boven het scherm uit)
-    this.plafondY = this.reg.id === 'grot' ? 70 : (this.baasModus ? 6 : null);
-    if (this.reg.id === 'grot') this.plafond = this.add.tileSprite(0, 0, 960, 90, 'plafond_grot').setOrigin(0).setScrollFactor(0).setDepth(7);
+    const grot = this.reg.id === 'grot' || (this.reg.id === 'alexgrot' && !this.baasModus);
+    this.plafondY = grot ? 70 : (this.baasModus ? 6 : null);
+    if (grot) this.plafond = this.add.tileSprite(0, 0, 960, 90, 'plafond_grot').setOrigin(0).setScrollFactor(0).setDepth(7);
     this.kogels = this.physics.add.group();
     this.decor = this.add.group();
 
@@ -677,6 +678,10 @@ class Spel extends Phaser.Scene {
   // bron: hoe je hem raakt ('slash', 'pijl', 'stamp', 'smash' of 'boer')
   raakVijand(v, schade, richting, bron) {
     if (!v.active || v.hp <= 0 || this.gewonnen) return;
+    // hulpjes en klonen van Alexander (Tara, Daniel, nep-Alexanders)
+    if (v.hulp) { this.alexHulpGeraakt(v, schade); return; }
+    // Alexander achter het noob-schild van Daniel: eerst Daniel een tik geven!
+    if (v.soort === 'baas' && v.baas === 'alexander' && this.alexSchildOp && this.alexSchildOp()) return;
     // de Brouwmachine kun je alleen raken als hij boven is
     if (v.soort === 'baas' && v.baas === 'machine' && v.status !== 'boven') {
       if ((v.ketsT || 0) < this.tijd) { v.ketsT = this.tijd + 1.5; this.popTekst('De machine zit in de grond!'); }
@@ -884,7 +889,7 @@ class Spel extends Phaser.Scene {
   // hoog en midden in beeld. Zo kun je nooit meteen nog een hartje verliezen.
   respawn() {
     const sp = this.speler, b = sp.body;
-    const x = this.camX + 380, y = this.reg.id === 'grot' ? 260 : 230;
+    const x = this.camX + 380, y = (this.reg.id === 'grot' || this.reg.id === 'alexgrot') ? 260 : 230;
     // vijanden en kogels vlak bij de veilige plek weghalen
     for (const grp of [this.vijanden, this.kogels, this.spikes, this.pegels]) {
       grp.getChildren().slice().forEach(v => {

@@ -90,6 +90,8 @@ const REGIOS = [
   { id: 'fabriek', naam: 'Fabriek', baas: 'machine', baasNaam: 'De Brouwmachine' },
   { id: 'speeltuin', naam: 'Speeltuin', baas: 'clown', baasNaam: 'De Eenwielerclown' },
   { id: 'maan', naam: 'Maan', baas: 'moederschip', baasNaam: 'Het Moederschip' },
+  // het allerlaatste level: pas open als je alle andere levels hebt gehaald
+  { id: 'alexgrot', naam: 'Terminatorgrot', baas: 'alexander', baasNaam: 'Alexander de Terminator' },
 ];
 
 function regioVan(n) { return REGIOS[n % REGIOS.length]; }
@@ -109,7 +111,7 @@ function kritKans(niveau) { return 0.5 * (1 - Math.pow(0.9, niveau || 0)); }
 function prijs(p, niveau) { return Math.round(p.basis * 3 * Math.pow(oneindig(p) ? 1.35 : 1.6, niveau)); }
 // kun je hem al kopen? (sommige power-ups gaan pas open in latere regio's)
 function powerupOpen(p) { return PROFIEL.regio >= (p.vanaf || 0); }
-function vanafNaam(n) { return n >= REGIOS.length ? 'na de Maan' : 'vanaf ' + REGIOS[n].naam; }
+function vanafNaam(n) { return n >= 10 ? 'na de Maan' : 'vanaf ' + REGIOS[n].naam; }
 const GOKKAST_VANAF = 2, DIEREN_VANAF = 10;
 function uitlegVan(p, niveau) { return p.uitleg[Math.min(niveau, p.uitleg.length - 1)]; }
 

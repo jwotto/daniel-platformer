@@ -74,6 +74,7 @@ class MonsterDeel {
     else if (id === 'berg') this.maakVlieger('adelaar', 'adelaar', x + w / 2, Phaser.Math.Between(80, 140));
     else if (id === 'vulkaan') this.maakVlieger('ptero', 'ptero', x + w / 2, hoog);
     else if (id === 'grot') { if (y <= 420) this.maakVleermuis(x + w / 2, y + 48); }
+    else if (id === 'alexgrot') this.maakRaketlex(x + w / 2, hoog);
     else if (NIEUW_LUCHT[id]) this.maakVlieger(NIEUW_LUCHT[id], NIEUW_LUCHT[id], x + w / 2, hoog);
     else if (id === 'savanne') {
       // gieren komen in groepjes, maar minder vaak (een groep telt als 4 gewone vliegers)
@@ -254,7 +255,7 @@ class MonsterDeel {
       v.setFlipX(v.richting > 0);
     };
     this.vijanden.getChildren().slice().forEach(v => {
-      if (!v.active || v.soort === 'baas') return;
+      if (!v.active || v.soort === 'baas' || v.hulp) return;
       // teken boven het monster: zo zie je hoe je hem verslaat
       const zwak = ZWAK[v.soort];
       if (zwak && !v.badge) {
@@ -363,6 +364,8 @@ class MonsterDeel {
         } else {
           patrouille(v, 1); // kruiper, ijsklontjes
         }
+      } else if (v.soort === 'raketlex') {
+        this.raketlexUpdate(v, dt, dx, dy, inBeeld);
       } else if (v.soort === 'bierpul' || v.soort === 'drone' || v.soort === 'ufo' || v.soort === 'ballon') {
         this.nieuwVliegerUpdate(v, dt, dx, dy, inBeeld);
       } else if (v.soort === 'gier') {
@@ -478,8 +481,8 @@ class MonsterDeel {
 }
 
 // ---------- KROEG, FABRIEK, SPEELTUIN, MAAN ----------
-const NIEUW_GROND = { kroeg: ['darter', 'uitsmijter'], fabriek: ['robot', 'stoomketel'], speeltuin: ['wipkip', 'zandmonster'], maan: ['alien', 'kraterkruiper'] };
-const NIEUW_LUCHT = { kroeg: 'bierpul', fabriek: 'drone', speeltuin: 'ballon', maan: 'ufo' };
+const NIEUW_GROND = { kroeg: ['darter', 'uitsmijter'], fabriek: ['robot', 'stoomketel'], speeltuin: ['wipkip', 'zandmonster'], maan: ['alien', 'kraterkruiper'], alexgrot: ['spinlex', 'spinlex'] };
+const NIEUW_LUCHT = { kroeg: 'bierpul', fabriek: 'drone', speeltuin: 'ballon', maan: 'ufo', alexgrot: 'raketlex' };
 // bw/bh = grootte van zijn lijf, hp + erbij×moeilijkheid, snel = loopsnelheid
 const NIEUW_INFO = {
   darter: { bw: 26, bh: 44, hp: 2, erbij: 0.6, snel: 50, shots: 3 },
@@ -490,6 +493,8 @@ const NIEUW_INFO = {
   zandmonster: { bw: 36, bh: 30, hp: 2, erbij: 0.6, snel: 30, shots: 3 },
   alien: { bw: 26, bh: 44, hp: 2, erbij: 0.7, snel: 50, shots: 4 },
   kraterkruiper: { bw: 44, bh: 30, hp: 3, erbij: 0.7, snel: 35, shots: 4 },
+  // Terminatorgrot: lopende spinrobot-Alexanders (super sterk!)
+  spinlex: { bw: 56, bh: 40, hp: 9, erbij: 1.2, snel: 95, shots: 8 },
 };
 
 MonsterDeel.prototype.nieuwLoperUpdate = function (v, dt, dx, dy, inBeeld, patrouille) {
@@ -550,6 +555,8 @@ MonsterDeel.prototype.nieuwLoperUpdate = function (v, dt, dx, dy, inBeeld, patro
       v.body.velocity.x = 0; v.setFlipX(dx > 0);
       if (v.actieT <= 0) { v.verstopt = true; v.actieT = 2; v.setAlpha(0.5); this.tweens.add({ targets: v, scaleY: 0.5, duration: 150 }); }
     }
+  } else if (v.soort === 'spinlex') {
+    this.spinlexUpdate(v, dt, dx, dy, dichtbij, patrouille);
   } else if (v.soort === 'alien') {
     // schiet een laserstraal
     if (v.actieT <= 0 && dichtbij && Math.abs(dy) < 70) {

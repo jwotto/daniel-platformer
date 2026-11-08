@@ -80,6 +80,15 @@ const THEMA_KLEUR = {
     kruiper: { lijf: ['#7aff8a', '#2a8a3a'], stekel: '#c8a0ff', oog: '#1b2f6b' },
     licht: { lijf: ['#c8a0ff', '#5a2aa8'], staart: 'rgba(160,120,255,.75)', oog: '#7aff8a' },
   },
+  // het allerlaatste level: de vulkaangrot van Alexander de Terminator
+  alexgrot: {
+    lucht: ['#060103', '#1e0406', '#4a0a0a', '#8a2010'],
+    ver: ['#3a0e10', '#1a0406'], mid: ['#2e0a0c', '#140304'], nabij: ['#220608', '#0c0203'],
+    boom: '#080102', steen: ['#4a4a56', '#1a1a22'], top: '#ff3a2c',
+    pilaar: ['#4a4a56', '#1a1a22'], kasteel: '#1a0406', sneeuw: false,
+    kruiper: { lijf: ['#3a3a44', '#16161c'], stekel: '#ff3a2c', oog: '#ff3a2c' },
+    licht: { lijf: ['#ffd27a', '#c83a1c'], staart: 'rgba(255,60,44,.8)', oog: '#fff6d8' },
+  },
   savanne: {
     lucht: ['#3a1a3a', '#c8504a', '#f2a03c', '#ffe08a'],
     ver: ['#c8705a', '#8a3a3a'], mid: ['#b8803a', '#7a4a1c'], nabij: ['#8a5a1c', '#4a2a0e'],
@@ -426,6 +435,24 @@ function tekenLucht(ctx, k, id) {
   const g = ctx.createLinearGradient(0, 0, 0, 540);
   [0, 0.45, 0.78, 1].forEach((s, i) => g.addColorStop(s, k.lucht[i]));
   ctx.fillStyle = g; ctx.fillRect(0, 0, 960, 540);
+  if (id === 'alexgrot') {
+    // vulkaangrot: gloeiende lavavonkjes en overal rode robotogen in het donker
+    for (let i = 0; i < 60; i++) {
+      const x = (i * 397) % 960, y = 60 + (i * 151) % 440;
+      ctx.fillStyle = `rgba(255,${90 + (i % 5) * 30},40,${0.25 + (i % 4) * 0.12})`;
+      ctx.beginPath(); ctx.arc(x, y, 1 + (i % 3), 0, TAU); ctx.fill();
+    }
+    ctx.save(); ctx.shadowColor = '#ff2a1c'; ctx.shadowBlur = 8; ctx.fillStyle = '#ff3a2c';
+    for (let i = 0; i < 14; i++) {
+      const x = 40 + (i * 271) % 900, y = 80 + (i * 113) % 300;
+      ctx.fillRect(x, y, 6, 3); ctx.fillRect(x + 12, y, 6, 3);
+    }
+    ctx.restore();
+    const gl = ctx.createLinearGradient(0, 380, 0, 540);
+    gl.addColorStop(0, 'rgba(255,90,30,0)'); gl.addColorStop(1, 'rgba(255,90,30,.35)');
+    ctx.fillStyle = gl; ctx.fillRect(0, 380, 960, 160);
+    return;
+  }
   if (id === 'grot') {
     // geen lucht in een grot: gloeiende kristallen in het donker
     for (let i = 0; i < 40; i++) {
@@ -575,7 +602,26 @@ function tekenAchtergronden(scene, id) {
       ctx.fillStyle = 'rgba(20,20,30,.35)';
       for (let x = 60; x < 2040; x += 140 + (x * 7) % 90) { const y = basis + rug(x, 2048, golven) + 30; ctx.beginPath(); ctx.ellipse(x, y, 30 + (x % 30), 8, 0, 0, TAU); ctx.fill(); }
     }
-    if (id === 'grot') {
+    if (id === 'alexgrot') {
+      // lavastromen langs de rotswand, en grote schermen met een zonnebril erop
+      ctx.strokeStyle = 'rgba(255,90,30,.75)'; ctx.lineWidth = 5;
+      for (const x0 of [180, 760, 1320, 1880]) {
+        const y0 = basis + rug(x0, 2048, golven);
+        ctx.beginPath(); ctx.moveTo(x0, y0);
+        for (let i = 1; i < 14; i++) ctx.lineTo(x0 + Math.sin(i * 1.3) * 12, y0 + i * 18);
+        ctx.stroke();
+      }
+      for (const x of [480, 1560]) {
+        const y = basis + rug(x, 2048, golven) - 30;
+        ctx.fillStyle = '#16161c'; ctx.fillRect(x - 70, y - 60, 140, 84);
+        ctx.fillStyle = '#3a0a0a'; ctx.fillRect(x - 62, y - 52, 124, 68);
+        ctx.fillStyle = '#ff3a2c';
+        ctx.beginPath(); ctx.ellipse(x - 24, y - 20, 20, 11, 0, 0, TAU); ctx.ellipse(x + 24, y - 20, 20, 11, 0, 0, TAU); ctx.fill();
+        ctx.fillRect(x - 6, y - 23, 12, 4);
+        ctx.fillStyle = '#16161c'; ctx.fillRect(x - 4, y + 24, 8, 40);
+      }
+    }
+    if (id === 'grot' || id === 'alexgrot') {
       // stalagmieten in de verte
       ctx.fillStyle = k.ver[1];
       for (let x = 30; x < 2040; x += 90 + (x * 7) % 60) {
@@ -623,7 +669,7 @@ function tekenAchtergronden(scene, id) {
         ctx.beginPath(); ctx.moveTo(x, y - 30 * s); ctx.lineTo(x - 16 * s, y - 52 * s); ctx.lineTo(x - 12 * s, y - 54 * s); ctx.closePath(); ctx.fill();
         ctx.beginPath(); ctx.ellipse(x - 4 * s, y - 60 * s, 36 * s, 9 * s, 0, 0, TAU); ctx.fill();
         ctx.beginPath(); ctx.ellipse(x - 20 * s, y - 56 * s, 16 * s, 6 * s, 0, 0, TAU); ctx.fill();
-      } else if (id === 'vulkaan' || id === 'grot') {
+      } else if (id === 'vulkaan' || id === 'grot' || id === 'alexgrot') {
         // kale, puntige rotsen
         ctx.beginPath();
         ctx.moveTo(x - 20 * s, y + 4); ctx.lineTo(x - 6 * s, y - 50 * s); ctx.lineTo(x + 2 * s, y - 30 * s);
@@ -649,7 +695,7 @@ function tekenAchtergronden(scene, id) {
     if (id !== 'berg' && id !== 'maan') {
       const kl = { rivier: ['#2aa9a6', '#14285e'], ijs: ['#a8e4f5', '#2a5a96'], vulkaan: ['#ffb03c', '#a8200c'],
         grot: ['#2a6a7a', '#0a1020'], savanne: ['#c8924a', '#5a3a1a'], kroeg: ['#f2a33a', '#6b2a0a'],
-        fabriek: ['#f2a33a', '#7a3a0a'], speeltuin: ['#f2d08a', '#b8864a'] }[id];
+        fabriek: ['#f2a33a', '#7a3a0a'], speeltuin: ['#f2d08a', '#b8864a'], alexgrot: ['#ff6a1c', '#7a0a04'] }[id];
       const g = ctx.createLinearGradient(0, 0, 0, 64);
       g.addColorStop(0, kl[0]); g.addColorStop(1, kl[1]);
       ctx.fillStyle = g; ctx.fillRect(0, 6, 512, 58);
@@ -785,6 +831,7 @@ function maakTexturen(scene) {
   maakMonsterTexturen(scene);
   maakIcoonTexturen(scene);
   maakDierTexturen(scene);
+  maakAlexanderTexturen(scene);
   // titelbord: een glas bier met een schuimkraag
   tekenTextuur(scene, 'titelbord', 380, 170, ctx => {
     const g = ctx.createLinearGradient(0, 40, 0, 160);

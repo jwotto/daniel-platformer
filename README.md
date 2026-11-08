@@ -93,6 +93,7 @@ Elke eindbaas heeft zijn eigen aanvallen, een eigen **ritme** (de pauzes tussen 
 | 🏭 Fabriek (lopende banden) | De Brouwmachine | 510 | zit in de grond (dan niet te raken) en doet 3 rondes: persen van boven, persen van opzij, over de vloer én hoger door de arena (spring eroverheen of duik eronder) (een doorzichtige rode baan laat vooraf zien waar een pers komt) en de hele vloer is een lopende band die altijd aanstaat en willekeurig van richting wisselt; links en rechts houdt de vloer op (val je eraf: hartje kwijt, terug op het bovenste platform) | **Naar boven**: na 3 rondes komt hij 5 seconden boven, dán kun je hem raken. Daarna wordt alles 2× zo zwaar | 3 rondes, boven, steeds ×2 |
 | 🛝 Speeltuin (trampolines) | De Eenwielerclown | 345 | rijdt op zijn eenwieler over vloer, muren én plafond; rijdt 2× zo snel; gooit telkens 4 grote, snelle ballen die blijven stuiteren tot ze je raken; **raak je hem, dan gooit hij meteen een taart en springt hij weg** (zijn gewone klokjes lopen gewoon door) | **Elke 4 seconden** springt hij op een nieuwe eenwieler naar een ander vlak (door je heen springen = 1 hartje); **taart in je gezicht** | om de 4 seconden een sprong |
 | 🌙 Maan (lage zwaartekracht) | Het Moederschip | 520 | vierkante, dichte arena; snelle lasers (1,5×), mini-ufo's, trekstraal; het schip is wat kleiner | **Elke 4 seconden draait het veld**: je speelt opzij of ondersteboven (de lucht, hartjes en knoppen blijven recht) | bliep... bloep |
+| 🤖 Terminatorgrot (pas na de Maan, het allerlaatste level) | Alexander de Terminator, met Robot-Tara en Daniel de noob | 1400 | 10 aanvallen om de beurt: raketregen, laserklauwen (Tara), zonnebrillaser, scheetwolk (Daniel, je wordt traag), kloonleger (welke is de echte?), muisraketten die je achtervolgen (Tara), spinvorm, scheetraket (Daniel), stijgende lava, noob-schild | **Noob-schild**: zolang Daniel "Ik ben een noob!" roept, kun je Alexander niet raken. Eerst Daniel een tik geven! | 10 aanvallen achter elkaar |
 
 
 Daarna begint het opnieuw met Rivier 2, en alles is sterker.
@@ -113,6 +114,7 @@ Elk monster heeft een eigen manier om hem te verslaan. Het tekentje boven zijn h
 | 🏭 Fabriek | Robot ⚔ (schiet kroonkurken), Stoomketel ⤓ (stoomwolken) | drone ➶ (laat flessen vallen) |
 | 🛝 Speeltuin | Wipkip ⤓ (hopt naar je toe), Zandbakmonster ⚔ (gooit zand) | ballon ➶ |
 | 🌙 Maan | Alien ⚔ (laser), Kraterkruiper ⤓ | ufo ➶ (trekstraal) |
+| 🤖 Terminatorgrot | Spinrobot-Alexander (springt op je af, laser uit zijn zonnebril; super sterk) | Raket-Alexander (raketrugzak, vuurt raketjes; super sterk) |
 | Overal, zeldzaam | Gouden flesje met pootjes: vang hem voor een heel flesje! | |
 
 Op sommige platforms liggen **spikes**: niet aanraken, ook niet als je erop springt! In de Grot hangen **stalactieten** aan het plafond: ze vallen als je eronder loopt en doen ook pijn als ze nog hangen.

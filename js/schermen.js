@@ -73,7 +73,7 @@ class Boot extends Phaser.Scene {
   create() {
     maakTexturen(this);
     const h = location.hash;
-    const regios = { '#ijs': 1, '#berg': 2, '#vulkaan': 3, '#grot': 4, '#savanne': 5, '#kroeg': 6, '#fabriek': 7, '#speeltuin': 8, '#maan': 9 };
+    const regios = { '#ijs': 1, '#berg': 2, '#vulkaan': 3, '#grot': 4, '#savanne': 5, '#kroeg': 6, '#fabriek': 7, '#speeltuin': 8, '#maan': 9, '#alexgrot': 10 };
     if (h === '#spel') {
       this.scene.start('Spel', { run: nieuweRun() });
     } else if (h === '#test') {
@@ -838,20 +838,23 @@ class LevelKeuze extends Phaser.Scene {
     this.add.text(480, 18, 'Kies je level', {
       fontFamily: FONT_TITEL, fontSize: '38px', color: '#f2c14e', stroke: '#0a1028', strokeThickness: 7,
     }).setOrigin(0.5, 0);
-    this.kaarten = REGIOS.map((r, n) => this.maakKaart(r, n, 22 + (n % 5) * 186, 82 + Math.floor(n / 5) * 186));
+    // 6 kaarten per rij (iets kleiner), dan passen alle levels erop
+    this.ks = 0.84;
+    this.kaarten = REGIOS.map((r, n) => this.maakKaart(r, n, 18 + (n % 6) * 156, 80 + Math.floor(n / 6) * 166));
     knop(this, 380, 470, 200, 52, '✕ Sluiten', 0x3cc8bb, () => this.sluit(), 22);
     this.input.keyboard.on('keydown-ESC', () => this.sluit());
   }
 
   maakKaart(r, n, x, y) {
-    const w = 172, h = 172, open = n <= PROFIEL.regio, verslagen = n < PROFIEL.regio, gekozen = n === Math.min(PROFIEL.startRegio, PROFIEL.regio);
-    const c = this.add.container(x + w / 2, y + h / 2);
+    const ks = this.ks, w = 172, h = 172, open = n <= PROFIEL.regio, verslagen = n < PROFIEL.regio, gekozen = n === Math.min(PROFIEL.startRegio, PROFIEL.regio);
+    const c = this.add.container(x + w * ks / 2, y + h * ks / 2).setScale(ks);
+    const laatste = n === REGIOS.length - 1;
     const g = this.add.graphics();
     const teken = (licht) => {
       g.clear();
       g.fillStyle(0x0a1028, 0.4).fillRoundedRect(-w / 2 + 3, -h / 2 + 6, w, h, 14);
       g.fillStyle(licht ? 0x2c4387 : 0x16244f, 1).fillRoundedRect(-w / 2, -h / 2, w, h, 14);
-      g.lineStyle(gekozen ? 5 : 2, gekozen ? 0xf2c14e : licht ? 0x3cc8bb : 0x2c4387, 1).strokeRoundedRect(-w / 2, -h / 2, w, h, 14);
+      g.lineStyle(gekozen || laatste ? 5 : 2, gekozen ? 0xf2c14e : laatste ? 0xff3a2c : licht ? 0x3cc8bb : 0x2c4387, 1).strokeRoundedRect(-w / 2, -h / 2, w, h, 14);
     };
     teken(false);
     const plaatje = this.add.image(0, -32, 'mini_' + r.id).setScale(0.98).setAlpha(open ? 1 : 0.35);
@@ -865,11 +868,11 @@ class LevelKeuze extends Phaser.Scene {
     c.add([g, plaatje, rand, baas, naam, sub]);
     if (verslagen) c.add(this.add.text(w / 2 - 6, -h / 2 + 2, '✔', { fontFamily: FONT, fontSize: '26px', fontStyle: 'bold', color: '#5fd38a', stroke: '#0a1028', strokeThickness: 5 }).setOrigin(1, 0));
     if (!open) c.add(this.add.text(0, -32, '🔒', { fontFamily: FONT, fontSize: '36px' }).setOrigin(0.5));
-    if (gekozen) this.tweens.add({ targets: c, scale: 1.04, yoyo: true, repeat: -1, duration: 600, ease: 'Sine.easeInOut' });
-    const z = this.add.zone(x, y, w, h).setOrigin(0).setInteractive({ useHandCursor: true })
-      .on('pointerover', () => { teken(true); this.tweens.add({ targets: c, y: y + h / 2 - 5, duration: 100 }); })
-      .on('pointerout', () => { teken(false); this.tweens.add({ targets: c, y: y + h / 2, scaleX: 1, scaleY: 1, duration: 120 }); })
-      .on('pointerdown', () => { this.tweens.add({ targets: c, scaleX: 0.92, scaleY: 0.92, duration: 60 }); Geluid.effect('klik'); })
+    if (gekozen) this.tweens.add({ targets: c, scale: ks * 1.04, yoyo: true, repeat: -1, duration: 600, ease: 'Sine.easeInOut' });
+    const z = this.add.zone(x, y, w * ks, h * ks).setOrigin(0).setInteractive({ useHandCursor: true })
+      .on('pointerover', () => { teken(true); this.tweens.add({ targets: c, y: y + h * ks / 2 - 5, duration: 100 }); })
+      .on('pointerout', () => { teken(false); this.tweens.add({ targets: c, y: y + h * ks / 2, scaleX: ks, scaleY: ks, duration: 120 }); })
+      .on('pointerdown', () => { this.tweens.add({ targets: c, scaleX: ks * 0.92, scaleY: ks * 0.92, duration: 60 }); Geluid.effect('klik'); })
       .on('pointerup', () => this.kies(n, c));
     return { n, c, z, naam };
   }
@@ -879,15 +882,15 @@ class LevelKeuze extends Phaser.Scene {
     if (n > PROFIEL.regio) {
       // nog dicht: schudden
       Geluid.effect('nee');
-      this.tweens.add({ targets: c, x: c.x + 8, yoyo: true, repeat: 3, duration: 45, onComplete: () => c.setScale(1) });
+      this.tweens.add({ targets: c, x: c.x + 8, yoyo: true, repeat: 3, duration: 45, onComplete: () => c.setScale(this.ks) });
       return;
     }
     this.weg = true;
     PROFIEL.startRegio = n;
     bewaarProfiel();
     Geluid.levelMelodie(n);
-    this.tweens.add({ targets: c, scaleX: 1.15, scaleY: 1.15, duration: 160, yoyo: true, ease: 'Back.easeOut' });
-    const f = this.add.rectangle(c.x, c.y, 172, 172, 0xf2c14e, 0.6);
+    this.tweens.add({ targets: c, scaleX: this.ks * 1.15, scaleY: this.ks * 1.15, duration: 160, yoyo: true, ease: 'Back.easeOut' });
+    const f = this.add.rectangle(c.x, c.y, 172 * this.ks, 172 * this.ks, 0xf2c14e, 0.6);
     this.tweens.add({ targets: f, alpha: 0, scale: 1.3, duration: 400 });
     this.time.delayedCall(450, () => this.sluit());
   }

@@ -25,6 +25,8 @@ const BAZEN = {
   clown: { hp: 345, kracht: 1.9, woest: 'taart', aanvallen: ['rijden', 'jongleren', 'rijden', 'taart'], ritme: [0.5, 1.0, 0.5, 1.0] },
   // bliep... bloep
   moederschip: { hp: 520, kracht: 2.0, woest: 'straal', aanvallen: ['laser', 'minis', 'laser', 'straal'], ritme: [1.2, 0.6, 1.2, 0.6] },
+  // het allerlaatste level: Alexander de Terminator, met Robot-Tara en Daniel de noob
+  alexander: { hp: 1400, kracht: 2.2, woest: 'kloon', aanvallen: ['raketregen'], ritme: [1] },
   draak: { hp: 120, kracht: 1.45, woest: 'spiraal', aanvallen: ['vuur', 'spiraal', 'duik', 'lava', 'spiraal'], ritme: [1.4, 1.2, 1.0, 0.8, 0.6] },
 };
 
@@ -49,7 +51,7 @@ class BaasDeel {
     }
 
     const soort = this.reg.baas, info = BAZEN[soort];
-    const vliegt = soort === 'draak' || soort === 'salamander' || soort === 'moederschip';
+    const vliegt = soort === 'draak' || soort === 'salamander' || soort === 'moederschip' || soort === 'alexander';
     const b = this.vijanden.create(vliegt ? 720 : 760, vliegt ? 150 : 468, 'baas_' + soort).setDepth(9);
     if (soort === 'moederschip') { b.setScale(0.8); b.setPosition(560, 150); }
     b.setOrigin(0.5, vliegt ? 0.5 : 1);
@@ -77,6 +79,7 @@ class BaasDeel {
     }
     this.arenaBand = 0;
     this.baas = b;
+    if (soort === 'alexander') this.alexStart(b);
 
     const vast = o => o.setScrollFactor(0).setDepth(100);
     this.baasBalk = vast(this.add.graphics());
@@ -136,6 +139,7 @@ class BaasDeel {
       this.straalG.setPosition(b.x, b.y + 20);
       if (Math.abs(sp.x - b.x) < 70 && sp.y > b.y) sp.body.setVelocityY(Math.max(sp.body.velocity.y - 90, -300));
     }
+    if (b.baas === 'alexander') { this.alexUpdate(b, dt, woede); return; }
     if (b.baas === 'machine') { this.machineUpdate(b, dt); return; }
     if (b.baas === 'clown') { this.clownUpdate(b, dt, woede); return; }
     if (b.baas === 'moederschip') this.veldDraaien(dt);
@@ -551,6 +555,7 @@ class BaasDeel {
     this.cameras.main.shake(500, 0.015);
     for (let i = 0; i < 6; i++) this.time.delayedCall(i * 120, () => this.vonken.explode(20, b.x + Phaser.Math.Between(-60, 60), b.y - Phaser.Math.Between(20, 100)));
     this.kogels.getChildren().slice().forEach(k => k.destroy());
+    if (b.baas === 'alexander') this.alexOpruimen();
     this.dropShotjes(b.x, b.y - 60, 20);
     b.destroy();
     // eerst de beloning uitrekenen (een nieuwe baas levert meer op dan een die je al had verslagen)

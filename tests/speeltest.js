@@ -57,7 +57,7 @@
 
     // in elke regio 3 keer in het water vallen: 1 hartje eraf en veilig op een platform
     async vallen() {
-      for (let r = 0; r < 10; r++) {
+      for (let r = 0; r < REGIOS.length; r++) {
         doe('regio ' + r); speel({ level: r }); await wacht(() => spelKlaar() && scene('Spel').n === r, 8000, 'regio ' + r);
         const sp = scene('Spel');
         for (let i = 0; i < 6; i++) { sp.speler.x += 60; await slaap(60); }
@@ -68,7 +68,7 @@
           moet(opPlatform(sp) && sp.speler.y < 270, sp.reg.id + ': val ' + (v + 1) + ' niet veilig op het platform (y=' + Math.round(sp.speler.y) + ')');
         }
       }
-      return '12 keer gevallen: steeds 1 hartje eraf en veilig op het platformpje';
+      return (REGIOS.length * 3) + ' keer gevallen: steeds 1 hartje eraf en veilig op het platformpje';
     },
 
     // elke regio heeft zijn eigen monsters
@@ -79,11 +79,12 @@
         grot: ['mol', 'vleermuis', 'goud'], savanne: ['neushoorn', 'gier', 'goud'],
         kroeg: ['darter', 'uitsmijter', 'bierpul', 'goud'], fabriek: ['robot', 'stoomketel', 'drone', 'goud'],
         speeltuin: ['wipkip', 'zandmonster', 'ballon', 'goud'], maan: ['alien', 'kraterkruiper', 'ufo', 'goud'],
+        alexgrot: ['spinlex', 'raketlex', 'goud'],
       };
       const EIGEN = { rivier: ['kruiper', 'vliegvis'], ijs: ['klont', 'klontje', 'pinguin', 'vliegpinguin'], berg: ['fust', 'adelaar'], vulkaan: ['lava', 'golem', 'ptero'], grot: ['mol', 'vleermuis'], savanne: ['neushoorn', 'gier'],
-        kroeg: ['darter', 'uitsmijter', 'bierpul'], fabriek: ['robot', 'stoomketel', 'drone'], speeltuin: ['wipkip', 'zandmonster', 'ballon'], maan: ['alien', 'kraterkruiper', 'ufo'] };
+        kroeg: ['darter', 'uitsmijter', 'bierpul'], fabriek: ['robot', 'stoomketel', 'drone'], speeltuin: ['wipkip', 'zandmonster', 'ballon'], maan: ['alien', 'kraterkruiper', 'ufo'], alexgrot: ['spinlex', 'raketlex'] };
       const uit = [];
-      for (let r = 0; r < 10; r++) {
+      for (let r = 0; r < REGIOS.length; r++) {
         doe('regio ' + r); speel({ level: r }); await wacht(() => spelKlaar() && scene('Spel').n === r, 8000, 'regio ' + r);
         const sp = scene('Spel'), gezien = new Set();
         for (let i = 0; i < 120; i++) {
@@ -102,19 +103,19 @@
     // elke eindbaas doet zijn eigen aanvallen en wordt woedend
     async bazen() {
       const uit = [];
-      for (let n = 0; n < 10; n++) {
+      for (let n = 0; n < REGIOS.length; n++) {
         doe('baas ' + n); PROFIEL.regio = n;
         speel({ level: n, baas: true }); await wacht(() => spelKlaar(0.3) && scene('Spel').baasModus && scene('Spel').n === n, 8000, 'baas ' + n);
         const sp = scene('Spel'), b = sp.baas, gezien = new Set();
         // kijk tot hij 2 soorten aanvallen heeft gedaan (max 20 seconden), maak hem dan woedend
         const eind = Date.now() + 20000;
-        while (Date.now() < eind && b.active && gezien.size < 2 && !['machine', 'clown'].includes(b.baas)) {
+        while (Date.now() < eind && b.active && gezien.size < 2 && !['machine', 'clown', 'alexander'].includes(b.baas)) {
           sp.run.harten = 99;
           if (b.status !== 'wacht' && b.beurt > 0) gezien.add(b.aanvallen[(b.beurt - 1) % b.aanvallen.length]);
           await slaap(50);
         }
         b.hp = Math.floor(b.maxHp * 0.4); await slaap(300);
-        if (!['machine', 'clown'].includes(b.baas)) moet(gezien.size >= 2, sp.reg.baasNaam + ' deed maar ' + gezien.size + ' soort aanval');
+        if (!['machine', 'clown', 'alexander'].includes(b.baas)) moet(gezien.size >= 2, sp.reg.baasNaam + ' deed maar ' + gezien.size + ' soort aanval');
         moet(b.woedend, sp.reg.baasNaam + ' werd niet woedend');
         uit.push(sp.reg.baasNaam + ': ' + [...gezien].join('/'));
       }
@@ -517,7 +518,7 @@
       doe('clown springt'); b.springT = 0; await wacht(() => b.status === 'springt', 3000, 'clown springt');
       await wacht(() => b.status === 'rijdt' && b.vlak !== vlak, 6000, 'clown op een ander vlak');
       doe('ballen'); b.aanvalT = 0; b.aanvalNr = 0; await wacht(() => sp.kogels.getChildren().some(k => k.eeuwig), 3000, 'stuiterballen');
-      const bal = sp.kogels.getChildren().find(k => k.eeuwig); moet(bal.scaleX === 3, 'bal niet 3× zo groot');
+      const bal = sp.kogels.getChildren().find(k => k.eeuwig); moet(bal.scaleX === 2.7, 'bal niet 2,7× zo groot');
       await slaap(2500); moet(bal.active, 'bal verdween (moet blijven stuiteren)');
       doe('moederschip'); speel({ level: 9, baas: true }); await wacht(() => spelKlaar(0.5) && scene('Spel').baas && scene('Spel').n === 9, 8000, 'moederschip');
       sp = scene('Spel');
