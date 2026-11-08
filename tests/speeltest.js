@@ -108,13 +108,13 @@
         const sp = scene('Spel'), b = sp.baas, gezien = new Set();
         // kijk tot hij 2 soorten aanvallen heeft gedaan (max 20 seconden), maak hem dan woedend
         const eind = Date.now() + 20000;
-        while (Date.now() < eind && b.active && gezien.size < 2) {
+        while (Date.now() < eind && b.active && gezien.size < 2 && b.baas !== 'machine') {
           sp.run.harten = 99;
           if (b.status !== 'wacht' && b.beurt > 0) gezien.add(b.aanvallen[(b.beurt - 1) % b.aanvallen.length]);
           await slaap(50);
         }
         b.hp = Math.floor(b.maxHp * 0.4); await slaap(300);
-        moet(gezien.size >= 2, sp.reg.baasNaam + ' deed maar ' + gezien.size + ' soort aanval');
+        if (b.baas !== 'machine') moet(gezien.size >= 2, sp.reg.baasNaam + ' deed maar ' + gezien.size + ' soort aanval');
         moet(b.woedend, sp.reg.baasNaam + ' werd niet woedend');
         uit.push(sp.reg.baasNaam + ': ' + [...gezien].join('/'));
       }
@@ -471,6 +471,25 @@
       const ev = KIST_VAKJES.reduce((a, b) => a + b, 0) / KIST_VAKJES.length;
       moet(KIST_VAKJES.filter(x => !x).length === KIST_VAKJES.length / 2 && Math.abs(ev - 1) < 0.001, 'kansen kloppen niet');
       return 'nemen, verlies en ×3 werken; 50% weg, gemiddeld precies je inzet terug';
+    },
+
+    // Brouwmachine: in de grond niet te raken, na 3 rondes boven, daarna 2× zo zwaar; van de vloer vallen
+    async machine() {
+      PROFIEL.regio = 7;
+      speel({ level: 7, baas: true, harten: 5 }); await wacht(() => spelKlaar(0.5) && scene('Spel').baasModus && scene('Spel').baas, 8000, 'Brouwmachine');
+      const sp = scene('Spel'), b = sp.baas;
+      moet(b.maxHp >= 500, 'te weinig levens (' + b.maxHp + ')');
+      moet(b.status === 'grond' && !b.body.enable, 'begint niet in de grond');
+      doe('in de grond niet te raken'); const hp = b.hp; sp.raakVijand(b, 10, 1, 'slash'); moet(b.hp === hp, 'kon hem raken in de grond');
+      doe('3 rondes'); for (let r = 1; r <= 3; r++) { b.timer = 0; await wacht(() => b.ronde === r, 4000, 'ronde ' + r); }
+      await wacht(() => sp.kogels.getChildren().some(k => k.texture.key === 'perszij'), 8000, 'een pers van opzij');
+      doe('naar boven'); b.timer = 0; await wacht(() => b.status === 'boven' && b.body.enable, 6000, 'machine komt naar boven');
+      sp.raakVijand(b, 10, 1, 'slash'); moet(b.hp < hp, 'boven kon je hem niet raken');
+      doe('weer weg, ×2'); b.timer = 0; await wacht(() => b.status === 'grond' && b.cyclus === 2, 4000, 'weer de grond in');
+      doe('van de vloer vallen'); sp.run.harten = 5; sp.onkwetsbaar = 0; sp.speler.body.reset(900, 560); sp.speler.body.setVelocity(0, 400);
+      await wacht(() => sp.run.harten === 4, 4000, 'hartje kwijt na vallen');
+      moet(Math.abs(sp.speler.x - 480) < 20 && sp.speler.y < 240, 'niet terug op het bovenste platform');
+      return 'in de grond onraakbaar, 3 rondes met zijpersen, boven raakbaar, daarna ×2; vallen kost 1 hartje en je staat op het bovenste platform';
     },
 
     // kebabrol eten: scheet en heel hoog de lucht in

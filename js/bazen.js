@@ -18,7 +18,9 @@ const BAZEN = {
   // tik-tak-tik-tak: altijd even lang
   kroegbaas: { hp: 190, kracht: 1.75, woest: 'donker', aanvallen: ['pullen', 'flessen', 'pullen', 'donker'], ritme: [0.8, 0.8, 0.8, 0.8] },
   // machine: tuf, tuf, tuf-tuf
-  machine: { hp: 210, kracht: 1.8, woest: 'pers', aanvallen: ['kurken', 'band', 'kurken', 'pers'], ritme: [1.0, 1.0, 0.5, 0.5] },
+  // de Brouwmachine zit in de grond: 3 rondes persen + lopende band, dan 5 seconden boven (raakbaar).
+  // Elke keer dat hij terugkomt wordt het 2× zo zwaar. Heel veel levens: 3× de Lepelaar.
+  machine: { hp: 510, kracht: 1.8, woest: 'pers', aanvallen: ['pers'], ritme: [1.0] },
   // circus: hop... hop-hop... hop
   clown: { hp: 230, kracht: 1.9, woest: 'taart', aanvallen: ['rijden', 'jongleren', 'rijden', 'taart'], ritme: [0.5, 1.0, 0.5, 1.0] },
   // bliep... bloep
@@ -30,9 +32,11 @@ class BaasDeel {
   // ---------- EINDBAAS-ARENA ----------
   maakArena() {
     // de vloer van de arena ligt vóór het water
-    this.maakPlatform(0, 470, 960, true).setDepth(8);
+    const machine = this.reg.baas === 'machine';
+    // bij de Brouwmachine houdt de vloer rechts op: de lopende band kan je eraf duwen
+    this.maakPlatform(0, 470, machine ? 860 : 960, true).setDepth(8);
     this.maakPilaar(-36, 0);
-    this.maakPilaar(948, 0);
+    if (!machine) this.maakPilaar(948, 0);
     this.maakPlatform(130, 340, 190);
     this.maakPlatform(640, 340, 190);
     this.maakPlatform(385, 225, 190);
@@ -52,7 +56,12 @@ class BaasDeel {
     if (vliegt) { b.body.setAllowGravity(false); b.body.setImmovable(true); }
     if (soort === 'salamander') { b.setOrigin(0.5); b.rand = 0; b.doelRand = 0.5; b.loopRichting = 1; b.status = 'kruip'; }
     if (soort === 'lepelaar') b.zwaarteT = 5;
-    if (soort === 'machine') { b.body.setImmovable(true); b.x = 800; }
+    if (soort === 'machine') {
+      // begint verstopt in de grond
+      b.body.setImmovable(true).setAllowGravity(false); b.body.enable = false;
+      b.x = 700; b.y = 730;
+      b.status = 'grond'; b.cyclus = 1; b.ronde = 0; b.timer = 2;
+    }
     this.arenaBand = 0;
     this.baas = b;
 
@@ -114,9 +123,7 @@ class BaasDeel {
       this.straalG.setPosition(b.x, b.y + 20);
       if (Math.abs(sp.x - b.x) < 70 && sp.y > b.y) sp.body.setVelocityY(Math.max(sp.body.velocity.y - 90, -300));
     }
-    // machine: de vloer is een lopende band naar hem toe
-    if (this.arenaBand) sp.x += this.arenaBand * 140 * dt;
-    if (b.baas === 'machine') b.body.velocity.x = 0;
+    if (b.baas === 'machine') { this.machineUpdate(b, dt); return; }
 
     if (b.vliegt) {
       if (b.status === 'straal') {
@@ -688,6 +695,87 @@ BaasDeel.prototype.lepelaarZwaarte = function (b, dt) {
     return true;
   }
   return false;
+};
+
+// ---------- DE BROUWMACHINE ----------
+// Zit in de grond en doet rondes: persen van boven, persen van opzij en een lopende band.
+// Na 3 rondes komt hij 5 seconden naar boven (dan kun je hem raken), daarna duikt hij weer weg
+// en wordt alles 2× zo zwaar (2× zoveel persen, 2× zo sterke band; de duur blijft hetzelfde).
+BaasDeel.prototype.machineUpdate = function (b, dt) {
+  const sp = this.speler, keer = Math.pow(2, b.cyclus - 1);
+  // de lopende band duwt je naar rechts, de afgrond in (alleen als je op de vloer staat)
+  if (this.arenaBand && sp.body.blocked.down && sp.y > 455) sp.x += this.arenaBand * dt;
+  // van de vloer gevallen? hartje eraf en terug op het bovenste platform
+  if (sp.y > 600 && !this.dood) this.machineVal();
+  b.timer -= dt;
+  if (b.timer > 0) return;
+  if (b.status === 'grond') {
+    if (b.ronde < 3) {
+      // een ronde: persen van boven, persen van opzij, dan de lopende band
+      b.ronde++;
+      this.baasRoep(`Ronde ${b.ronde}${b.cyclus > 1 ? ' (×' + keer + ')' : ''}`);
+      const pers = 2 * keer, zij = 2 * keer;
+      for (let i = 0; i < pers; i++) {
+        const x = i === 0 ? sp.x : Phaser.Math.Between(60, 840);
+        this.time.delayedCall(i * Math.min(350, 1400 / pers), () => this.waarschuwing(x, 0.8, () => {
+          const k = this.kogel('persblok', x, -40, 0, 1100, 0); k.golf = true; k.leeft = 0.9;
+          this.time.delayedCall(420, () => { this.cameras.main.shake(120, 0.01); Geluid.effect('smash'); });
+        }));
+      }
+      for (let i = 0; i < zij; i++) {
+        const links = i % 2 === 0;
+        this.time.delayedCall(1600 + i * Math.min(450, 1400 / zij), () => this.zijPers(links));
+      }
+      this.time.delayedCall(3300, () => {
+        if (!b.active || this.gewonnen) return;
+        this.baasRoep(`Lopende band${keer > 1 ? ' ×' + keer : ''}!`);
+        this.arenaBand = 140 * keer;
+        this.time.delayedCall(3000, () => { this.arenaBand = 0; });
+      });
+      b.timer = 7;
+    } else {
+      // na 3 rondes: naar boven! 5 seconden kun je hem raken
+      b.status = 'boven'; b.ronde = 0; b.timer = 5.8;
+      this.arenaBand = 0;
+      this.baasRoep('Hij komt naar boven! Nu raken!');
+      this.cameras.main.shake(400, 0.01);
+      Geluid.effect('smash');
+      this.tweens.add({ targets: b, y: 468, duration: 800, ease: 'Back.easeOut', onComplete: () => { if (b.active) { b.body.enable = true; b.body.reset(b.x, b.y); } } });
+    }
+  } else if (b.status === 'boven') {
+    // weer de grond in, en alles wordt 2× zo zwaar
+    b.status = 'grond'; b.cyclus++; b.timer = 1.5;
+    b.body.enable = false;
+    this.baasRoep('Weg! Nu ×' + Math.pow(2, b.cyclus - 1) + '!');
+    this.tweens.add({ targets: b, y: 730, duration: 700, ease: 'Quad.easeIn' });
+  }
+};
+
+// een pers die vanaf de zijkant over de vloer schuift: spring eroverheen!
+BaasDeel.prototype.zijPers = function (links) {
+  if (this.gewonnen || this.dood) return;
+  const x = links ? -60 : 1020, y = 446;
+  const w = this.add.rectangle(links ? 20 : 940, y, 40, 50, 0xd1495b, 0.5).setDepth(6);
+  this.tweens.add({ targets: w, alpha: 0.1, yoyo: true, repeat: 2, duration: 120, onComplete: () => w.destroy() });
+  this.time.delayedCall(700, () => {
+    if (this.gewonnen) return;
+    const k = this.kogel('perszij', x, y, links ? 760 : -760, 0, 0); k.golf = true; k.leeft = 1.6;
+    k.setFlipX(!links);
+    Geluid.effect('dash');
+  });
+};
+
+// van de vloer gevallen: een hartje minder en terug op het bovenste platform
+BaasDeel.prototype.machineVal = function () {
+  const sp = this.speler;
+  this.run.harten -= 1;
+  this.baasGeraakt = true;
+  this.cameras.main.flash(150, 209, 73, 91);
+  Geluid.effect('au');
+  if (this.run.harten <= 0 && this.bijnaDood()) return;
+  sp.body.reset(480, 222);
+  sp.body.setVelocity(0, 0);
+  this.onkwetsbaar = 2; this.knipper = 2;
 };
 
 voegToeAanSpel(BaasDeel);

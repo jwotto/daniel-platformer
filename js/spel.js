@@ -675,6 +675,11 @@ class Spel extends Phaser.Scene {
   // bron: hoe je hem raakt ('slash', 'pijl', 'stamp', 'smash' of 'boer')
   raakVijand(v, schade, richting, bron) {
     if (!v.active || v.hp <= 0 || this.gewonnen) return;
+    // de Brouwmachine kun je alleen raken als hij boven is
+    if (v.soort === 'baas' && v.baas === 'machine' && v.status !== 'boven') {
+      if ((v.ketsT || 0) < this.tijd) { v.ketsT = this.tijd + 1.5; this.popTekst('De machine zit in de grond!'); }
+      return;
+    }
     // sommige monsters kun je maar op één manier verslaan
     const zwak = ZWAK[v.soort];
     const telt = !zwak || bron === zwak || bron === 'boer' || (zwak === 'stamp' && bron === 'smash');

@@ -90,7 +90,7 @@ Elke eindbaas heeft zijn eigen aanvallen, een eigen **ritme** (de pauzes tussen 
 | 🦇 Grot (dicht plafond!) | De Salamander | 150 | kruipt razendsnel over vloer, muren en plafond; vlucht naar de overkant als je hem raakt | **Tongslurp**: trekt je met zijn tong naar zich toe en bijt dan (HAP!) | snel-snel-snel, even wachten |
 | 🦒 Savanne | De Lepelaar | 170 | lepelpik (rent op je af), waaier van veren | **Geen zwaartekracht!** Elke 5 seconden 3 seconden zweven, en hij stuitert als een flipperbal rond | elke 5 seconden |
 | 🍺 Kroeg (gladde bierplassen) | De Kroegbaas | 190 | schuift bierpullen over de vloer, gooit flessen die in scherven springen | **Laatste ronde!** Het licht gaat uit en hij stormt op je af | tik-tak-tik-tak |
-| 🏭 Fabriek (lopende banden) | De Brouwmachine | 210 | kroonkurkenkanon, de hele vloer wordt een lopende band | **De Pers**: komt naar beneden waar jij staat | tuf, tuf, tuf-tuf |
+| 🏭 Fabriek (lopende banden) | De Brouwmachine | 510 | zit in de grond (dan niet te raken) en doet 3 rondes: persen van boven, persen van opzij (spring eroverheen) en een lopende band die je van de vloer duwt (val je eraf: hartje kwijt, terug op het bovenste platform) | **Naar boven**: na 3 rondes komt hij 5 seconden boven, dán kun je hem raken. Daarna wordt alles 2× zo zwaar | 3 rondes, boven, steeds ×2 |
 | 🛝 Speeltuin (trampolines) | De Eenwielerclown | 230 | eenwieler heen en weer, stuiterballen | **Taart in je gezicht!** Even zie je bijna niks | hop... hop-hop |
 | 🌙 Maan (lage zwaartekracht) | Het Moederschip | 260 | lasers, laat mini-ufo's los | **Trekstraal**: trekt je omhoog | bliep... bloep |
 
