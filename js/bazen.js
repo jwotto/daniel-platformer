@@ -704,18 +704,22 @@ BaasDeel.prototype.salamanderUpdate = function (b, dt, woede) {
 };
 
 // ---------- DE LEPELAAR ----------
-// Elke 5 seconden haalt hij 3 seconden de zwaartekracht weg en stuitert hij als een flipperbal rond.
-// Geeft true terug als hij aan het flipperen is (dan doet hij verder niks).
+// Elke 5 seconden haalt hij 3 seconden de zwaartekracht weg en glijdt hij als een pinguïn op zijn buik
+// door de hele arena: 3× zo snel als een duikende adelaar, en hij stuitert tegen alle randen.
+// Geeft true terug als hij aan het glijden is (dan doet hij verder niks).
+const LEPELAAR_GLIJ = 520 * 3; // de adelaar duikt met 520
 BaasDeel.prototype.lepelaarZwaarte = function (b, dt) {
   if (b.flipper > 0) {
     b.flipper -= dt;
     const v = b.body.velocity;
-    if ((b.x < 80 && v.x < 0) || (b.x > 880 && v.x > 0)) { v.x *= -1; this.cameras.main.shake(80, 0.005); }
-    if ((b.y < 170 && v.y < 0) || (b.y > 468 && v.y > 0)) { v.y *= -1; this.cameras.main.shake(80, 0.005); }
-    b.angle += dt * 720;
+    if ((b.x < 50 && v.x < 0) || (b.x > 910 && v.x > 0)) { v.x *= -1; this.cameras.main.shake(80, 0.005); }
+    if ((b.y < 60 && v.y < 0) || (b.y > 468 && v.y > 0)) { v.y *= -1; this.cameras.main.shake(80, 0.005); }
+    // snavel altijd vooruit (het plaatje kijkt naar links)
+    b.setFlipX(false).setRotation(Math.atan2(v.y, v.x) + Math.PI);
     if (b.flipper <= 0) {
       this.physics.world.gravity.y = 1500;
-      b.body.setAllowGravity(true); b.angle = 0;
+      b.body.setAllowGravity(true); b.setRotation(0); b.setTexture('baas_lepelaar');
+      b.body.setVelocity(b.body.velocity.x * 0.2, 0);
       b.status = 'wacht'; b.timer = 0.8; b.zwaarteT = 5;
       this.baasRoep('Zwaartekracht terug!');
     }
@@ -727,10 +731,11 @@ BaasDeel.prototype.lepelaarZwaarte = function (b, dt) {
     b.status = 'flipper';
     this.physics.world.gravity.y = 0;
     b.body.setAllowGravity(false);
-    const r = Math.random() < 0.5 ? -1 : 1;
-    b.body.setVelocity(r * 520, -460);
+    b.setTexture('baas_lepelaar_glij');
+    const r = Math.random() < 0.5 ? -1 : 1, hoek = Phaser.Math.DegToRad(Phaser.Math.Between(25, 55));
+    b.body.setVelocity(r * Math.cos(hoek) * LEPELAAR_GLIJ, -Math.sin(hoek) * LEPELAAR_GLIJ);
     this.speler.body.setVelocityY(Math.min(this.speler.body.velocity.y, -120));
-    this.baasRoep('Geen zwaartekracht!');
+    this.baasRoep('Pinguïnglijden!');
     Geluid.effect('duik');
     return true;
   }

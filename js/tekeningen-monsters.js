@@ -455,6 +455,36 @@ function tekenLepelaar(ctx) {
   ctx.restore();
 }
 
+// De Lepelaar in pinguïn-glijhouding: plat op zijn buik, kop en snavel vooruit, poten naar achteren
+function tekenLepelaarGlij(ctx) {
+  ctx.save();
+  ctx.strokeStyle = INKT; lijn(ctx, 3);
+  // poten gestrekt naar achteren
+  ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(110, 82); ctx.lineTo(138, 78); ctx.moveTo(110, 90); ctx.lineTo(138, 94); ctx.stroke();
+  ctx.strokeStyle = '#e8708a'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(110, 82); ctx.lineTo(138, 78); ctx.moveTo(110, 90); ctx.lineTo(138, 94); ctx.stroke();
+  lijn(ctx, 3); ctx.strokeStyle = INKT;
+  // lijf plat en gestroomlijnd
+  const g = ctx.createLinearGradient(0, 66, 0, 104);
+  g.addColorStop(0, '#ffc0d8'); g.addColorStop(1, '#e8708a');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(80, 86, 40, 18, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  // vleugels plat langs het lijf
+  ctx.fillStyle = '#d0507a'; ctx.beginPath(); ctx.ellipse(90, 80, 30, 9, -0.05, 0, TAU); ctx.fill(); ctx.stroke();
+  // nek recht vooruit
+  ctx.lineWidth = 14; ctx.beginPath(); ctx.moveTo(48, 84); ctx.lineTo(30, 82); ctx.stroke();
+  ctx.strokeStyle = '#ffc0d8'; ctx.lineWidth = 9; ctx.beginPath(); ctx.moveTo(48, 84); ctx.lineTo(30, 82); ctx.stroke();
+  lijn(ctx, 3); ctx.strokeStyle = INKT;
+  ctx.fillStyle = '#ffc0d8'; ctx.beginPath(); ctx.arc(28, 80, 12, 0, TAU); ctx.fill(); ctx.stroke();
+  // lepelsnavel vooruit
+  ctx.fillStyle = '#3a3a4a'; ctx.beginPath(); ctx.moveTo(18, 77); ctx.lineTo(4, 80); ctx.lineTo(4, 85); ctx.lineTo(18, 84); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#f2c14e'; ctx.beginPath(); ctx.ellipse(4, 82, 6, 7, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  oog(ctx, 26, 76, 5, '#d1495b');
+  // snelheidsstreepjes
+  ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 3;
+  for (const [y, l] of [[66, 22], [106, 28], [74, 14]]) { ctx.beginPath(); ctx.moveTo(118, y); ctx.lineTo(118 + l, y); ctx.stroke(); }
+  ctx.restore();
+}
+
 function kroonkurkKlein(ctx, x, y, r) {
   ctx.fillStyle = '#f2c14e'; ctx.strokeStyle = INKT; ctx.lineWidth = 1.4;
   ctx.beginPath(); for (let i = 0; i < 16; i++) { const a = i * TAU / 16, rr = i % 2 ? r : r * 0.82; ctx.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); }
@@ -713,6 +743,7 @@ function maakMonsterTexturen(scene) {
   tekenTextuur(scene, 'gier', 72, 44, tekenGier);
   tekenTextuur(scene, 'baas_salamander', 200, 84, tekenSalamander);
   tekenTextuur(scene, 'baas_lepelaar', 140, 154, tekenLepelaar);
+  tekenTextuur(scene, 'baas_lepelaar_glij', 140, 154, tekenLepelaarGlij);
   tekenTextuur(scene, 'vliegvis', 56, 44, tekenVliegvis);
   tekenTextuur(scene, 'vliegpinguin', 58, 44, tekenVliegpinguin);
   tekenTextuur(scene, 'adelaar', 76, 46, tekenAdelaar);
