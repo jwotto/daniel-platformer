@@ -154,14 +154,39 @@ class Instellingen extends Phaser.Scene {
     } else knop(this, 385, 395, 190, 52, 'Klaar', 0x3cc8bb, () => this.sluit(), 22);
     this.input.keyboard.on('keydown-ESC', () => this.sluit());
   }
+  // eerst vragen of je het zeker weet
   stopPotje() {
+    this.scene.stop();
+    this.scene.launch('StopVraag');
+  }
+  sluit() {
+    this.scene.resume(this.terug);
+    this.scene.stop();
+  }
+}
+
+// "Weet je het zeker?" voordat je een potje stopt. Je flesjes houd je gewoon.
+class StopVraag extends Phaser.Scene {
+  constructor() { super('StopVraag'); }
+  create() {
+    this.add.rectangle(0, 0, 960, 540, 0x0a1028, 0.8).setOrigin(0).setInteractive();
+    const g = this.add.graphics();
+    g.fillStyle(0x16244f, 1).fillRoundedRect(250, 140, 460, 250, 20);
+    g.lineStyle(3, 0xd1495b, 1).strokeRoundedRect(250, 140, 460, 250, 20);
+    this.add.text(480, 166, 'Potje stoppen?', { fontFamily: FONT_TITEL, fontSize: '36px', color: '#ff8a8a' }).setOrigin(0.5, 0);
+    this.add.text(480, 230, 'Je houdt al je flesjes en shotjes.', { fontFamily: FONT, fontSize: '20px', fontStyle: 'bold', color: '#f3ead6' }).setOrigin(0.5, 0);
+    knop(this, 280, 300, 190, 56, 'Ja, stoppen', 0xd1495b, () => this.ja(), 22);
+    knop(this, 490, 300, 190, 56, 'Nee, verder', 0x3cc8bb, () => this.nee(), 22);
+    this.input.keyboard.on('keydown-ESC', () => this.nee());
+  }
+  ja() {
     const sp = this.scene.get('Spel');
     this.scene.resume('Spel');
     this.scene.stop();
     if (sp && !sp.dood) sp.gameOver();
   }
-  sluit() {
-    this.scene.resume(this.terug);
+  nee() {
+    this.scene.resume('Spel');
     this.scene.stop();
   }
 }

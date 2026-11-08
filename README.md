@@ -65,7 +65,7 @@ In het Game over-menu (na het doodgaan) zit **🏆 Prestaties**: 40 doelen van m
 
 ### Het startscherm
 
-Het poppetje staat een biertje te drinken, overal zweeft bier... en de **Start**-knop rent 3 keer op pootjes weg ("haha noob!"). De 4e keer mag je echt spelen. Daarna hoef je nooit meer terug naar het startscherm: alles zit in het Game over-menu. Wil je tijdens het spelen stoppen? Tandwiel → **■ Stop potje**.
+Het poppetje staat een biertje te drinken, overal zweeft bier... en de **Start**-knop rent 3 keer op pootjes weg ("haha noob!"). De 4e keer mag je echt spelen. Daarna hoef je nooit meer terug naar het startscherm: alles zit in het Game over-menu. Wil je tijdens het spelen stoppen? Druk op de **⏹-knop** rechtsboven (of tandwiel → ■ Stop potje). Je krijgt eerst de vraag of je het zeker weet; je flesjes en shotjes houd je.
 
 ### Shop en skins
 

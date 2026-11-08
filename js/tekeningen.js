@@ -820,6 +820,11 @@ function maakTexturen(scene) {
     tekenAchtergronden(scene, id);
   }
   tekenTextuur(scene, 'plafond_grot', 512, 90, tekenPlafond);
+  // stopknop in het spel
+  tekenTextuur(scene, 'stopknop', 40, 40, ctx => {
+    ctx.fillStyle = 'rgba(10,16,40,.55)'; rondRect(ctx, 1, 1, 38, 38, 9); ctx.fill();
+    ctx.fillStyle = '#ff8a8a'; rondRect(ctx, 12, 12, 16, 16, 3); ctx.fill();
+  });
   // klein plaatje van elke regio (voor het levelkeuzescherm): lucht, verre bergen, dichtbij en de bodem
   for (const id of Object.keys(THEMA_KLEUR)) {
     tekenTextuur(scene, 'mini_' + id, 160, 90, ctx => {

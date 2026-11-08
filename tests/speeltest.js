@@ -308,8 +308,13 @@
       doe('stop potje'); scene('Winkel').spelen(); await wacht(() => spelKlaar(0.5), 8000, 'spel');
       scene('Spel').scene.launch('Instellingen', { terug: 'Spel' }); scene('Spel').scene.pause();
       await wacht(() => actief('Instellingen'), 4000, 'instellingen');
-      druk(scene('Instellingen'), 'Stop potje'); await wacht(() => actief('Winkel'), 6000, 'Game over-menu na stoppen');
-      return 'Start (3× noob), Draai, Terug, Verder spelen, Stop potje, en in het Game over-menu: Power-ups (kopen/ongedaan), Eindbaas, Level, Gokkast, Dieren, Prestaties, Skins, Instellingen en Spelen werken';
+      druk(scene('Instellingen'), 'Stop potje'); await wacht(() => actief('StopVraag'), 4000, 'vraag: zeker weten?');
+      druk(scene('StopVraag'), 'Nee'); await wacht(() => actief('Spel') && !M().isPaused('Spel') && !actief('StopVraag'), 4000, 'verder na nee');
+      doe('stopknop'); const fl = PROFIEL.flessen; scene('Spel').stopKnop.emit('pointerup');
+      await wacht(() => actief('StopVraag'), 4000, 'vraag via de stopknop');
+      druk(scene('StopVraag'), 'Ja'); await wacht(() => actief('Winkel'), 6000, 'Game over-menu na stoppen');
+      moet(PROFIEL.flessen >= fl, 'flesjes kwijt na stoppen');
+      return 'Start (3× noob), Draai, Terug, Verder spelen, Stop potje (Nee/Ja), stopknop, en in het Game over-menu: Power-ups (kopen/ongedaan), Eindbaas, Level, Gokkast, Dieren, Prestaties, Skins, Instellingen en Spelen werken';
     },
 
     // regio-trucjes: trampoline, lopende band, bierplas, maan

@@ -919,6 +919,16 @@ class Spel extends Phaser.Scene {
     }
     maakInstellingenKnop(this, 932, 28);
     maakVolledigSchermKnop(this, 884, 28);
+    // stopknop: potje stoppen (eerst komt de vraag of je het zeker weet)
+    this.stopKnop = vast(this.add.image(932, 76, 'stopknop')).setDepth(210).setAlpha(0.85)
+      .setInteractive({ useHandCursor: true }).on('pointerup', () => this.vraagStop());
+  }
+
+  vraagStop() {
+    if (this.dood || this.gewonnen || this.scene.isPaused()) return;
+    Geluid.effect('klik');
+    this.scene.launch('StopVraag');
+    this.scene.pause();
   }
 
   popTekst(t) {
