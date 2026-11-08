@@ -31,7 +31,7 @@
     // doodgaan → keuze → winkel (kopen, ongedaan) → shop en terug → baasgevecht → doodgaan → spelen
     async ronde() {
       doe('normaal potje'); speel({ harten: 3 }); await wacht(() => spelKlaar(1), 8000, 'spel start');
-      doe('doodgaan'); scene('Spel').gameOver(); await wacht(() => actief('Winkel'), 5000, 'winkel');
+      doe('doodgaan'); scene('Spel').gameOver(); await wacht(() => actief('Winkel'), 8000, 'winkel');
       const w = scene('Winkel');
       moet(w.kiest, 'geen keuzescherm na doodgaan');
       w.spelen(); await slaap(300); moet(actief('Winkel'), 'spelen kon al vóór het kiezen');

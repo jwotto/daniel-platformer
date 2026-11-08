@@ -76,7 +76,8 @@ function vulScherm(scene) {
     && !(o.texture && o.texture.key === 'mist')); // de mist (donkere randjes) niet uitrekken, dat geeft een naad
 
   const vakken = [];
-  if (ox) { vakken.push([0, oy, ox, BASIS_H], [ox + BASIS_B, oy, W - ox - BASIS_B, BASIS_H]); }
+  // 1 pixel over het midden heen: anders zie je op sommige telefoons een donker naadje
+  if (ox) { vakken.push([0, oy, ox + 1, BASIS_H], [ox + BASIS_B - 1, oy, W - ox - BASIS_B + 1, BASIS_H]); }
   if (oy) { vakken.push([0, 0, W, oy], [0, oy + BASIS_H, W, H - oy - BASIS_H]); }
   for (const [vx, vy, vw, vh] of vakken) {
     if (vw <= 0 || vh <= 0) continue;
@@ -101,13 +102,15 @@ function vulScherm(scene) {
         }
         k = scene.add.image(0, 0, key).setOrigin(0);
         if (zij === 'T') { k.setDisplaySize(W, oy); k.plekX = 0; k.plekY = 0; }
-        else { k.setDisplaySize(vw, BASIS_H); k.plekX = vx; k.plekY = oy; }
+        else { k.setDisplaySize(vw + 2, BASIS_H); k.plekX = vx - 1; k.plekY = oy; }
       }
       else if (o.type === 'Rectangle') k = scene.add.rectangle(0, 0, W, H, o.fillColor, o.fillAlpha).setOrigin(0);
       else {
         // raakt hij de onderkant (water, grond)? dan laten we hem doorlopen tot de onderkant van het scherm
         const totOnder = o.y + o.height >= BASIS_H - 1;
-        k = scene.add.tileSprite(0, 0, W, totOnder ? H - (o.y + oy) : o.height, o.texture.key).setOrigin(0);
+        // let op: in WebGL heeft een TileSprite een eigen interne texture; het echte plaatje is displayTexture
+        const tex = (o.displayTexture || o.texture).key;
+        k = scene.add.tileSprite(0, 0, W, totOnder ? H - (o.y + oy) : o.height, tex).setOrigin(0);
       }
       k[RAND_KOPIE] = true;
       k.bron = o;
