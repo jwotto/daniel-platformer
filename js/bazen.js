@@ -5,9 +5,9 @@ const BAZEN = {
   // kort, kort, lang
 // kracht: hoe snel en fel hij is (elke baas is sterker dan de vorige).
 // woest: zijn speciale aanval, die hij vaker doet als hij woedend is (onder de helft van zijn hartjes).
-  pad: { hp: 40, kracht: 1, woest: 'tong', aanvallen: ['hophop', 'tong', 'bubbels', 'tong'], ritme: [0.5, 0.5, 1.8] },
+  pad: { hp: 60, kracht: 1, woest: 'tong', aanvallen: ['hophop', 'tong', 'bubbels', 'tong'], ritme: [0.5, 0.5, 1.8] },
   // traag, traag, snel
-  beer: { hp: 65, kracht: 1.15, woest: 'glijden', aanvallen: ['glijden', 'pegels', 'blokjes', 'glijden'], ritme: [1.4, 1.4, 0.4] },
+  beer: { hp: 117, kracht: 1.15, woest: 'glijden', aanvallen: ['glijden', 'pegels', 'blokjes', 'glijden'], ritme: [1.4, 1.4, 0.4] },
   // snel-snel-snel, lange pauze
   geit: { hp: 90, kracht: 1.3, woest: 'bergsprong', aanvallen: ['ren', 'vaten', 'bergsprong', 'ren', 'vaten'], ritme: [0.4, 0.4, 0.4, 2.2] },
   // steeds sneller
@@ -22,9 +22,9 @@ const BAZEN = {
   // Elke keer dat hij terugkomt wordt het 2× zo zwaar. Heel veel levens: 3× de Lepelaar.
   machine: { hp: 510, kracht: 1.8, woest: 'pers', aanvallen: ['pers'], ritme: [1.0] },
   // circus: hop... hop-hop... hop
-  clown: { hp: 230, kracht: 1.9, woest: 'taart', aanvallen: ['rijden', 'jongleren', 'rijden', 'taart'], ritme: [0.5, 1.0, 0.5, 1.0] },
+  clown: { hp: 345, kracht: 1.9, woest: 'taart', aanvallen: ['rijden', 'jongleren', 'rijden', 'taart'], ritme: [0.5, 1.0, 0.5, 1.0] },
   // bliep... bloep
-  moederschip: { hp: 260, kracht: 2.0, woest: 'straal', aanvallen: ['laser', 'minis', 'laser', 'straal'], ritme: [1.2, 0.6, 1.2, 0.6] },
+  moederschip: { hp: 520, kracht: 2.0, woest: 'straal', aanvallen: ['laser', 'minis', 'laser', 'straal'], ritme: [1.2, 0.6, 1.2, 0.6] },
   draak: { hp: 120, kracht: 1.45, woest: 'spiraal', aanvallen: ['vuur', 'spiraal', 'duik', 'lava', 'spiraal'], ritme: [1.4, 1.2, 1.0, 0.8, 0.6] },
 };
 

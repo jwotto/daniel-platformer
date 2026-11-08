@@ -83,16 +83,16 @@ Elke eindbaas heeft zijn eigen aanvallen, een eigen **ritme** (de pauzes tussen 
 
 | Regio | Eindbaas | Hartjes | Aanvallen | Speciale aanval | Ritme |
 |---|---|---|---|---|---|
-| 🐸 Rivier | Koning Bierpad | 40 | Hop-hop-HOP (2 sprongetjes + een grote met schokgolf), bierbellen | **Tongslurp**: tong schiet uit en trekt je naar hem toe | kort, kort, lang |
-| 🧊 IJsvlakte (je glijdt!) | De IJsbierbeer | 65 | ijspegels uit de lucht, ijsblokjes | **Buikglijden**: stuitert 3× door de arena | traag, traag, snel |
+| 🐸 Rivier | Koning Bierpad | 60 | Hop-hop-HOP (2 sprongetjes + een grote met schokgolf), bierbellen | **Tongslurp**: tong schiet uit en trekt je naar hem toe | kort, kort, lang |
+| 🧊 IJsvlakte (je glijdt!) | De IJsbierbeer | 117 | ijspegels uit de lucht, ijsblokjes | **Buikglijden**: stuitert 3× door de arena | traag, traag, snel |
 | ⛰️ Bergen | De Bokbiergeit | 90 | rammen, biervaten rollen | **Bergsprong**: springt uit beeld en knalt neer waar jij staat | snel-snel-snel, lange pauze |
 | 🌋 Vulkaan | De Brouwdraak | 120 | vuurballen, lavaregen, duikvlucht | **Vuurspiraal**: vuurballen in een rondje, 2 golven | steeds sneller |
 | 🦇 Grot (dicht plafond!) | De Salamander | 150 | kruipt razendsnel over vloer, muren en plafond; vlucht naar de overkant als je hem raakt | **Tongslurp**: trekt je met zijn tong naar zich toe en bijt dan (HAP!) | snel-snel-snel, even wachten |
 | 🦒 Savanne | De Lepelaar | 170 | lepelpik (rent op je af), waaier van veren | **Geen zwaartekracht!** Elke 5 seconden 3 seconden zweven, en hij stuitert als een flipperbal rond | elke 5 seconden |
 | 🍺 Kroeg (gladde bierplassen) | De Kroegbaas | 190 | schuift bierpullen over de vloer, gooit flessen die in scherven springen | **Laatste ronde!** Het licht gaat uit en hij stormt op je af | tik-tak-tik-tak |
 | 🏭 Fabriek (lopende banden) | De Brouwmachine | 510 | zit in de grond (dan niet te raken) en doet 3 rondes: persen van boven, persen van opzij, over de vloer én hoger door de arena (spring eroverheen of duik eronder) (een doorzichtige rode baan laat vooraf zien waar een pers komt) en de hele vloer is een lopende band die altijd aanstaat en willekeurig van richting wisselt; links en rechts houdt de vloer op (val je eraf: hartje kwijt, terug op het bovenste platform) | **Naar boven**: na 3 rondes komt hij 5 seconden boven, dán kun je hem raken. Daarna wordt alles 2× zo zwaar | 3 rondes, boven, steeds ×2 |
-| 🛝 Speeltuin (trampolines) | De Eenwielerclown | 230 | rijdt op zijn eenwieler over vloer, muren én plafond; gooit 3× zo grote, snelle ballen die blijven stuiteren tot ze je raken | **Elke 4 seconden** springt hij op een nieuwe eenwieler naar een ander vlak (door je heen springen = 1 hartje); **taart in je gezicht** | om de 4 seconden een sprong |
-| 🌙 Maan (lage zwaartekracht) | Het Moederschip | 260 | vierkante, dichte arena; snelle lasers (1,5×), mini-ufo's, trekstraal; het schip is wat kleiner | **Elke 4 seconden draait het veld**: je speelt opzij of ondersteboven (de lucht, hartjes en knoppen blijven recht) | bliep... bloep |
+| 🛝 Speeltuin (trampolines) | De Eenwielerclown | 345 | rijdt op zijn eenwieler over vloer, muren én plafond; gooit 3× zo grote, snelle ballen die blijven stuiteren tot ze je raken | **Elke 4 seconden** springt hij op een nieuwe eenwieler naar een ander vlak (door je heen springen = 1 hartje); **taart in je gezicht** | om de 4 seconden een sprong |
+| 🌙 Maan (lage zwaartekracht) | Het Moederschip | 520 | vierkante, dichte arena; snelle lasers (1,5×), mini-ufo's, trekstraal; het schip is wat kleiner | **Elke 4 seconden draait het veld**: je speelt opzij of ondersteboven (de lucht, hartjes en knoppen blijven recht) | bliep... bloep |
 
 
 Daarna begint het opnieuw met Rivier 2, en alles is sterker.
