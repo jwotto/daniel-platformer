@@ -12,7 +12,7 @@ const BAZEN = {
   geit: { hp: 90, kracht: 1.3, woest: 'bergsprong', aanvallen: ['ren', 'vaten', 'bergsprong', 'ren', 'vaten'], ritme: [0.4, 0.4, 0.4, 2.2] },
   // steeds sneller
   // snel, snel, snel, snel... en dan even wachten
-  salamander: { hp: 150, kracht: 1.6, woest: 'tong', aanvallen: ['kruip', 'tong', 'kruip', 'kruip', 'tong'], ritme: [0.3, 0.6, 0.3, 0.3, 1.2] },
+  salamander: { hp: 300, kracht: 1.6, woest: 'tong', aanvallen: ['kruip', 'tong', 'kruip', 'kruip', 'tong'], ritme: [0.3, 0.6, 0.3, 0.3, 1.2] },
   // elke 5 seconden geen zwaartekracht (dat regelt hij zelf); daartussen pikken en veren gooien
   lepelaar: { hp: 170, kracht: 1.7, woest: 'veren', aanvallen: ['pik', 'veren', 'pik'], ritme: [0.6, 0.6, 1.0] },
   // tik-tak-tik-tak: altijd even lang
@@ -692,12 +692,13 @@ BaasDeel.prototype.salamanderUpdate = function (b, dt, woede) {
     this.baasRoep('Tongslurp!');
     const m = this.salamanderMond(b);
     const d = Math.hypot(sp.x - m.x, sp.y - 30 - m.y) || 1;
-    const vx = (sp.x - m.x) / d * 900, vy = (sp.y - 30 - m.y) / d * 900;
+    // 2× zo snel (1800) en 1,5× zo ver (486 pixels) als eerst
+    const vx = (sp.x - m.x) / d * 1800, vy = (sp.y - 30 - m.y) / d * 1800;
     const k = this.kogel('tong', m.x, m.y, vx, vy, 0);
-    k.tong = true; k.leeft = 0.8; k.golf = true;
+    k.tong = true; k.leeft = 0.6; k.golf = true;
     this.tong = k;
     Geluid.effect('duik');
-    this.time.delayedCall(360, () => { if (k.active) k.setVelocity(-vx, -vy); });
+    this.time.delayedCall(270, () => { if (k.active) k.setVelocity(-vx, -vy); });
     b.status = 'bezig';
     this.time.delayedCall(900, () => { if (b.active && b.status === 'bezig') { b.status = 'wacht'; b.timer = this.pauze(b); } });
   }
