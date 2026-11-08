@@ -37,6 +37,7 @@ class Spel extends Phaser.Scene {
     this.baas = null; this.baasBalk = null; this.baasTekst = null;
     this.levelTekst = null; this.meterTekst = null;
     this.donker = null; this.splat = null; this.straalG = null; this.tong = null; this.bandVloer = null;
+    this.kistGestart = false; this.gewonnenTijd = 0;
     this.achtergrond = maakAchtergrond(this, this.reg.id);
 
     this.platforms = this.physics.add.staticGroup();
@@ -426,7 +427,7 @@ class Spel extends Phaser.Scene {
     for (const b of this.banden) b.tilePositionX -= b.richting * 120 * dt;
     this.pegelsUpdate(dt);
     this.vijandenUpdate(dt);
-    if (this.baasModus) this.baasUpdate(dt);
+    if (this.baasModus) { this.baasUpdate(dt); this.baasKistCheck(); }
     this.kogelsUpdate(dt);
     this.shotjesUpdate();
     this.updateHud();

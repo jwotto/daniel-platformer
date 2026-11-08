@@ -547,17 +547,30 @@ class BaasDeel {
     this.time.delayedCall(2500, () => checkPrestaties(this));
     this.toonBeloning(flesjes, nieuweSkin ? skin : null);
     // de beloning zit in een schatkist: nemen of gokken. Daarna door naar de volgende regio.
-    this.time.delayedCall(3000, () => {
-      this.scene.launch('Schatkist', { inzet: flesjes, baas: true, klaar: () => {
-        this.scene.resume();
-        Geluid.effect('regio');
-        // je upgrade blijft, want het is nog hetzelfde potje
-        this.scene.start('Spel', { run: { level: this.n + 1, up: this.run.up, harten: hartenMet(this.run.keuze), baas: false, keuze: this.run.keuze } });
-      } });
-      this.scene.pause();
-    });
+    // (het spel controleert ook zelf elk beeldje of de kist al open is, zie baasKistCheck)
+    this.baasFlesjes = flesjes;
+    this.gewonnenTijd = this.tijd;
+    this.kistGestart = false;
+    this.time.delayedCall(3000, () => this.openBaasKist());
   }
 }
+// De schatkist met de baasbeloning openen (maar één keer), daarna in één stap door naar de volgende regio
+BaasDeel.prototype.openBaasKist = function () {
+  if (this.kistGestart || this.dood) return;
+  this.kistGestart = true;
+  const run = { level: this.n + 1, up: this.run.up, harten: hartenMet(this.run.keuze), baas: false, keuze: this.run.keuze };
+  this.scene.launch('Schatkist', { inzet: this.baasFlesjes, baas: true, klaar: () => {
+    Geluid.effect('regio');
+    // je upgrade blijft, want het is nog hetzelfde potje
+    this.scene.start('Spel', { run });
+  } });
+  this.scene.pause();
+};
+// vangnet: baas verslagen, maar na 3,5 seconde nog geen kist? dan nu
+BaasDeel.prototype.baasKistCheck = function () {
+  if (this.gewonnen && !this.kistGestart && this.tijd - this.gewonnenTijd > 3.5) this.openBaasKist();
+};
+
 // Het beloningsscherm na het verslaan van een eindbaas
 BaasDeel.prototype.toonBeloning = function (flesjes, skin) {
   const vast = o => o.setScrollFactor(0).setDepth(160);

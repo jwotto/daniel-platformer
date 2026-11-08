@@ -492,6 +492,23 @@
       return 'in de grond onraakbaar, 3 rondes met zijpersen, boven raakbaar, daarna ×2; vallen kost 1 hartje en je staat op het bovenste platform';
     },
 
+    // na een gewonnen baas: doodgaan in het volgende level, dan opnieuw spelen én de volgende baas kunnen doen
+    async nabaas() {
+      PROFIEL.regio = 0; PROFIEL.flessen = 200; PROFIEL.prestaties = PRESTATIES.map(p => p.id);
+      scene('Titel').scene.start('Spel', { run: nieuweRun(true, 0) }); await wacht(() => spelKlaar(1) && scene('Spel').baasModus, 8000, 'baas');
+      let sp = scene('Spel'); sp.baas.hp = 1; sp.raakVijand(sp.baas, 5, 1, 'slash');
+      await wacht(() => actief('Schatkist'), 15000, 'schatkist'); scene('Schatkist').neem();
+      await wacht(() => spelKlaar(0.5) && scene('Spel').n === 1 && !scene('Spel').baasModus, 15000, 'volgende level');
+      doe('doodgaan in het volgende level'); scene('Spel').gameOver(); await wacht(() => actief('Winkel'), 6000, 'menu na doodgaan');
+      const w = scene('Winkel'); kiesUpgrade(w);
+      doe('opnieuw spelen'); w.spelen(); await wacht(() => spelKlaar(0.5), 8000, 'opnieuw spelen');
+      doe('stoppen en de volgende baas'); scene('Spel').gameOver(); await wacht(() => actief('Winkel'), 6000, 'menu');
+      kiesUpgrade(scene('Winkel')); PROFIEL.startRegio = 1; scene('Winkel').vernieuwAlles();
+      moet(scene('Winkel').koopBaas(), 'kon de volgende baas niet kopen'); scene('Winkel').vechten();
+      await wacht(() => spelKlaar(0.5) && scene('Spel').baasModus && scene('Spel').n === 1, 8000, 'volgende baas start');
+      return 'na de baas: doodgaan, opnieuw spelen en de volgende baas starten werkt';
+    },
+
     // kebabrol eten: scheet en heel hoog de lucht in
     async kebab() {
       speel({ kebab: true }); await wacht(() => spelKlaar(0.5), 8000, 'spel start');

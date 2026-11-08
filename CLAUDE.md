@@ -24,3 +24,4 @@ Dit project is van Daniel, de neef van Jan-Willem. Daniel leert hier vibecoden: 
 - Commit na elke stap die werkt, met een korte Nederlandse commit-boodschap.
 - Online zetten gaat altijd met `./zet-online.sh` (niet met een losse `git push`). Dat script geeft alle bestanden een nieuw versienummer (`?v=...` in `index.html` en `versie.txt`), zodat browsers niet de oude versie uit hun cache laden. Bij het opstarten kijkt de game in `versie.txt` of er een nieuwere versie is en laadt dan zelf opnieuw.
 - Vaste speeltest: `python3 tests/test.py` (alle onderdelen) of `python3 tests/test.py ronde` (één onderdeel). Werkwijze van Jan-Willem: eerst alles bouwen, pas aan het eind van een blok alle tests draaien (dat gaat sneller). Nieuwe functie? Voeg een onderdeel toe in `tests/speeltest.js` en `tests/test.py`.
+- Klik-tests (echte muisklikken op het scherm, zoals in de scratchpad) alleen doen als je een menu aanpast. Anders volstaat `python3 tests/test.py`.
