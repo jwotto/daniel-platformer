@@ -960,10 +960,15 @@ BaasDeel.prototype.veldDraaien = function (dt) {
   }
   for (const c of [this.luchtCam, this.hudCam]) c.setViewport(main.x, main.y, main.width, main.height);
   for (const o of this.children.list) {
-    if (o.__randKopie) continue;
+    // de kopieën voor de schermranden horen alleen in hun eigen randcamera
+    if (o.__randKopie) {
+      for (const c of [this.luchtCam, this.hudCam]) if (!(o.cameraFilter & c.id)) c.ignore(o);
+      continue;
+    }
     const vast = o.scrollFactorX === 0;
     if (vast) { if (!(o.cameraFilter & main.id)) main.ignore(o); }
-    const luchtLaag = vast && o.depth < 0;
+    // alles wat vast staat en geen HUD is (lucht, bergen, maanbodem) is achtergrond: achter de wereld
+    const luchtLaag = vast && o.depth < 50;
     if (!luchtLaag && !(o.cameraFilter & this.luchtCam.id)) this.luchtCam.ignore(o);
     if (!(vast && !luchtLaag) && !(o.cameraFilter & this.hudCam.id)) this.hudCam.ignore(o);
   }
