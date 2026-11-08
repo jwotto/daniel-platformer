@@ -55,12 +55,17 @@ const RAND_KOPIE = '__randKopie';
 function vulScherm(scene) {
   // de echte grootte van het canvas (bij EXPAND groter dan 960×540)
   const W = scene.scale.canvas.width, H = scene.scale.canvas.height;
-  const ox = Math.max(0, (W - BASIS_B) / 2), oy = Math.max(0, (H - BASIS_H) / 2);
+  // hele pixels, anders zie je een dun naadje
+  const ox = Math.max(0, Math.floor((W - BASIS_B) / 2)), oy = Math.max(0, Math.floor((H - BASIS_H) / 2));
   const main = scene.cameras.main;
   // oude randen weg
-  (scene.__randen || []).forEach(r => { scene.cameras.remove(r.cam); r.kopieen.forEach(k => k.destroy()); });
+  (scene.__randen || []).forEach(r => {
+    if (scene.cameras.cameras.includes(r.cam)) scene.cameras.remove(r.cam);
+    r.kopieen.forEach(k => { if (k.scene) k.destroy(); });
+  });
   scene.__randen = [];
   main.setViewport(ox, oy, BASIS_B, BASIS_H);
+  scene.__vulMaat = W + 'x' + H; scene.__vulCamX = ox;
   // de mist maakt de randen van het midden donker: op een breed of hoog scherm geeft dat een naad, dus dan uit
   scene.children.list.forEach(o => { if (o.texture && o.texture.key === 'mist') o.setVisible(!ox && !oy); });
   if (!ox && !oy) return;
@@ -81,19 +86,22 @@ function vulScherm(scene) {
     const kopieen = bg.map(o => {
       let k;
       if (o.type === 'Image') {
-        // de buitenste rand van het plaatje uitrekken: dan sluit de kleur precies aan op het midden
-        k = scene.add.image(0, 0, o.texture.key).setOrigin(0);
-        const fw = k.frame.width, fh = k.frame.height;
-        if (vy === oy) { // links of rechts
-          const kolom = vx < ox ? 0 : fw - 1;
-          k.setCrop(kolom, 0, 1, fh).setScale(vw, BASIS_H / fh);
-          k.plekX = vx - kolom * vw; k.plekY = oy;
-        } else { // boven of onder (onder komt het water, daar geen lucht)
-          if (vy > oy) { k.destroy(); return null; }
-          const rij = 0;
-          k.setCrop(0, rij, fw, 1).setScale(W / fw, vh);
-          k.plekX = 0; k.plekY = vy - rij * vh;
+        // de buitenste rand van het plaatje (1 kolom of 1 rij pixels) uitrekken: dan sluit de kleur precies aan
+        const bron = o.texture.getSourceImage(), fw = bron.width, fh = bron.height;
+        const zij = vy === oy ? (vx < ox ? 'L' : 'R') : (vy < oy ? 'T' : 'B');
+        if (zij === 'B') return null; // onder komt het water, daar geen lucht
+        const key = 'rand_' + o.texture.key + '_' + zij;
+        if (!scene.textures.exists(key)) {
+          const t = zij === 'T' ? scene.textures.createCanvas(key, fw, 1) : scene.textures.createCanvas(key, 1, fh);
+          const ctx = t.getContext();
+          if (zij === 'L') ctx.drawImage(bron, 0, 0, 1, fh, 0, 0, 1, fh);
+          else if (zij === 'R') ctx.drawImage(bron, fw - 1, 0, 1, fh, 0, 0, 1, fh);
+          else ctx.drawImage(bron, 0, 0, fw, 1, 0, 0, fw, 1);
+          t.refresh();
         }
+        k = scene.add.image(0, 0, key).setOrigin(0);
+        if (zij === 'T') { k.setDisplaySize(W, oy); k.plekX = 0; k.plekY = 0; }
+        else { k.setDisplaySize(vw, BASIS_H); k.plekX = vx; k.plekY = oy; }
       }
       else if (o.type === 'Rectangle') k = scene.add.rectangle(0, 0, W, H, o.fillColor, o.fillAlpha).setOrigin(0);
       else {
@@ -120,6 +128,15 @@ function vulScherm(scene) {
 
 // elke beeldje: randcamera's laten meekijken en dingen die vast in beeld staan (HUD) overslaan
 function randBijwerken(scene) {
+  // vangnet: klopt de schermmaat nog? zo niet, dan alles opnieuw instellen
+  const sm = scene.scale, el = sm.parent;
+  const doel = el ? el.clientWidth + 'x' + el.clientHeight : '';
+  if (el && sm.__ingesteld !== doel) {
+    sm.__ingesteld = doel;
+    sm.getParentBounds(); sm.refresh();
+  }
+  const maat = sm.canvas.width + 'x' + sm.canvas.height;
+  if (scene.__vulMaat !== maat || (scene.__vulCamX !== undefined && scene.cameras.main.x !== scene.__vulCamX)) vulScherm(scene);
   const randen = scene.__randen;
   if (!randen || !randen.length) return;
   const main = scene.cameras.main;
@@ -127,8 +144,10 @@ function randBijwerken(scene) {
     r.cam.scrollX = main.scrollX + r.vx - main.x;
     r.cam.scrollY = main.scrollY + r.vy - main.y;
     for (const k of r.kopieen) {
-      if (!k.bron.active) { k.setVisible(false); continue; }
-      k.setVisible(k.bron.visible).setAlpha(k.bron.alpha);
+      // origineel is weg (bijv. keuzescherm gesloten)? dan de kopie ook weg
+      // (doorzichtig in plaats van onzichtbaar: een randcamera zonder iets te tekenen geeft een leeg beeld)
+      if (!scene.children.exists(k.bron)) { k.setAlpha(0); continue; }
+      k.setAlpha(k.bron.visible ? k.bron.alpha : 0);
       if (k.type === 'TileSprite') { k.tilePositionX = k.bron.tilePositionX - main.x; k.tilePositionY = k.bron.tilePositionY; }
     }
   }
@@ -144,24 +163,27 @@ function startScherm(game) {
   scherpstellenPhaser(game);
   const opnieuw = () => {
     zetDraai();
+    // eerst de nieuwe maat laten lezen, dan pas alles opnieuw instellen
+    game.scale.getParentBounds();
     game.scale.refresh();
   };
   window.addEventListener('resize', () => setTimeout(opnieuw, 60));
   window.addEventListener('orientationchange', () => setTimeout(opnieuw, 250));
-  // elk scherm: randen opvullen bij het starten en als het scherm van grootte verandert
-  for (const scene of game.scene.scenes) {
-    scene.sys.events.on('create', () => vulScherm(scene));
-    scene.sys.events.on('postupdate', () => randBijwerken(scene));
-  }
-  game.scale.on('resize', () => {
-    // even wachten: Phaser zet eerst zelf de camera's goed, daarna vullen wij de randen
-    setTimeout(() => { for (const scene of game.scene.getScenes(true)) vulScherm(scene); }, 0);
+  // Vlak voor elk beeldje: alle actieve schermen nalopen (nieuw gestart? andere maat? randen meeschuiven).
+  // Zo hoeft geen enkel scherm zich aan te melden, en klopt het altijd, ook na een herstart.
+  game.events.on('poststep', () => {
+    for (const scene of game.scene.getScenes(true)) {
+      if (!scene.__haak) {
+        scene.__haak = true;
+        // bij afsluiten zijn de randcamera's en kopieën weg: volgende keer opnieuw opbouwen
+        scene.sys.events.on('shutdown', () => { scene.__randen = []; scene.__vulMaat = null; scene.__vulCamX = undefined; });
+      }
+      randBijwerken(scene);
+    }
   });
-  // schermen die al draaien ook meteen opvullen
-  for (const scene of game.scene.getScenes(true)) vulScherm(scene);
-  window.__scherm = true;
-  game.scale.getParentBounds();
-  game.scale.refresh();
-  // schermen die al open waren ook meteen goedzetten
-  for (const scene of game.scene.getScenes(true)) vulScherm(scene);
+  game.scale.on('resize', () => {
+    // Phaser zet eerst zelf de camera's goed; bij het volgende beeldje vullen wij de randen opnieuw
+    for (const scene of game.scene.getScenes(true)) scene.__vulMaat = null;
+  });
+  opnieuw();
 }

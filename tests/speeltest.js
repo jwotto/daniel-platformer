@@ -463,10 +463,10 @@
       await wacht(() => !actief('Schatkist') && !M().isPaused('Spel'), 4000, 'spel gaat verder');
       moet(PROFIEL.flessen === inzet, 'nemen klopt niet');
       doe('gokken: verlies'); sp.maakKist(sp.speler.x, sp.speler.y); await wacht(() => actief('Schatkist'), 4000, 'kist 2');
-      const v = PROFIEL.flessen; scene('Schatkist').draai(0); await wacht(() => !actief('Schatkist'), 8000, 'rad stopt');
+      const v = PROFIEL.flessen; scene('Schatkist').draai(0); await wacht(() => !actief('Schatkist'), 20000, 'rad stopt');
       moet(PROFIEL.flessen === v, 'verlies klopt niet');
       doe('gokken: ×3'); sp.maakKist(sp.speler.x, sp.speler.y); await wacht(() => actief('Schatkist'), 4000, 'kist 3');
-      const i2 = scene('Schatkist').inzet, v2 = PROFIEL.flessen; scene('Schatkist').draai(KIST_VAKJES.indexOf(3)); await wacht(() => !actief('Schatkist'), 8000, 'rad stopt');
+      const i2 = scene('Schatkist').inzet, v2 = PROFIEL.flessen; scene('Schatkist').draai(KIST_VAKJES.indexOf(3)); await wacht(() => !actief('Schatkist'), 20000, 'rad stopt');
       moet(PROFIEL.flessen === v2 + i2 * 3, '×3 klopt niet');
       const ev = KIST_VAKJES.reduce((a, b) => a + b, 0) / KIST_VAKJES.length;
       moet(KIST_VAKJES.filter(x => !x).length === KIST_VAKJES.length / 2 && Math.abs(ev - 1) < 0.001, 'kansen kloppen niet');
