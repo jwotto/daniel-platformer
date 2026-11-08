@@ -42,6 +42,7 @@ const PRESTATIES = [
   { id: 'clown', naam: 'Clownsneus', uitleg: 'Versla De Eenwielerclown', stat: 'baas_clown', doel: 1, beloning: 16 },
   { id: 'moederschip', naam: 'Maanlander', uitleg: 'Versla Het Moederschip', stat: 'baas_moederschip', doel: 1, beloning: 18 },
   { id: 'alexander', naam: 'Terminator-terminator', uitleg: 'Versla Alexander de Terminator', stat: 'baas_alexander', doel: 1, beloning: 40 },
+  { id: 'worst', naam: 'Worstenbroodje', uitleg: 'Versla De Grote Roze Worst', stat: 'baas_worst', doel: 1, beloning: 60 },
   { id: 'alleskins', naam: 'Modekoning', uitleg: 'Verzamel alle skins', stat: 'skins', doel: () => SKINS.length, beloning: 20 },
   { id: 'dier1', naam: 'Baasje', uitleg: 'Win je eerste huisdier', stat: 'dieren', doel: 1, beloning: 10 },
   { id: 'ster', naam: 'Opnieuw gebrouwen', uitleg: 'Brouw opnieuw en verdien een ster', stat: 'prestige', doel: 1, beloning: 25 },

@@ -79,10 +79,10 @@
         grot: ['mol', 'vleermuis', 'goud'], savanne: ['neushoorn', 'gier', 'goud'],
         kroeg: ['darter', 'uitsmijter', 'bierpul', 'goud'], fabriek: ['robot', 'stoomketel', 'drone', 'goud'],
         speeltuin: ['wipkip', 'zandmonster', 'ballon', 'goud'], maan: ['alien', 'kraterkruiper', 'ufo', 'goud'],
-        alexgrot: ['spinlex', 'raketlex', 'goud'],
+        alexgrot: ['spinlex', 'raketlex', 'goud'], happy: ['beertje', 'vliegvarken', 'goud'],
       };
       const EIGEN = { rivier: ['kruiper', 'vliegvis'], ijs: ['klont', 'klontje', 'pinguin', 'vliegpinguin'], berg: ['fust', 'adelaar'], vulkaan: ['lava', 'golem', 'ptero'], grot: ['mol', 'vleermuis'], savanne: ['neushoorn', 'gier'],
-        kroeg: ['darter', 'uitsmijter', 'bierpul'], fabriek: ['robot', 'stoomketel', 'drone'], speeltuin: ['wipkip', 'zandmonster', 'ballon'], maan: ['alien', 'kraterkruiper', 'ufo'], alexgrot: ['spinlex', 'raketlex'] };
+        kroeg: ['darter', 'uitsmijter', 'bierpul'], fabriek: ['robot', 'stoomketel', 'drone'], speeltuin: ['wipkip', 'zandmonster', 'ballon'], maan: ['alien', 'kraterkruiper', 'ufo'], alexgrot: ['spinlex', 'raketlex'], happy: ['beertje', 'vliegvarken'] };
       const uit = [];
       for (let r = 0; r < REGIOS.length; r++) {
         doe('regio ' + r); speel({ level: r }); await wacht(() => spelKlaar() && scene('Spel').n === r, 8000, 'regio ' + r);
@@ -109,13 +109,13 @@
         const sp = scene('Spel'), b = sp.baas, gezien = new Set();
         // kijk tot hij 2 soorten aanvallen heeft gedaan (max 20 seconden), maak hem dan woedend
         const eind = Date.now() + 20000;
-        while (Date.now() < eind && b.active && gezien.size < 2 && !['machine', 'clown', 'alexander'].includes(b.baas)) {
+        while (Date.now() < eind && b.active && gezien.size < 2 && !['machine', 'clown', 'alexander', 'worst'].includes(b.baas)) {
           sp.run.harten = 99;
           if (b.status !== 'wacht' && b.beurt > 0) gezien.add(b.aanvallen[(b.beurt - 1) % b.aanvallen.length]);
           await slaap(50);
         }
         b.hp = Math.floor(b.maxHp * 0.4); await slaap(300);
-        if (!['machine', 'clown', 'alexander'].includes(b.baas)) moet(gezien.size >= 2, sp.reg.baasNaam + ' deed maar ' + gezien.size + ' soort aanval');
+        if (!['machine', 'clown', 'alexander', 'worst'].includes(b.baas)) moet(gezien.size >= 2, sp.reg.baasNaam + ' deed maar ' + gezien.size + ' soort aanval');
         moet(b.woedend, sp.reg.baasNaam + ' werd niet woedend');
         uit.push(sp.reg.baasNaam + ': ' + [...gezien].join('/'));
       }

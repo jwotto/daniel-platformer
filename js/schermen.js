@@ -73,7 +73,7 @@ class Boot extends Phaser.Scene {
   create() {
     maakTexturen(this);
     const h = location.hash;
-    const regios = { '#ijs': 1, '#berg': 2, '#vulkaan': 3, '#grot': 4, '#savanne': 5, '#kroeg': 6, '#fabriek': 7, '#speeltuin': 8, '#maan': 9, '#alexgrot': 10 };
+    const regios = { '#ijs': 1, '#berg': 2, '#vulkaan': 3, '#grot': 4, '#savanne': 5, '#kroeg': 6, '#fabriek': 7, '#speeltuin': 8, '#maan': 9, '#alexgrot': 10, '#happy': 11 };
     if (h === '#spel') {
       this.scene.start('Spel', { run: nieuweRun() });
     } else if (h === '#test') {

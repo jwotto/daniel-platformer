@@ -92,6 +92,8 @@ const REGIOS = [
   { id: 'maan', naam: 'Maan', baas: 'moederschip', baasNaam: 'Het Moederschip' },
   // het allerlaatste level: pas open als je alle andere levels hebt gehaald
   { id: 'alexgrot', naam: 'Terminatorgrot', baas: 'alexander', baasNaam: 'Alexander de Terminator' },
+  // en dan het allerallerlaatste, ultra-ultramoeilijke level: pas open na Alexander
+  { id: 'happy', naam: 'Jantje Willie Happy Place', baas: 'worst', baasNaam: 'De Grote Roze Worst' },
 ];
 
 function regioVan(n) { return REGIOS[n % REGIOS.length]; }
@@ -100,7 +102,8 @@ function levelNaam(n) { const r = rondeVan(n); return regioVan(n).naam + (r > 0 
 // Hoe verder je bent, hoe meer een shotje waard is
 function shotWaarde(n) { return 1 + n; }
 // Een gevecht met de eindbaas is duur!
-function baasPrijs(n) { return 15 + n * 12; }
+// (in Jantje Willie Happy Place is alles duurder: het gevecht kost 3×)
+function baasPrijs(n) { const p = 15 + n * 12; return regioVan(n).id === 'happy' ? p * 3 : p; }
 // Wat je krijgt als je hem verslaat: altijd meer dan je betaalt
 // een baas die je al verslagen hebt nog eens doen levert iets minder op (maar nog steeds meer dan de prijs)
 function baasBeloning(n) { return baasPrijs(n) + (n < PROFIEL.regio ? 5 + n * 2 : 10 + n * 5); }

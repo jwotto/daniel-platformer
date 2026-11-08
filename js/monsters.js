@@ -58,6 +58,8 @@ class MonsterDeel {
       this.maakMol(x + w / 2, y, x, x + w);
     } else if (id === 'savanne') {
       this.maakNeushoorn(x + w / 2, y, x, x + w);
+    } else if (id === 'happy') {
+      this.maakBeertje(x + w / 2, y, x, x + w);
     } else if (NIEUW_GROND[id]) {
       // kroeg, fabriek, speeltuin, maan: kies een van de twee grondmonsters
       const [a, b] = NIEUW_GROND[id];
@@ -75,6 +77,7 @@ class MonsterDeel {
     else if (id === 'vulkaan') this.maakVlieger('ptero', 'ptero', x + w / 2, hoog);
     else if (id === 'grot') { if (y <= 420) this.maakVleermuis(x + w / 2, y + 48); }
     else if (id === 'alexgrot') this.maakRaketlex(x + w / 2, hoog);
+    else if (id === 'happy') this.maakVliegvarken(x + w / 2, hoog);
     else if (NIEUW_LUCHT[id]) this.maakVlieger(NIEUW_LUCHT[id], NIEUW_LUCHT[id], x + w / 2, hoog);
     else if (id === 'savanne') {
       // gieren komen in groepjes, maar minder vaak (een groep telt als 4 gewone vliegers)
@@ -364,6 +367,8 @@ class MonsterDeel {
         } else {
           patrouille(v, 1); // kruiper, ijsklontjes
         }
+      } else if (v.soort === 'vliegvarken') {
+        this.vliegvarkenUpdate(v, dt, dx, dy, inBeeld);
       } else if (v.soort === 'raketlex') {
         this.raketlexUpdate(v, dt, dx, dy, inBeeld);
       } else if (v.soort === 'bierpul' || v.soort === 'drone' || v.soort === 'ufo' || v.soort === 'ballon') {
@@ -495,6 +500,9 @@ const NIEUW_INFO = {
   kraterkruiper: { bw: 44, bh: 30, hp: 3, erbij: 0.7, snel: 35, shots: 4 },
   // Terminatorgrot: lopende spinrobot-Alexanders (super sterk!)
   spinlex: { bw: 56, bh: 40, hp: 9, erbij: 1.2, snel: 95, shots: 8 },
+  // Jantje Willie Happy Place: dikke depressieve beertjes (ultra sterk) en de poepmonstertjes van de worst
+  beertje: { bw: 50, bh: 56, hp: 16, erbij: 1.8, snel: 38, shots: 12 },
+  poepje: { bw: 30, bh: 28, hp: 5, erbij: 0, snel: 70, shots: 2 },
 };
 
 MonsterDeel.prototype.nieuwLoperUpdate = function (v, dt, dx, dy, inBeeld, patrouille) {
@@ -555,6 +563,10 @@ MonsterDeel.prototype.nieuwLoperUpdate = function (v, dt, dx, dy, inBeeld, patro
       v.body.velocity.x = 0; v.setFlipX(dx > 0);
       if (v.actieT <= 0) { v.verstopt = true; v.actieT = 2; v.setAlpha(0.5); this.tweens.add({ targets: v, scaleY: 0.5, duration: 150 }); }
     }
+  } else if (v.soort === 'beertje') {
+    this.beertjeUpdate(v, dt, dx, dy, dichtbij, patrouille);
+  } else if (v.soort === 'poepje') {
+    this.poepjeUpdate(v, dt, dx, dichtbij, patrouille);
   } else if (v.soort === 'spinlex') {
     this.spinlexUpdate(v, dt, dx, dy, dichtbij, patrouille);
   } else if (v.soort === 'alien') {

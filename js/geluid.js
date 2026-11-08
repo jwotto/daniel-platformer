@@ -103,6 +103,8 @@ const Geluid = (() => {
     boing: () => toon(180, 760, 0.25, 'sine', 0.35),
     laser: () => toon(1800, 300, 0.15, 'sawtooth', 0.14),
     plop: () => toon(600, 1200, 0.08, 'square', 0.2),
+    // een vieze scheet (de Grote Roze Worst)
+    pfrrt: () => { ruisje(0.5, 'lowpass', 420, 110, 0.55); toon(95, 48, 0.45, 'sawtooth', 0.16); },
     boer: () => {
       if (!ctx) return;
       const t = ctx.currentTime;

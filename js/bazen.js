@@ -27,6 +27,8 @@ const BAZEN = {
   moederschip: { hp: 520, kracht: 2.0, woest: 'straal', aanvallen: ['laser', 'minis', 'laser', 'straal'], ritme: [1.2, 0.6, 1.2, 0.6] },
   // het allerlaatste level: Alexander de Terminator, met Robot-Tara en Daniel de noob
   alexander: { hp: 1400, kracht: 2.2, woest: 'kloon', aanvallen: ['raketregen'], ritme: [1] },
+  // het allerallerlaatste level: de Grote Roze Worst (ultra-ultramoeilijk)
+  worst: { hp: 2600, kracht: 2.4, woest: 'regen', aanvallen: ['druppels'], ritme: [1] },
   draak: { hp: 120, kracht: 1.45, woest: 'spiraal', aanvallen: ['vuur', 'spiraal', 'duik', 'lava', 'spiraal'], ritme: [1.4, 1.2, 1.0, 0.8, 0.6] },
 };
 
@@ -80,6 +82,7 @@ class BaasDeel {
     this.arenaBand = 0;
     this.baas = b;
     if (soort === 'alexander') this.alexStart(b);
+    if (soort === 'worst') this.worstStart(b);
 
     const vast = o => o.setScrollFactor(0).setDepth(100);
     this.baasBalk = vast(this.add.graphics());
@@ -140,6 +143,7 @@ class BaasDeel {
       if (Math.abs(sp.x - b.x) < 70 && sp.y > b.y) sp.body.setVelocityY(Math.max(sp.body.velocity.y - 90, -300));
     }
     if (b.baas === 'alexander') { this.alexUpdate(b, dt, woede); return; }
+    if (b.baas === 'worst') { this.worstUpdate(b, dt, woede); return; }
     if (b.baas === 'machine') { this.machineUpdate(b, dt); return; }
     if (b.baas === 'clown') { this.clownUpdate(b, dt, woede); return; }
     if (b.baas === 'moederschip') this.veldDraaien(dt);
@@ -556,6 +560,7 @@ class BaasDeel {
     for (let i = 0; i < 6; i++) this.time.delayedCall(i * 120, () => this.vonken.explode(20, b.x + Phaser.Math.Between(-60, 60), b.y - Phaser.Math.Between(20, 100)));
     this.kogels.getChildren().slice().forEach(k => k.destroy());
     if (b.baas === 'alexander') this.alexOpruimen();
+    if (b.baas === 'worst') this.vijanden.getChildren().slice().forEach(v => v.soort === 'poepje' && v.destroy());
     this.dropShotjes(b.x, b.y - 60, 20);
     b.destroy();
     // eerst de beloning uitrekenen (een nieuwe baas levert meer op dan een die je al had verslagen)

@@ -89,6 +89,15 @@ const THEMA_KLEUR = {
     kruiper: { lijf: ['#3a3a44', '#16161c'], stekel: '#ff3a2c', oog: '#ff3a2c' },
     licht: { lijf: ['#ffd27a', '#c83a1c'], staart: 'rgba(255,60,44,.8)', oog: '#fff6d8' },
   },
+  // het allerallerlaatste level: Jantje Willie Happy Place (veel te vrolijk... en daardoor eng)
+  happy: {
+    lucht: ['#ff9ad8', '#ffc0e8', '#c8f0ff', '#fff2a0'],
+    ver: ['#b8f08a', '#6ac06a'], mid: ['#ffb0e0', '#e070b8'], nabij: ['#9ae0ff', '#5aa0d8'],
+    boom: '#ff6ab8', steen: ['#ff9ad8', '#c04a8a'], top: '#fff6a0',
+    pilaar: ['#ff9ad8', '#7a5cff'], kasteel: '#ffb0e0', sneeuw: false,
+    kruiper: { lijf: ['#ff9ad8', '#c04a8a'], stekel: '#fff6a0', oog: '#1b2f6b' },
+    licht: { lijf: ['#fff6a0', '#ff9ad8'], staart: 'rgba(255,154,216,.75)', oog: '#1b2f6b' },
+  },
   savanne: {
     lucht: ['#3a1a3a', '#c8504a', '#f2a03c', '#ffe08a'],
     ver: ['#c8705a', '#8a3a3a'], mid: ['#b8803a', '#7a4a1c'], nabij: ['#8a5a1c', '#4a2a0e'],
@@ -435,6 +444,26 @@ function tekenLucht(ctx, k, id) {
   const g = ctx.createLinearGradient(0, 0, 0, 540);
   [0, 0.45, 0.78, 1].forEach((s, i) => g.addColorStop(s, k.lucht[i]));
   ctx.fillStyle = g; ctx.fillRect(0, 0, 960, 540);
+  if (id === 'happy') {
+    // een veel te vrolijke regenboog, wolkjes met een glimlach, en een zon die je aanstaart
+    const kl = ['#ff4a6a', '#ff9a3c', '#ffe04a', '#6ad86a', '#4ab8ff', '#9a6aff'];
+    kl.forEach((k, i) => { ctx.strokeStyle = k; ctx.lineWidth = 16; ctx.beginPath(); ctx.arc(480, 470, 380 - i * 16, Math.PI, 0); ctx.stroke(); });
+    for (const [x, y, r] of [[150, 110, 34], [700, 70, 28], [880, 190, 30], [330, 220, 24]]) {
+      ctx.fillStyle = 'rgba(255,255,255,.95)';
+      for (const [dx, dy, rr] of [[0, 0, 1], [-0.9, 0.25, 0.7], [0.9, 0.25, 0.7]]) { ctx.beginPath(); ctx.arc(x + dx * r, y + dy * r, rr * r, 0, TAU); ctx.fill(); }
+      ctx.fillStyle = INKT; ctx.beginPath(); ctx.arc(x - r * 0.3, y - r * 0.05, 2.5, 0, TAU); ctx.arc(x + r * 0.3, y - r * 0.05, 2.5, 0, TAU); ctx.fill();
+      ctx.strokeStyle = INKT; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y + r * 0.1, r * 0.35, 0.15 * Math.PI, 0.85 * Math.PI); ctx.stroke();
+    }
+    // de zon met een te brede glimlach en lege ogen
+    ctx.fillStyle = '#ffe04a'; ctx.strokeStyle = '#ff9a3c'; ctx.lineWidth = 5;
+    for (let i = 0; i < 16; i++) { const a = i * TAU / 16; ctx.beginPath(); ctx.moveTo(800 + Math.cos(a) * 52, 90 + Math.sin(a) * 52); ctx.lineTo(800 + Math.cos(a) * 72, 90 + Math.sin(a) * 72); ctx.stroke(); }
+    ctx.beginPath(); ctx.arc(800, 90, 46, 0, TAU); ctx.fill();
+    ctx.fillStyle = INKT; ctx.beginPath(); ctx.ellipse(784, 80, 6, 9, 0, 0, TAU); ctx.ellipse(816, 80, 6, 9, 0, 0, TAU); ctx.fill();
+    ctx.strokeStyle = INKT; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(800, 92, 28, 0.08 * Math.PI, 0.92 * Math.PI); ctx.stroke();
+    for (let x = 776; x <= 824; x += 8) { ctx.beginPath(); ctx.moveTo(x, 104 + Math.abs(x - 800) * -0.25 + 12); ctx.lineTo(x, 112 + Math.abs(x - 800) * -0.25 + 12); ctx.stroke(); }
+    ctx.fillStyle = 'rgba(80,140,255,.8)'; ctx.beginPath(); ctx.ellipse(784, 96, 3, 6, 0, 0, TAU); ctx.fill(); // een traantje
+    return;
+  }
   if (id === 'alexgrot') {
     // vulkaangrot: gloeiende lavavonkjes en overal rode robotogen in het donker
     for (let i = 0; i < 60; i++) {
@@ -602,6 +631,23 @@ function tekenAchtergronden(scene, id) {
       ctx.fillStyle = 'rgba(20,20,30,.35)';
       for (let x = 60; x < 2040; x += 140 + (x * 7) % 90) { const y = basis + rug(x, 2048, golven) + 30; ctx.beginPath(); ctx.ellipse(x, y, 30 + (x % 30), 8, 0, 0, TAU); ctx.fill(); }
     }
+    if (id === 'happy') {
+      // snoepheuvels met zuurstokken en een reuzenkonijn met een starende glimlach
+      for (let x = 60; x < 2040; x += 150 + (x * 7) % 80) {
+        const y = basis + rug(x, 2048, golven);
+        ctx.fillStyle = '#fff'; ctx.fillRect(x - 6, y - 90, 12, 96);
+        ctx.fillStyle = '#ff4a6a'; for (let i = 0; i < 6; i++) ctx.fillRect(x - 6, y - 88 + i * 16, 12, 7);
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 12; ctx.beginPath(); ctx.arc(x + 14, y - 90, 14, Math.PI, 0); ctx.stroke();
+      }
+      for (const x of [600, 1500]) {
+        const y = basis + rug(x, 2048, golven) - 20;
+        ctx.fillStyle = 'rgba(255,255,255,.75)';
+        ctx.beginPath(); ctx.ellipse(x - 26, y - 150, 14, 46, -0.2, 0, TAU); ctx.ellipse(x + 26, y - 150, 14, 46, 0.2, 0, TAU); ctx.fill();
+        ctx.beginPath(); ctx.arc(x, y - 80, 52, 0, TAU); ctx.fill();
+        ctx.fillStyle = INKT; ctx.beginPath(); ctx.arc(x - 18, y - 90, 7, 0, TAU); ctx.arc(x + 18, y - 90, 7, 0, TAU); ctx.fill();
+        ctx.strokeStyle = INKT; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(x, y - 78, 34, 0.1 * Math.PI, 0.9 * Math.PI); ctx.stroke();
+      }
+    }
     if (id === 'alexgrot') {
       // lavastromen langs de rotswand, en grote schermen met een zonnebril erop
       ctx.strokeStyle = 'rgba(255,90,30,.75)'; ctx.lineWidth = 5;
@@ -642,6 +688,12 @@ function tekenAchtergronden(scene, id) {
         for (const [dx, dy, r] of [[0, -46, 22], [-16, -34, 16], [16, -34, 16], [0, -70, 15]]) {
           ctx.beginPath(); ctx.arc(x + dx * s, y + dy * s, r * s, 0, TAU); ctx.fill();
         }
+      } else if (id === 'happy') {
+        // reuzenlolly's
+        ctx.fillRect(x - 2 * s, y - 50 * s, 4 * s, 54 * s);
+        const kl = ['#ff4a6a', '#ffe04a', '#4ab8ff', '#6ad86a', '#9a6aff'];
+        for (let i = 0; i < 4; i++) { ctx.fillStyle = kl[(i + (x | 0)) % kl.length]; ctx.beginPath(); ctx.arc(x, y - 62 * s, (18 - i * 4) * s, 0, TAU); ctx.fill(); }
+        ctx.fillStyle = k.boom;
       } else if (id === 'kroeg') {
         // biervaten en barkrukken
         if ((x / 7 | 0) % 2) { ctx.beginPath(); ctx.ellipse(x, y - 18 * s, 16 * s, 20 * s, 0, 0, TAU); ctx.fill(); }
@@ -695,7 +747,7 @@ function tekenAchtergronden(scene, id) {
     if (id !== 'berg' && id !== 'maan') {
       const kl = { rivier: ['#2aa9a6', '#14285e'], ijs: ['#a8e4f5', '#2a5a96'], vulkaan: ['#ffb03c', '#a8200c'],
         grot: ['#2a6a7a', '#0a1020'], savanne: ['#c8924a', '#5a3a1a'], kroeg: ['#f2a33a', '#6b2a0a'],
-        fabriek: ['#f2a33a', '#7a3a0a'], speeltuin: ['#f2d08a', '#b8864a'], alexgrot: ['#ff6a1c', '#7a0a04'] }[id];
+        fabriek: ['#f2a33a', '#7a3a0a'], speeltuin: ['#f2d08a', '#b8864a'], alexgrot: ['#ff6a1c', '#7a0a04'], happy: ['#ff9ad8', '#a83a8a'] }[id];
       const g = ctx.createLinearGradient(0, 0, 0, 64);
       g.addColorStop(0, kl[0]); g.addColorStop(1, kl[1]);
       ctx.fillStyle = g; ctx.fillRect(0, 6, 512, 58);
@@ -832,6 +884,7 @@ function maakTexturen(scene) {
   maakIcoonTexturen(scene);
   maakDierTexturen(scene);
   maakAlexanderTexturen(scene);
+  maakHappyTexturen(scene);
   // titelbord: een glas bier met een schuimkraag
   tekenTextuur(scene, 'titelbord', 380, 170, ctx => {
     const g = ctx.createLinearGradient(0, 40, 0, 160);

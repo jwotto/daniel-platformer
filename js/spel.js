@@ -39,6 +39,7 @@ class Spel extends Phaser.Scene {
     this.donker = null; this.splat = null; this.straalG = null; this.tong = null; this.bandVloer = null;
     this.kistGestart = false; this.gewonnenTijd = 0;
     this.vierkant = null; this.hudCam = null; this.luchtCam = null;
+    this.snoepjes = [];
     this.achtergrond = maakAchtergrond(this, this.reg.id);
 
     this.platforms = this.physics.add.staticGroup();
@@ -133,7 +134,7 @@ class Spel extends Phaser.Scene {
 
     Geluid.muziekAan();
     // liedje kiezen: Bierpolka voor Rivier en IJsvlakte, Bergmars voor Bergen en Vulkaan, Baaslied bij een eindbaas
-    const lied = this.baasModus ? 'baas' : (['rivier', 'ijs', 'savanne', 'kroeg', 'speeltuin'].includes(this.reg.id) ? 'polka' : 'mars');
+    const lied = this.baasModus ? 'baas' : (['rivier', 'ijs', 'savanne', 'kroeg', 'speeltuin', 'happy'].includes(this.reg.id) ? 'polka' : 'mars');
     Geluid.speelLied(lied, Math.min(30, rondeVan(this.n) * 10));
 
     const titel = this.baasModus ? this.reg.baasNaam : levelNaam(this.n);
@@ -220,6 +221,8 @@ class Spel extends Phaser.Scene {
     if (this.reg.id === 'speeltuin' && w >= 140 && Math.random() < 0.35) this.maakTrampoline(x + w * 0.65, y);
     // grot: stalactieten aan het plafond boven het platform
     if (this.reg.id === 'grot' && this.genX > 1000 && Math.random() < 0.45) this.maakPegel(x + Phaser.Math.Between(20, w - 20));
+    // Jantje Willie Happy Place: gevaarlijk snoepgoed
+    if (this.reg.id === 'happy' && this.genX > 600) this.maakSnoep(x, y, w);
     // af en toe een kebabrol
     if (this.genX > 1200 && Math.random() < 0.07 * (1 + (this.run.up.kebabradar || 0) * 1.5)) this.maakKebab(x + w * 0.75, y - 40);
     if (Math.random() < 0.3) this.rijShotjes(x + w / 2, y - 34, Phaser.Math.Between(2, 4));
@@ -396,6 +399,7 @@ class Spel extends Phaser.Scene {
     this.tijd += dt;
     const inp = this.besturing.update(this.run.up.dash > 0);
     if (this.dood) { this.achtergrond.update(this.camX, this.tijd); return; }
+    if (this.reg.id === 'happy' && !this.baasModus) this.snoepUpdate(dt);
 
     if (!this.baasModus) {
       const snelheid = Math.min(125, 48 + this.n * 8 + this.speler.x / 400);
