@@ -36,7 +36,7 @@ class Spel extends Phaser.Scene {
     // dus eerst leegmaken. Anders loopt het baasgevecht vast na een normaal potje (en andersom).
     this.baas = null; this.baasBalk = null; this.baasTekst = null;
     this.levelTekst = null; this.meterTekst = null;
-    this.donker = null; this.splat = null; this.straalG = null; this.tong = null;
+    this.donker = null; this.splat = null; this.straalG = null; this.tong = null; this.bandVloer = null;
     this.achtergrond = maakAchtergrond(this, this.reg.id);
 
     this.platforms = this.physics.add.staticGroup();

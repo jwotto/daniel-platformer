@@ -33,10 +33,13 @@ class BaasDeel {
   maakArena() {
     // de vloer van de arena ligt vóór het water
     const machine = this.reg.baas === 'machine';
-    // bij de Brouwmachine houdt de vloer rechts op: de lopende band kan je eraf duwen
-    this.maakPlatform(0, 470, machine ? 860 : 960, true).setDepth(8);
-    this.maakPilaar(-36, 0);
-    if (!machine) this.maakPilaar(948, 0);
+    // bij de Brouwmachine houdt de vloer links én rechts op: de lopende band kan je eraf duwen
+    const vloer = this.maakPlatform(machine ? 100 : 0, 470, machine ? 760 : 960, true).setDepth(8);
+    if (!machine) { this.maakPilaar(-36, 0); this.maakPilaar(948, 0); }
+    if (machine) {
+      // de vloer is één grote lopende band (de streepjes laten zien welke kant hij op gaat)
+      this.bandVloer = this.add.tileSprite(vloer.x + 6, vloer.y + 2, vloer.displayWidth - 12, 10, 'band').setOrigin(0).setDepth(9);
+    }
     this.maakPlatform(130, 340, 190);
     this.maakPlatform(640, 340, 190);
     this.maakPlatform(385, 225, 190);
@@ -61,6 +64,7 @@ class BaasDeel {
       b.body.setImmovable(true).setAllowGravity(false); b.body.enable = false;
       b.x = 700; b.y = 730;
       b.status = 'grond'; b.cyclus = 1; b.ronde = 0; b.timer = 2;
+      b.bandRichting = 1; b.bandT = 2.5;
     }
     this.arenaBand = 0;
     this.baas = b;
@@ -703,8 +707,18 @@ BaasDeel.prototype.lepelaarZwaarte = function (b, dt) {
 // en wordt alles 2× zo zwaar (2× zoveel persen, 2× zo sterke band; de duur blijft hetzelfde).
 BaasDeel.prototype.machineUpdate = function (b, dt) {
   const sp = this.speler, keer = Math.pow(2, b.cyclus - 1);
-  // de lopende band duwt je naar rechts, de afgrond in (alleen als je op de vloer staat)
-  if (this.arenaBand && sp.body.blocked.down && sp.y > 455) sp.x += this.arenaBand * dt;
+  // de lopende band staat altijd aan en wisselt willekeurig van richting
+  b.bandT -= dt;
+  if (b.bandT <= 0) {
+    const nieuw = Math.random() < 0.5 ? -1 : 1;
+    if (nieuw !== b.bandRichting) this.baasRoep(nieuw > 0 ? 'Band →' : '← Band');
+    b.bandRichting = nieuw;
+    b.bandT = Phaser.Math.FloatBetween(2, 4.5);
+  }
+  this.arenaBand = b.bandRichting * 140 * keer;
+  if (this.bandVloer) { this.bandVloer.tilePositionX -= this.arenaBand * dt; this.bandVloer.setFlipX(b.bandRichting < 0); }
+  // hij duwt je de afgrond in (alleen als je op de vloer staat)
+  if (sp.body.blocked.down && sp.y > 455) sp.x += this.arenaBand * dt;
   // van de vloer gevallen? hartje eraf en terug op het bovenste platform
   if (sp.y > 600 && !this.dood) this.machineVal();
   b.timer -= dt;
@@ -717,26 +731,23 @@ BaasDeel.prototype.machineUpdate = function (b, dt) {
       const pers = 2 * keer, zij = 2 * keer;
       for (let i = 0; i < pers; i++) {
         const x = i === 0 ? sp.x : Phaser.Math.Between(60, 840);
-        this.time.delayedCall(i * Math.min(350, 1400 / pers), () => this.waarschuwing(x, 0.8, () => {
-          const k = this.kogel('persblok', x, -40, 0, 1100, 0); k.golf = true; k.leeft = 0.9;
-          this.time.delayedCall(420, () => { this.cameras.main.shake(120, 0.01); Geluid.effect('smash'); });
-        }));
+        this.time.delayedCall(i * Math.min(350, 1400 / pers), () => {
+          // doorzichtige rode baan: hier komt de pers naar beneden
+          this.rodeBaan(x - 60, 0, 120, 470, 0.8);
+          this.waarschuwing(x, 0.8, () => {
+            const k = this.kogel('persblok', x, -40, 0, 1100, 0); k.golf = true; k.leeft = 0.9;
+            this.time.delayedCall(420, () => { this.cameras.main.shake(120, 0.01); Geluid.effect('smash'); });
+          });
+        });
       }
       for (let i = 0; i < zij; i++) {
         const links = i % 2 === 0;
         this.time.delayedCall(1600 + i * Math.min(450, 1400 / zij), () => this.zijPers(links));
       }
-      this.time.delayedCall(3300, () => {
-        if (!b.active || this.gewonnen) return;
-        this.baasRoep(`Lopende band${keer > 1 ? ' ×' + keer : ''}!`);
-        this.arenaBand = 140 * keer;
-        this.time.delayedCall(3000, () => { this.arenaBand = 0; });
-      });
       b.timer = 7;
     } else {
       // na 3 rondes: naar boven! 5 seconden kun je hem raken
       b.status = 'boven'; b.ronde = 0; b.timer = 5.8;
-      this.arenaBand = 0;
       this.baasRoep('Hij komt naar boven! Nu raken!');
       this.cameras.main.shake(400, 0.01);
       Geluid.effect('smash');
@@ -751,12 +762,19 @@ BaasDeel.prototype.machineUpdate = function (b, dt) {
   }
 };
 
+// doorzichtige rode baan die knippert: hier komt zo een pers
+BaasDeel.prototype.rodeBaan = function (x, y, w, h, duur) {
+  const r = this.add.rectangle(x, y, w, h, 0xff3a3a, 0.28).setOrigin(0).setDepth(5);
+  r.setStrokeStyle(2, 0xff3a3a, 0.6);
+  this.tweens.add({ targets: r, alpha: 0.35, yoyo: true, repeat: Math.max(1, Math.round(duur / 0.25) - 1), duration: 125, onComplete: () => r.destroy() });
+};
+
 // een pers die vanaf de zijkant over de vloer schuift: spring eroverheen!
 BaasDeel.prototype.zijPers = function (links) {
   if (this.gewonnen || this.dood) return;
   const x = links ? -60 : 1020, y = 446;
-  const w = this.add.rectangle(links ? 20 : 940, y, 40, 50, 0xd1495b, 0.5).setDepth(6);
-  this.tweens.add({ targets: w, alpha: 0.1, yoyo: true, repeat: 2, duration: 120, onComplete: () => w.destroy() });
+  // doorzichtige rode strook over de vloer: hier schuift de pers langs
+  this.rodeBaan(0, y - 25, 960, 50, 0.7);
   this.time.delayedCall(700, () => {
     if (this.gewonnen) return;
     const k = this.kogel('perszij', x, y, links ? 760 : -760, 0, 0); k.golf = true; k.leeft = 1.6;
