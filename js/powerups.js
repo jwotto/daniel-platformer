@@ -138,7 +138,10 @@ function hartenMet(id) {
 
 // ---------- OPSLAAN ----------
 // Je flesjes, power-ups en regio's worden in de browser bewaard, ook als je doodgaat.
-const OPSLAG = 'flesje_profiel_v2';
+// Nieuwe naam = iedereen begint opnieuw (de oude voortgang wordt niet meer gelezen).
+// v3: reset op 8 november 2026, na de grote balans-update.
+const OPSLAG = 'flesje_profiel_v3';
+try { localStorage.removeItem('flesje_profiel_v2'); } catch (e) { /* geeft niks */ }
 const TESTMODUS = ['#test', '#winkel', '#shop', '#kebab', '#baas', '#ijs', '#berg', '#vulkaan', '#grot', '#savanne', '#kroeg', '#fabriek', '#speeltuin', '#maan', '#prestaties', '#gokkast', '#levels', '#dieren', '#spel'].some(h => location.hash.startsWith(h));
 
 function laadProfiel() {

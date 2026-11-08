@@ -203,6 +203,10 @@ Typ `./zet-online.sh`. Dat geeft de game een nieuw versienummer, maakt een commi
 
 Waarom een versienummer? Je browser bewaart de bestanden van de game een tijdje (de *cache*), zodat hij sneller laadt. Zonder nieuw nummer speel je dan nog de oude versie. Met een nieuw nummer haalt de browser alles opnieuw op. De game kijkt bij het opstarten ook zelf of er een nieuwere versie is, en laadt dan meteen opnieuw.
 
+## Voortgang opnieuw beginnen
+
+De voortgang wordt in de browser bewaard onder de naam in `OPSLAG` (in `js/powerups.js`). Wil je dat iedereen opnieuw begint? Verhoog dan het nummer (bijv. `flesje_profiel_v3` → `v4`) en zet het online. Op 8 november 2026 is dit één keer gedaan (v2 → v3), na de grote balans-update.
+
 ## Problemen en oplossingen
 
 - **Na twee keer doodgaan bleef de game hangen.** Oorzaak: een scherm onthield "ik ben al weg" van de vorige keer, en reageerde de volgende keer niet meer op de knop. Oplossing: dat vlaggetje wordt nu elke keer opnieuw op nul gezet als het scherm opent. Getest met drie keer doodgaan en echt klikken.
