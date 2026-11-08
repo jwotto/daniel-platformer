@@ -77,30 +77,30 @@ function tekenVliegvarken(ctx) {
 function tekenWorst(ctx) {
   ctx.save(); ctx.strokeStyle = INKT; ctx.lineWidth = 4;
   // twee roze harige gehaktballen als benen
-  for (const x of [56, 114]) {
-    ctx.fillStyle = '#e88ab0'; ctx.beginPath(); ctx.arc(x, 172, 26, 0, TAU); ctx.fill(); ctx.stroke();
+  for (const x of [66, 104]) {
+    ctx.fillStyle = '#e88ab0'; ctx.beginPath(); ctx.arc(x, 174, 22, 0, TAU); ctx.fill(); ctx.stroke();
     ctx.strokeStyle = '#b0507a'; ctx.lineWidth = 2;
-    for (let i = 0; i < 22; i++) { const a = i * TAU / 22; ctx.beginPath(); ctx.moveTo(x + Math.cos(a) * 24, 172 + Math.sin(a) * 24); ctx.lineTo(x + Math.cos(a) * 31, 172 + Math.sin(a) * 31); ctx.stroke(); }
-    ctx.fillStyle = 'rgba(140,60,90,.45)'; for (const [dx, dy] of [[-8, -6], [6, 4], [-2, 10], [10, -10]]) { ctx.beginPath(); ctx.arc(x + dx, 172 + dy, 3, 0, TAU); ctx.fill(); }
+    for (let i = 0; i < 20; i++) { const a = i * TAU / 20; ctx.beginPath(); ctx.moveTo(x + Math.cos(a) * 20, 174 + Math.sin(a) * 20); ctx.lineTo(x + Math.cos(a) * 27, 174 + Math.sin(a) * 27); ctx.stroke(); }
+    ctx.fillStyle = 'rgba(140,60,90,.45)'; for (const [dx, dy] of [[-7, -5], [5, 4], [-2, 9], [8, -8]]) { ctx.beginPath(); ctx.arc(x + dx, 174 + dy, 2.6, 0, TAU); ctx.fill(); }
     ctx.strokeStyle = INKT; ctx.lineWidth = 4;
   }
-  // de grote roze worst
-  const g = ctx.createLinearGradient(30, 0, 140, 0); g.addColorStop(0, '#d0608a'); g.addColorStop(0.45, '#ffa8c8'); g.addColorStop(1, '#c0507a');
-  ctx.fillStyle = g; rondRect(ctx, 36, 34, 98, 130, 48); ctx.fill(); ctx.stroke();
-  ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(58, 62); ctx.lineTo(58, 130); ctx.stroke();
+  // de grote roze worst (lang en dun)
+  const g = ctx.createLinearGradient(60, 0, 110, 0); g.addColorStop(0, '#d0608a'); g.addColorStop(0.45, '#ffa8c8'); g.addColorStop(1, '#c0507a');
+  ctx.fillStyle = g; rondRect(ctx, 60, 30, 50, 136, 25); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(70, 60); ctx.lineTo(70, 140); ctx.stroke();
   ctx.strokeStyle = 'rgba(150,40,80,.4)'; ctx.lineWidth = 2;
-  for (const y of [120, 140]) { ctx.beginPath(); ctx.moveTo(44, y); ctx.quadraticCurveTo(85, y + 8, 126, y); ctx.stroke(); }
+  for (const y of [124, 144]) { ctx.beginPath(); ctx.moveTo(63, y); ctx.quadraticCurveTo(85, y + 6, 107, y); ctx.stroke(); }
   // gezicht: grote blije ogen en een veel te brede glimlach
-  ctx.strokeStyle = INKT; ctx.lineWidth = 3;
-  for (const x of [68, 102]) { ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, 76, 11, 0, TAU); ctx.fill(); ctx.stroke(); ctx.fillStyle = INKT; ctx.beginPath(); ctx.arc(x + 2, 78, 5, 0, TAU); ctx.fill(); }
-  ctx.fillStyle = '#7a1a3a'; ctx.beginPath(); ctx.moveTo(56, 96); ctx.quadraticCurveTo(85, 128, 114, 96); ctx.closePath(); ctx.fill(); ctx.stroke();
-  ctx.fillStyle = '#fff'; for (let x = 64; x < 108; x += 9) ctx.fillRect(x, 97, 6, 6);
-  ctx.fillStyle = 'rgba(255,90,120,.6)'; ctx.beginPath(); ctx.arc(54, 92, 6, 0, TAU); ctx.arc(116, 92, 6, 0, TAU); ctx.fill();
+  ctx.strokeStyle = INKT; ctx.lineWidth = 2.5;
+  for (const x of [76, 95]) { ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, 72, 8, 0, TAU); ctx.fill(); ctx.stroke(); ctx.fillStyle = INKT; ctx.beginPath(); ctx.arc(x + 1.5, 74, 3.6, 0, TAU); ctx.fill(); }
+  ctx.fillStyle = '#7a1a3a'; ctx.beginPath(); ctx.moveTo(68, 90); ctx.quadraticCurveTo(85, 114, 102, 90); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#fff'; for (let x = 72; x < 99; x += 6.5) ctx.fillRect(x, 91, 4.5, 5);
+  ctx.fillStyle = 'rgba(255,90,120,.6)'; ctx.beginPath(); ctx.arc(66, 86, 4, 0, TAU); ctx.arc(104, 86, 4, 0, TAU); ctx.fill();
   // rode pet (klep naar links)
   ctx.fillStyle = '#d1302b'; ctx.strokeStyle = INKT; ctx.lineWidth = 3;
-  ctx.beginPath(); ctx.ellipse(85, 40, 44, 26, 0, Math.PI, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(46, 38); ctx.quadraticCurveTo(14, 38, 8, 48); ctx.lineTo(50, 46); ctx.closePath(); ctx.fill(); ctx.stroke();
-  ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(85, 16, 4, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(85, 38, 27, 20, 0, Math.PI, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(60, 36); ctx.quadraticCurveTo(36, 36, 30, 45); ctx.lineTo(62, 44); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(85, 18, 3.5, 0, TAU); ctx.fill(); ctx.stroke();
   ctx.restore();
 }
 
@@ -127,7 +127,7 @@ function maakHappyTexturen(scene) {
   tekenTextuur(scene, 'beertje', 68, 82, ctx => tekenBeertje(ctx, BEER_KLEUREN[0]));
   tekenTextuur(scene, 'regenbooglolly', 46, 94, tekenRegenboogLolly);
   tekenTextuur(scene, 'vliegvarken', 70, 44, tekenVliegvarken);
-  tekenTextuur(scene, 'baas_worst', 170, 202, tekenWorst);
+  tekenTextuur(scene, 'baas_worst', 120, 202, ctx => { ctx.translate(-25, 0); tekenWorst(ctx); });
   for (let i = 0; i < 4; i++) tekenTextuur(scene, 'poepje_' + i, 34, 36, ctx => tekenPoepje(ctx, i));
   tekenTextuur(scene, 'poepje', 34, 36, ctx => tekenPoepje(ctx, 0));
   tekenTextuur(scene, 'diarree', 16, 16, ctx => { ctx.fillStyle = '#8a5a1a'; ctx.strokeStyle = INKT; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(8, 1); ctx.quadraticCurveTo(15, 10, 8, 15); ctx.quadraticCurveTo(1, 10, 8, 1); ctx.fill(); ctx.stroke(); });
