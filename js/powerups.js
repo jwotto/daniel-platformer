@@ -91,9 +91,9 @@ const REGIOS = [
   { id: 'speeltuin', naam: 'Speeltuin', baas: 'clown', baasNaam: 'De Eenwielerclown' },
   { id: 'maan', naam: 'Maan', baas: 'moederschip', baasNaam: 'Het Moederschip' },
   // het allerlaatste level: pas open als je alle andere levels hebt gehaald
-  { id: 'alexgrot', naam: 'Terminatorgrot', baas: 'alexander', baasNaam: 'Alexander de Terminator' },
+  { id: 'alexgrot', naam: 'Alex', baas: 'alexander', baasNaam: 'Alexander de Terminator' },
   // en dan het allerallerlaatste, ultra-ultramoeilijke level: pas open na Alexander
-  { id: 'happy', naam: 'Jantje Willie Happy Place', baas: 'worst', baasNaam: 'De Grote Roze Worst' },
+  { id: 'happy', naam: 'Happy', baas: 'worst', baasNaam: 'De Grote Roze Worst' },
 ];
 
 function regioVan(n) { return REGIOS[n % REGIOS.length]; }

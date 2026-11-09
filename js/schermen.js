@@ -80,7 +80,7 @@ class Boot extends Phaser.Scene {
       POWERUPS.forEach(p => { PROFIEL.up[p.id] = Math.min(2, p.max); });
       this.scene.start('Spel', { run: { level: 2, up: PROFIEL.up, harten: 99, baas: false } });
     } else if (h.startsWith('#baas')) {
-      // #baas0 = pad, #baas1 = beer, #baas2 = geit, #baas3 = draak
+      // #baas0 = pad, #baas1 = beer ... #baas10 = alexander, #baas11 = worst
       POWERUPS.forEach(p => { PROFIEL.up[p.id] = Math.min(2, p.max); });
       PROFIEL.regio = Number(h.slice(5)) || 0;
       this.scene.start('Spel', { run: { level: PROFIEL.regio, up: PROFIEL.up, harten: 99, baas: true } });

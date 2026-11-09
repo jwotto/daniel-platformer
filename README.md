@@ -32,8 +32,8 @@ Een roguelike platformer van Daniel. Het is een HTML-game, gemaakt met [Phaser 3
 - Vijanden laten **shotjes** vallen. 10 shotjes = **1 vol flesje**. In latere regio's zijn shotjes meer waard.
 - Ga je dood, dan kies je eerst **1 van 3 upgrades** voor je volgende potje. Elke upgrade heeft een plus én een min, bijvoorbeeld *Springveer*: 1.2× zo hoog springen, maar 0.8× zo snel lopen. Of *Gulzig*: 1.5× zoveel shotjes, maar maar 1 hartje. De upgrade geldt alleen voor dat ene potje (ook als je daarin een eindbaas verslaat).
 - Daarna kom je in het **Game over-menu**: grote tegels naar Power-ups, Skins, Dieren, Gokkast, Level, Eindbaas, Prestaties en Instellingen, en onderaan **▶ Spelen**. Elke tegel heeft een hintje (bijv. "3 te koop!"), en vanuit elk scherm kom je met ← Terug weer in dit menu. Daar koop je power-ups met je flesjes. Alles wat je koopt blijft van jou.
-- In de winkel koop je ook een gevecht met de **eindbaas**. Dat is duur! Versla je hem, dan ga je door naar de volgende regio. Je ticket is op zodra je gaat vechten: verlies je, dan moet je opnieuw betalen.
-- Regio's die je hebt vrijgespeeld kun je in de winkel kiezen als startplek.
+- Via de tegel **Eindbaas** koop je een gevecht met de **eindbaas**. Dat is duur! Versla je hem, dan ga je door naar de volgende regio. Je ticket is op zodra je gaat vechten: verlies je, dan moet je opnieuw betalen.
+- Regio's die je hebt vrijgespeeld kun je via de tegel **Level** kiezen als startplek.
 - Af en toe zweeft er een **kebabrol**. Eet je hem op, dan laat je een scheet en vlieg je heel hoog de lucht in!
 - Je held draagt een **bierfles als muts**.
 
@@ -43,17 +43,17 @@ Op elke power-up-kaart in de winkel staat links het niveau dat **aan** staat (me
 
 ### Level kiezen
 
-In de winkel zit linksonder de **levelknop** met een plaatje van het level waar je start. Tik erop en je krijgt alle levels als kaarten: met een plaatje, de eindbaas, een ✔ als je hem verslagen hebt en een 🔒 als het level nog dicht zit. Elk level heeft een eigen melodietje als je hem kiest. Alle knoppen in de game veren in als je ze indrukt, met een klikje.
+In het Game over-menu zit de tegel **Level** met een plaatje van het level waar je start. Tik erop en je krijgt alle 12 levels als kaarten (2 rijen van 6; de laatste, Happy, heeft een rode rand): met een plaatje, de eindbaas, een ✔ als je hem verslagen hebt en een 🔒 als het level nog dicht zit. Elk level heeft een eigen melodietje als je hem kiest. Alle knoppen in de game veren in als je ze indrukt, met een klikje.
 
 ### Huisdieren
 
-In het Game over-menu (na het doodgaan) en in de shop zit **🐾 Dieren**. Draai aan het dierenrad (heel duur: 80 flesjes, en elk volgend dier 40 meer) en win een van 12 huisdieren. Upgrade ze tot niveau 5 (★★★★★). Je neemt er één mee; hij loopt of vliegt met je mee en helpt je:
+In het Game over-menu (na het doodgaan) en in de shop zit **🐾 Dieren**. Draai aan het dierenrad (heel duur: 500 flesjes, en elk volgend dier 250 meer) en win een van 12 huisdieren. Upgrade ze tot niveau 5 (★★★★★). Je neemt er één mee; hij loopt of vliegt met je mee en helpt je:
 
 Kuiken (shotjes meer waard) · Otje de bruine Franse bulldog (haalt shotjes van ver op) · Tara de donkergrijze kat (krabt monsters) · Uil (hoger springen) · Schildpad (extra hartjes) · Vos (sneller lopen) · Papegaai (schiet pijlen) · Draakje (spuwt vuurballen) · Eenhoorn (kans op flesjes) · Bierbeestje (meer shotjes én schade) · Flin de baby (huilt WAAAH!: monsters verdoofd, kogels weg) · Alexander Dikkop (kopstoot op élk monster).
 
 ### Opnieuw brouwen (prestige)
 
-Heb je alle 10 eindbazen verslagen? Dan staat op het titelscherm **⭐ Opnieuw brouwen**. Je begint weer bij de Rivier zonder flesjes en power-ups, maar je houdt je skins, huisdieren en prestaties, én je krijgt een ster: elke ster maakt shotjes voor altijd 10% meer waard.
+Heb je alle 12 eindbazen verslagen (ook Alexander en de Grote Roze Worst)? Dan staat op het titelscherm **⭐ Opnieuw brouwen**. Je begint weer bij de Rivier zonder flesjes en power-ups, maar je houdt je skins, huisdieren en prestaties, én je krijgt een ster: elke ster maakt shotjes voor altijd 10% meer waard.
 
 ### Schatkist
 
@@ -65,7 +65,7 @@ In de shop zit de **🎰 Gokkast**. Kies hoeveel flesjes je inzet (1, 5, 10, 25 
 
 ### Prestaties
 
-In het Game over-menu (na het doodgaan) zit **🏆 Prestaties**: 40 doelen van makkelijk (je eerste potje: 1 flesje) tot heel moeilijk (500 flesjes verdienen: 30 flesjes). Haal je er een, dan komt er een melding in beeld en krijg je de flesjes meteen.
+In het Game over-menu (na het doodgaan) zit **🏆 Prestaties**: 45 doelen van makkelijk (je eerste potje: 1 flesje) tot heel moeilijk (500 flesjes verdienen: 30 flesjes). Haal je er een, dan komt er een melding in beeld en krijg je de flesjes meteen.
 
 ### Het startscherm
 
@@ -75,7 +75,8 @@ Het poppetje staat een biertje te drinken, overal zweeft bier... en de **Start**
 
 In het Game over-menu zit de tegel **Skins** (de shop). Daar draai je aan een rad en win je een nieuwe **skin**: andere kleren en een ander flesje op je hoofd. De eerste keer draaien kost 5 flesjes, daarna elke keer 5 meer (10, 15, 20 …). Je wint altijd een skin die je nog niet had. Bij "Jouw skins" tik je een skin aan om hem aan te trekken.
 
-Skins: Gewoon · Groene Fles · Goudkoning · Nachtridder · Rode Duivel · IJskoud · Roze Rosé · Zombie.
+Skins aan het rad: Gewoon · Groene Fles · Goudkoning · Nachtridder · Rode Duivel · IJskoud · Roze Rosé · Zombie.
+Baas-skins met een kroon (win je door een baas te verslaan): Padkoning · IJsbeer · Bokkenrijder · Drakendoder · Grottenjager · Flipperkoning · Barkeeper · Brouwmeester · Clown · Astronaut. Alexander en de Worst hebben geen skin (het rooster in de shop is vol), wel een eigen prestatie.
 
 ### Regio's en eindbazen
 
@@ -93,11 +94,11 @@ Elke eindbaas heeft zijn eigen aanvallen, een eigen **ritme** (de pauzes tussen 
 | 🏭 Fabriek (lopende banden) | De Brouwmachine | 510 | zit in de grond (dan niet te raken) en doet 3 rondes: persen van boven, persen van opzij, over de vloer én hoger door de arena (spring eroverheen of duik eronder) (een doorzichtige rode baan laat vooraf zien waar een pers komt) en de hele vloer is een lopende band die altijd aanstaat en willekeurig van richting wisselt; links en rechts houdt de vloer op (val je eraf: hartje kwijt, terug op het bovenste platform) | **Naar boven**: na 3 rondes komt hij 5 seconden boven, dán kun je hem raken. Daarna wordt alles 2× zo zwaar | 3 rondes, boven, steeds ×2 |
 | 🛝 Speeltuin (trampolines) | De Eenwielerclown | 345 | rijdt op zijn eenwieler over vloer, muren én plafond; rijdt 2× zo snel; gooit telkens 4 grote, snelle ballen die blijven stuiteren tot ze je raken; **raak je hem, dan gooit hij meteen een taart en springt hij weg** (zijn gewone klokjes lopen gewoon door) | **Elke 4 seconden** springt hij op een nieuwe eenwieler naar een ander vlak (door je heen springen = 1 hartje); **taart in je gezicht** | om de 4 seconden een sprong |
 | 🌙 Maan (lage zwaartekracht) | Het Moederschip | 520 | vierkante, dichte arena; snelle lasers (1,5×), mini-ufo's, trekstraal; het schip is wat kleiner | **Elke 4 seconden draait het veld**: je speelt opzij of ondersteboven (de lucht, hartjes en knoppen blijven recht) | bliep... bloep |
-| 🤖 Terminatorgrot (pas na de Maan, het allerlaatste level) | Alexander de Terminator, met Robot-Tara en Daniel de noob | 1400 | 10 aanvallen om de beurt: raketregen, laserklauwen (Tara), zonnebrillaser, scheetwolk (Daniel, je wordt traag), kloonleger (welke is de echte?), muisraketten die je achtervolgen (Tara), spinvorm, scheetraket (Daniel), stijgende lava, noob-schild | **Noob-schild**: zolang Daniel "Ik ben een noob!" roept, kun je Alexander niet raken. Eerst Daniel een tik geven! | 10 aanvallen achter elkaar |
-| 🌈 Jantje Willie Happy Place (pas na Alexander, ultra-ultramoeilijk; het gevecht kost 3×) | De Grote Roze Worst (rode pet, roze harige gehaktballen als benen) | 2600 | gele druppels omhoog die op je neervallen, drollengolven over de vloer (spring eroverheen), kleine poepmonstertjes (4 soorten) die meevechten, worstensprong met schokgolf | **Snoepregen van ellende**: dubbele druppelregen plus een drollengolf; woedend komen de drollen van twee kanten | PFRRT! |
+| 🤖 Alex: een vulkaangrot vol terminatorrobots (pas na de Maan) | Alexander de Terminator, met Robot-Tara en Daniel de noob | 1400 | 10 aanvallen om de beurt: raketregen, laserklauwen (Tara), zonnebrillaser, scheetwolk (Daniel, je wordt traag), kloonleger (welke is de echte?), muisraketten die je achtervolgen (Tara), spinvorm, scheetraket (Daniel), stijgende lava, noob-schild | **Noob-schild**: zolang Daniel "Ik ben een noob!" roept, kun je Alexander niet raken. Eerst Daniel een tik geven! | 10 aanvallen achter elkaar |
+| 🌈 Happy: Jantje Willie Happy Place, een veel te vrolijk regenboogland (pas na Alexander, ultra-ultramoeilijk; het gevecht kost 3×) | De Grote Roze Worst (rode pet, roze harige gehaktballen als benen) | 2600 | gele druppels omhoog die op je neervallen, drollengolven over de vloer (spring eroverheen), kleine poepmonstertjes (4 soorten) die meevechten, worstensprong met schokgolf | **Snoepregen van ellende**: dubbele druppelregen plus een drollengolf; woedend komen de drollen van twee kanten | PFRRT! |
 
 
-Daarna begint het opnieuw met Rivier 2, en alles is sterker.
+In de levelkeuze heten de laatste twee kort **Alex** en **Happy**, zodat de namen mooi passen. Na Happy begint het opnieuw met Rivier 2, en alles is sterker.
 
 ### Monsters per regio
 
@@ -115,19 +116,19 @@ Elk monster heeft een eigen manier om hem te verslaan. Het tekentje boven zijn h
 | 🏭 Fabriek | Robot ⚔ (schiet kroonkurken), Stoomketel ⤓ (stoomwolken) | drone ➶ (laat flessen vallen) |
 | 🛝 Speeltuin | Wipkip ⤓ (hopt naar je toe), Zandbakmonster ⚔ (gooit zand) | ballon ➶ |
 | 🌙 Maan | Alien ⚔ (laser), Kraterkruiper ⤓ | ufo ➶ (trekstraal) |
-| 🤖 Terminatorgrot | Spinrobot-Alexander (springt op je af, laser uit zijn zonnebril; super sterk) | Raket-Alexander (raketrugzak, vuurt raketjes; super sterk) |
-| 🌈 Jantje Willie Happy Place | Dik depressief beertje met kaboutermuts (mept met een reuzenregenbooglolly; ultra sterk) | Vliegend roze varken (schiet diarree uit zijn kont) · gevaarlijk snoepgoed: lollyspikes, exploderende zuurtjes, kauwgom (je plakt vast), zwiepende dropveters |
+| 🤖 Alex | Spinrobot-Alexander (springt op je af, laser uit zijn zonnebril; super sterk) | Raket-Alexander (raketrugzak, vuurt raketjes; super sterk) |
+| 🌈 Happy | Dik depressief beertje met kaboutermuts (mept met een reuzenregenbooglolly; ultra sterk) | Vliegend roze varken (schiet diarree uit zijn kont) · gevaarlijk snoepgoed: lollyspikes, exploderende zuurtjes, kauwgom (je plakt vast), zwiepende dropveters |
 | Overal, zeldzaam | Gouden flesje met pootjes: vang hem voor een heel flesje! | |
 
 Op sommige platforms liggen **spikes**: niet aanraken, ook niet als je erop springt! In de Grot hangen **stalactieten** aan het plafond: ze vallen als je eronder loopt en doen ook pijn als ze nog hangen.
 
 ### Een baas nog eens verslaan
 
-Kies in de winkel bij "Start in" een eerdere regio. Dan staat de baas van die regio op de baaskaart, met een **✔** rechtsboven als je hem al verslagen hebt. Je kunt hem gewoon nog eens bevechten: je betaalt opnieuw, maar de beloning is altijd hoger dan de prijs.
+Kies via de tegel **Level** een eerdere regio. Dan staat de baas van die regio bij de tegel **Eindbaas**, met een **✔** rechtsboven als je hem al verslagen hebt. Je kunt hem gewoon nog eens bevechten: je betaalt opnieuw, maar de beloning is altijd hoger dan de prijs.
 
 ### Beloning na een eindbaas
 
-Versla je een eindbaas, dan krijg je flink wat flesjes, altijd meer dan het gevecht kostte (25, 42, 59 …) en de eerste keer een **baas-skin met een kroon** (Padkoning, IJsbeer, Bokkenrijder, Drakendoder). Die skins kun je niet aan het rad winnen.
+Versla je een eindbaas, dan krijg je flink wat flesjes, altijd meer dan het gevecht kostte (25, 42, 59 …) en de eerste keer een **baas-skin met een kroon** (zie Shop en skins). Die skins kun je niet aan het rad winnen.
 
 ### Power-ups en balans
 
@@ -165,7 +166,7 @@ Elk liedje is een **akkoordenschema**: één akkoord per maat. De bas, de akkoor
 | **Bergmars** | Bergen, Vulkaan | A mineur | Am Am Dm E7 · Am F G C · F G Em Am · Dm E7 Am Am |
 | **Baaslied** (snel) | eindbazen | D mineur | Dm Dm Bb A7 · Dm Bb C A7 |
 
-Grot gebruikt de Bergmars, Savanne de Bierpolka. Een nieuw liedje maken? Voeg in `LIEDJES` een schema en een rijtje melodie-patronen toe.
+Savanne, Kroeg, Speeltuin en Happy gebruiken de Bierpolka; Grot, Fabriek, Maan en Alex de Bergmars. Een nieuw liedje maken? Voeg in `LIEDJES` een schema en een rijtje melodie-patronen toe.
 
 ## Bestanden
 
@@ -180,13 +181,15 @@ Grot gebruikt de Bergmars, Savanne de Bierpolka. Een nieuw liedje maken? Voeg in
 | `js/spel.js` | het level, de speler, aanvallen, schade en de HUD |
 | `js/monsters.js` | alle gewone monsters per regio en wat ze doen |
 | `js/bazen.js` | de eindbazen: arena, aanvallen, ritme, woedefase |
+| `js/alexander.js` | level Alex: de Alexander-robots en eindbaas Alexander met Robot-Tara en Daniel |
+| `js/happyplace.js` | level Happy: beertjes, vliegende varkens, gevaarlijk snoepgoed en de Grote Roze Worst |
 | `js/krachten.js` | effecten van Reservevat, Boerbom en Flesmaatje |
 | `js/schermen.js` | titelscherm, instellingen en winkel |
 | `js/shop.js` | de shop met het draairad en je skins |
 | `js/gokkast.js` | de gokkast |
 | `js/schatkist.js` | de schatkist met het gokrad |
 | `js/dieren.js` | de huisdieren: tekeningen, wat ze doen en de dierenwinkel |
-| `js/prestaties.js` | de 40 prestaties, de tellers en het prestatiescherm |
+| `js/prestaties.js` | de 45 prestaties, de tellers en het prestatiescherm |
 | `js/iconen.js` | de icoontjes van de power-ups en de upgrade-keuzes |
 | `js/main.js` | zet alles aan |
 | `js/scherm.js` | altijd liggend spelen en het hele scherm vullen |
@@ -195,15 +198,17 @@ Grot gebruikt de Bergmars, Savanne de Bierpolka. Een nieuw liedje maken? Voeg in
 ### Vaste speeltest
 
 Typ `python3 tests/test.py`. Dan speelt de computer de game na in een onzichtbare Chrome en zegt per onderdeel ✔ of ✘:
-ronde (doodgaan → kiezen → winkel → shop → baas → weer spelen), vallen, monsters, zwak (zwakke plekken), bazen, powerups, shop en kebab.
+ronde (doodgaan → kiezen → winkel → shop → baas → weer spelen), vallen, monsters, zwak (zwakke plekken), bazen, beloning, opnieuw, powerups, shop, spikes, kebab, prestaties, aan, knoppen, trucjes, levels, gokken, dieren, prestige, balansregels, schatkist, machine, nabaas (na een baas verder kunnen) en clownufo. Alle regio's tellen mee, ook Alex en Happy.
+Let op: draait de computer tegelijk iets zwaars (bijv. video's maken), dan halen sommige onderdelen hun wachttijd niet. Draai ze dan later nog eens.
 Eén onderdeel testen kan ook: `python3 tests/test.py vallen`.
 
 ### Test-adressen
 
 Zet dit achter het adres van de game (je opgeslagen spel wordt dan niet aangeraakt):
 - `#test`: de computer speelt zelf, met alle power-ups op niveau 2
-- `#baas0` t/m `#baas3`: meteen vechten tegen een eindbaas (de computer speelt)
-- `#ijs`, `#berg`, `#vulkaan`: meteen naar die regio
+- `#baas0` t/m `#baas11`: meteen vechten tegen een eindbaas (0 = Koning Bierpad … 10 = Alexander, 11 = de Worst)
+- `#ijs`, `#berg`, `#vulkaan`, `#grot`, `#savanne`, `#kroeg`, `#fabriek`, `#speeltuin`, `#maan`, `#alexgrot`, `#happy`: meteen naar die regio
+- `#kist`, `#dieren`, `#gokkast`, `#levels`, `#prestaties`: meteen naar dat onderdeel
 - `#winkel`: meteen naar de winkel, met 60 flesjes
 - `#shop`: meteen naar de shop met het draairad, met 200 flesjes
 - `#kebab`: meteen spelen met een kebabrol voor je neus
@@ -237,5 +242,7 @@ De voortgang wordt in de browser bewaard onder de naam in `OPSLAG` (in `js/power
 - **Een nieuwe baas gaf de lagere beloning.** Oorzaak: de beloning werd uitgerekend nádat de volgende regio open ging, dus telde de baas als "al verslagen". Oplossing: eerst de beloning uitrekenen, dan pas de regio openzetten. Gevonden door de test `beloning`.
 - **Op de telefoon vulde de game het scherm niet goed** (in het spel een lege strook rechts, in het menu geen achtergrond aan de randen). Oorzaken: (1) bij een andere schermmaat (draaien, adresbalk, volledig scherm) liet de game alles opnieuw instellen vóórdat de nieuwe maat gelezen was; (2) de randen meldden zich per scherm aan toen die schermen nog niet bestonden, dus schoven ze niet mee. Oplossing: eerst de maat lezen, dan instellen; en vlak voor elk beeldje alle actieve schermen nalopen (maat, randen, meeschuiven). Getest door een telefoon na te doen (851×393 met een wisselende schermmaat) en foto's uit het canvas te maken.
 - **Na een verslagen baas kon je soms niet meer verder** (Daniel). Oorzaak: de schatkist met de beloning ging alleen open via één timer; als die niet afging, bleef het spel hangen. Daarnaast werd het volgende level gestart met "verder" en "opnieuw" tegelijk. Oplossing: het spel controleert nu zelf elk beeldje of de kist al open had moeten zijn, en het volgende level start in één stap. Getest met echte klikken: baas verslaan → kist → volgende level → stoppen → opnieuw spelen → volgende baas, 5 keer achter elkaar goed.
+- **Op de telefoon liepen aan de randen alleen de lucht door, niet de bergen en het water.** Oorzaak: op een telefoon tekent de game met de grafische chip (WebGL); daar heeft een bewegende achtergrondlaag een eigen, lege hulp-plaatje, en de randkopieën gebruikten per ongeluk dat lege plaatje. Oplossing: de kopieën gebruiken het echte plaatje (`displayTexture`), en de randen overlappen het midden 1 pixel zodat er geen naadje is.
+- **In de arena van het moederschip lag de achtergrond vóór de vloer.** Oorzaak: voor het draaiende veld zijn er 3 camera's (lucht, wereld, hartjes); de maanbodem en de randkopieën kwamen in de bovenste camera terecht. Oplossing: alles wat vast staat en geen hartje of knop is, gaat naar de luchtcamera achteraan.
 - **Zwarte balk opzij op de telefoon.** Oorzaak: het speelvak hield ruimte vrij voor de camera-uitsparing en navigatiebalk. Oplossing: het speelvak vult nu het hele scherm (menu's en knoppen staan toch in het midden).
 - **Fouten zien op je telefoon?** Als er iets misgaat, komt er onderaan een rode balk met de fout. Maak daar een screenshot van en geef hem aan Claude.
